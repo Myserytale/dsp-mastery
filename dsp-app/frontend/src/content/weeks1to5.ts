@@ -453,8 +453,18 @@ For each system, we test four properties:
 | (e) $(x[n])^3$ | ✗ | ✓ | ✓ | ✓ |
 | (f) $x[n]-x[n-1]+0.5y[n-1]$ | ✓ | ✓ | ✓ | ✗ |
 | (g) hard limiter | ✗ | ✓ | ✓ | ✓ |
-| (h) $e^{x[n]}-1$ | ✗ | ✓ | ✓ | ✓ |`,
+| (h) $e^{x[n]}-1$ | ✗ | ✓ | ✓ | ✓ |
 
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What is the primary advantage of Digital Signal Processing over Analog Signal Processing?
+a: DSP requires less power and is naturally faster than ASP.
+b: DSP guarantees perfect reproducibility and stability over time and temperature variations.
+c: DSP can process infinite-bandwidth signals without any filtering.
+answer: b
+\`\`\`
+`,
     labWalkthrough: `## 🔬 Lab 01: Python Basics for DSP
 
 > **Objective:** Familiarization with interactive Python, data structures, \`numpy\` arrays, and \`matplotlib\` plotting for digital signals.
@@ -545,8 +555,18 @@ plt.stem(n, step[n])     # Plots the step
 - Setting \`impulse[0] = 1\` creates the Kronecker delta $\\delta[n]$.
 - \`plt.stem\` plots vertical lines with markers at the top, accurately representing the discrete nature of digital signals.
 - \`np.roll(array, shift)\` circularly shifts the array, useful for delaying signals.
-\`\`\``,
+\`\`\`
 
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What is the primary advantage of Digital Signal Processing over Analog Signal Processing?
+a: DSP requires less power and is naturally faster than ASP.
+b: DSP guarantees perfect reproducibility and stability over time and temperature variations.
+c: DSP can process infinite-bandwidth signals without any filtering.
+answer: b
+\`\`\`
+`,
     keyFormulas: `## Week 1 Key Formulas
 
 | Formula | Description |
@@ -822,8 +842,18 @@ ax3.stem(n_y, y); ax3.set_title('x[n] * r[n]')
 plt.tight_layout()
 plt.show()
 \`\`\`
-`,
 
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What property of the convolution sum indicates that the order of the signals does not matter?
+a: Associative Property
+b: Commutative Property
+c: Distributive Property
+answer: b
+\`\`\`
+`,
     labWalkthrough: `## 🔬 Lab 02: Convolution Implementations
 
 > **Objective:** Explore the mechanics of the convolution sum by implementing it in Python with progressive levels of vectorization, culminating in a matrix-multiplication approach.
@@ -898,8 +928,18 @@ impulse[0] = 1
 print(convolve(x, impulse)) # Returns [1, 2, 3, 4, 5, 0...]
 \`\`\`
 
-**Explanation:** The empirical proof of the identity property $x * \\delta = x$.`,
+**Explanation:** The empirical proof of the identity property $x * \\delta = x$.
 
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What property of the convolution sum indicates that the order of the signals does not matter?
+a: Associative Property
+b: Commutative Property
+c: Distributive Property
+answer: b
+\`\`\`
+`,
     keyFormulas: `## Week 2 Key Formulas
 
 | Formula | Description |
@@ -1477,8 +1517,18 @@ x_exp = np.exp(-np.abs(t))
 X_exp_ana = 2 / (1 + (2 * np.pi * f_ana)**2)
 plot_pair(t, x_exp, f_ana, X_exp_ana, '(e) exp(-|t|)')
 \`\`\`
-`,
 
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: According to the Nyquist-Shannon Sampling Theorem, what is the minimum sampling frequency required to perfectly reconstruct a signal with maximum frequency f_max?
+a: f_max
+b: 2 * f_max
+c: 4 * f_max
+answer: b
+\`\`\`
+`,
     labWalkthrough: `## 🔬 Lab 04: FFT of Rect and Gaussian
 
 > **Objective:** Explore the numerical nuances of the FFT, particularly how time-domain centering affects the presence of imaginary components in the spectrum, and analyze Gaussian transforms.
@@ -1547,6 +1597,17 @@ plt.title('Gaussian Transform')
 plt.show()
 \`\`\`
 **Explanation:** The FFT perfectly matches the theoretical analytic curve, provided we scale by $T$ and properly align the time-domain signal to index 0 using \`fftshift\` before passing it to \`fft\`.
+
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: According to the Nyquist-Shannon Sampling Theorem, what is the minimum sampling frequency required to perfectly reconstruct a signal with maximum frequency f_max?
+a: f_max
+b: 2 * f_max
+c: 4 * f_max
+answer: b
+\`\`\`
 `,
     keyFormulas: `## Week 4 Key Formulas
 
