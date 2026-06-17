@@ -32,7 +32,7 @@ const WEEK_META = [
   { id: 13, title: 'Review & Exam Prep', slide: 'dsp13.pdf', hw: null },
 ];
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 function App() {
   const [allWeeks, setAllWeeks] = useState<WeekContent[]>([]);
