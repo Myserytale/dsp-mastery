@@ -268,7 +268,7 @@ export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRende
 
             const rawCode = extractText(children);
             
-            if (className === 'language-quiz') {
+            if (className?.includes('language-quiz')) {
               return <QuizCard rawCode={rawCode} />;
             }
 

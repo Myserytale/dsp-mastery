@@ -234,7 +234,18 @@ plt.show()
 By executing this code, students can see directly how the theories discussed in Homework 10 map into digital reality. 
 1. The **Bilinear transform** inside \`butter\` successfully scaled the chirp off after 1 second (100 Hz mark).
 2. The **Notch filter**, utilizing complex conjugate zeros directly on the unit circle at precisely $50$ Hz, perfectly hollowed out the interference, validating our math on direct pole-zero placement.`,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: In the context of the DFT, what does the phenomenon of spectral leakage refer to?
+a: Energy from a frequency component spreading into adjacent frequency bins due to finite observation windows.
+b: The loss of low-frequency components when using a high-pass filter.
+c: The aliasing of high frequencies into the low-frequency range.
+answer: a
+\`\`\`
+`,
 
     keyFormulas: `## Week 10 Key Formulas
 
@@ -415,7 +426,18 @@ Completed At: 2026-06-17T00:35:41Z
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1039,"LineContent":"    homeworkGuide: \`## 📝 Homework 3 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1309,"LineContent":"    homeworkGuide: \`## 📝 Homework 4 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}`,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What happens to the Fourier transform of a signal if the signal is compressed in the time domain?
+a: Its frequency spectrum also compresses.
+b: Its frequency spectrum expands (stretches) and its amplitude scales.
+c: Its frequency spectrum remains completely unchanged.
+answer: b
+\`\`\`
+`,
 
     keyFormulas: `## Week 11 Key Formulas
 
@@ -573,7 +595,18 @@ Completed At: 2026-06-17T00:35:41Z
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1039,"LineContent":"    homeworkGuide: \`## 📝 Homework 3 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1309,"LineContent":"    homeworkGuide: \`## 📝 Homework 4 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}`,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: Which of the following best describes the difference between the Discrete-Time Fourier Transform (DTFT) and the Discrete Fourier Transform (DFT)?
+a: Both are discrete in frequency, but DTFT is continuous in time.
+b: The DTFT is continuous in frequency, while the DFT is discrete in frequency.
+c: The DFT is used for continuous-time signals, while the DTFT is for digital signals.
+answer: b
+\`\`\`
+`,
 
     keyFormulas: `## Week 12 Key Formulas
 
@@ -840,7 +873,18 @@ Result: The reconstructed signal will have frequencies at **100 Hz** and **200 H
 2. **Substitute into H(s):**
    $$H(z) = \\frac{1}{\\frac{1-z^{-1}}{1+z^{-1}} + 1} = \\frac{1}{\\frac{(1-z^{-1}) + (1+z^{-1})}{1+z^{-1}}}$$
    $$H(z) = \\frac{1+z^{-1}}{2} = 0.5 + 0.5z^{-1}$$
-   Result: The digital filter is $y[n] = 0.5x[n] + 0.5x[n-1]$ (a simple moving average!).`,
+   Result: The digital filter is $y[n] = 0.5x[n] + 0.5x[n-1]$ (a simple moving average!).
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: If a discrete-time sequence is purely real and even, what can be said about its Discrete Time Fourier Transform (DTFT)?
+a: It is purely imaginary and odd.
+b: It is purely real and even.
+c: It has a constant magnitude of 1.
+answer: b
+\`\`\`
+`,
 
     labWalkthrough: `## Course Lab Summary
 

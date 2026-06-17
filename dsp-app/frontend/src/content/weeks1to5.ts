@@ -1156,6 +1156,17 @@ Thus, the sum of complex exponentials exactly yields the periodic Dirac comb.
 **(e) $f * \\delta(t-t_0) = f(t-t_0)$**: Sifting property of the Dirac delta.
 
 **(f) $f * q_T = \\sum f(t-nT)$**: $q_T(t) = T \\sum \\delta(t-nT)$. Convolving $f(t)$ with a sum of deltas yields a sum of shifted $f(t)$'s.
+
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: In the Fourier Series, what do the coefficients represent?
+a: The time delay of the signal at various points.
+b: The instantaneous frequency of the signal.
+c: The amplitude and phase of the individual sinusoidal frequency components.
+answer: c
+\`\`\`
 `,
 
     labWalkthrough: `## 🔬 Lab 03: FFT as Numerical Fourier Transform
@@ -1920,7 +1931,18 @@ for n in arange(-Nsamp//2, Nsamp//2):
 \\\`\\\`\\\`
 Finally, we iterate over the sampled discrete sequence \\\`xhat\\\` and multiply each point by a time-shifted continuous \\\`sinc\\\` function. When all these overlapping sinc functions are summed together across the temporal grid (\\\`xrec += ...\\\`), they perfectly blend to reconstruct our original continuous triangular-spectrum signal.
 `,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What is the primary purpose of an anti-aliasing filter before analog-to-digital conversion?
+a: To eliminate noise in the signal.
+b: To strictly limit the bandwidth of the signal to less than half the sampling rate.
+c: To amplify the highest frequencies of the signal.
+answer: b
+\`\`\`
+`,
 
     keyFormulas: `## Week 5 Key Formulas
 

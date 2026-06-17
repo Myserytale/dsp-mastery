@@ -493,7 +493,18 @@ With a sampling frequency $f_s = 1000$ and $N = 1000$ samples, the frequency res
 - If you call \`show_fft(10)\`, the input is exactly 10 Hz. This matches an FFT bin perfectly, meaning there are an integer number of cycles in the observation window. The plot will show a single, perfect vertical spike with zero spectral leakage.
 - If you call \`show_fft(10.5)\`, the frequency falls exactly between the 10 Hz and 11 Hz bins. Because an incomplete cycle ends the window abruptly, the signal's energy "leaks" out over all surrounding bins (Spectral Leakage), and the true peak amplitude is severely attenuated (Scalloping Loss). This hands-on function vividly demonstrates why applying window functions (like Hann or Blackman) is a fundamental prerequisite in practical signal processing.
 `,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What is the primary effect of zero-padding a signal before computing its FFT?
+a: It interpolates the frequency spectrum, providing a smoother visual representation.
+b: It fundamentally increases the true frequency resolution of the analysis.
+c: It removes spectral leakage and the need for a windowing function.
+answer: a
+\`\`\`
+`,
 
     keyFormulas: `## Week 6 Key Formulas
 
@@ -1024,7 +1035,18 @@ P_freq_sum = np.sum(Pxx_one_sided) * df
 \`\`\`
 By integrating the area under our one-sided PSD curve (\`Sum * df\`), we extract the total signal power \`P_freq_sum\`, mapping directly back to the time-domain mean squared value \`P_time\`.
 `,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: Why is Welch's method preferred over a standard periodogram for spectral density estimation?
+a: It computes the FFT significantly faster than a standard periodogram.
+b: It reduces variance by averaging overlapping, windowed segments of the signal.
+c: It completely eliminates bias in the spectral estimate.
+answer: b
+\`\`\`
+`,
 
     keyFormulas: `## Week 7 Key Formulas
 
@@ -1275,7 +1297,18 @@ plt.show()
 
 ### Conclusion
 Throughout Lab 08, we leveraged numerical libraries to validate our manual solutions from Homework 8. Python handles the rigorous algebraic computations, allowing us as DSP engineers to focus heavily on analyzing the geometry of poles, zeros, and regions of convergence. Ensure your plots are adequately documented with axes and units for your final lab submissions!`,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: In the z-plane, where must all poles of a causal LTI system lie for the system to be stable?
+a: Strictly inside the unit circle (|z| < 1).
+b: Strictly outside the unit circle (|z| > 1).
+c: On the unit circle (|z| = 1).
+answer: a
+\`\`\`
+`,
 
     keyFormulas: `## Week 8 Key Formulas
 
@@ -1776,7 +1809,18 @@ plt.show()
 
 **End of Lab 09 Walkthrough**
 `,
-    labWalkthrough: ``,
+    labWalkthrough: `
+
+### 🧠 Knowledge Check
+
+\`\`\`quiz
+question: What distinguishes an Infinite Impulse Response (IIR) filter from a Finite Impulse Response (FIR) filter?
+a: An IIR filter only requires feed-forward coefficients.
+b: An IIR filter has feedback (poles) and its impulse response continues indefinitely.
+c: An IIR filter can only be implemented in continuous time.
+answer: b
+\`\`\`
+`,
 
     keyFormulas: `## Week 9 Key Formulas
 
