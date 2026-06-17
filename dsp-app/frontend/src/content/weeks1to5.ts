@@ -689,6 +689,7 @@ print("NumPy: ", z_np)
 
 ### 📌 Problem 6: Plotting Convolution
 \`\`\`python
+import numpy as np
 import matplotlib.pyplot as plt
 
 x = np.array([1, 2, 3, 4, 5])
