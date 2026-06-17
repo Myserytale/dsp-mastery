@@ -1927,13 +1927,10 @@ plt.grid(True); plt.legend()
 plt.show()
 
 # --- (b) Compute and represent the x(t) signal ---
-# Using IFFT to obtain time-domain signal.
-# Scaled by fs_sim for continuous magnitude approximation.
 x_t = fs_sim * np.real(ifft(X_f))
-t = fftfreq(N, dt/N) # Time vector for the inverse transform
 
-# Shift signals to center around t=0 for better visualization
-t_shifted = fftshift(t)
+# Explicitly create a properly shifted time vector
+t_shifted = np.arange(-N//2, N//2) * dt
 x_t_shifted = fftshift(x_t)
 
 plt.figure(figsize=(12, 4))
@@ -1945,14 +1942,14 @@ plt.grid(True); plt.legend()
 plt.show()
 
 # --- (c) Demonstrate the sampling process ---
-# Nyquist frequency is 2*f0 = 10 Hz. 
-# We choose to under-sample at fs_samp = 8 Hz to demonstrate incomplete reconstruction in (e).
 fs_samp = 8.0 
-m = int(fs_sim / fs_samp) # Decimation factor
+m = int(fs_sim / fs_samp) 
 Ts = dt * m
 
-x_sampled = x_t_shifted[::m]
-t_sampled = t_shifted[::m]
+# Offset the slice to ensure we grab the exact center peak at t=0
+offset = (N // 2) % m
+x_sampled = x_t_shifted[offset::m]
+t_sampled = t_shifted[offset::m]
 
 plt.figure(figsize=(12, 4))
 plt.plot(t_shifted, x_t_shifted, 'k', alpha=0.3, label="Continuous $x(t)$")
@@ -1968,7 +1965,6 @@ X_sampled_f = fft(x_sampled)
 f_samp = fftfreq(len(x_sampled), Ts)
 
 plt.figure(figsize=(12, 4))
-# Multiply by Ts to scale DFT back to a continuous FT approximation
 plt.plot(fftshift(f_samp), fftshift(np.abs(X_sampled_f)) * Ts, 'r', label="Sampled Spectrum")
 plt.title("(d) Fourier Transform of Sampled Signal (Notice Aliasing)")
 plt.xlabel("Frequency (Hz)")
@@ -1979,7 +1975,6 @@ plt.show()
 def whittaker_shannon_interp(x_s, t_s, t_eval, T_samp):
     x_rec = np.zeros(len(t_eval))
     for n, val in enumerate(x_s):
-        # np.sinc computes sin(pi*x)/(pi*x) automatically
         x_rec += val * np.sinc((t_eval - t_s[n]) / T_samp)
     return x_rec
 
