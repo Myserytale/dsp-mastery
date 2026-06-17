@@ -283,7 +283,101 @@ answer: a
 explanation: The Parks-McClellan algorithm uses the Chebyshev approximation (minimax criterion) to produce an equiripple FIR filter — one where the approximation error oscillates equally between its maximum and minimum values across the bands. This is provably optimal: no other FIR filter of the same order can achieve a smaller maximum error. Option (b) is misleading — while equiripple designs are often shorter than window-based designs for the same specs, this is a consequence, not the defining property. Option (c) is wrong because Parks-McClellan can design any filter type. Option (d) describes IIR-to-FIR conversion techniques, not the Remez algorithm.
 \`\`\`
 `,
-    labWalkthrough: `
+    labWalkthrough: `## 🔬 Lab 10 Walkthrough
+
+This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
+
+### Step 1: Implementation
+
+\`\`\`python
+# impulse response of a simple cont. LTI
+cs = signal.lti([10], [1, 10])
+t, sig = cs.impulse(T = arange(0, 10, 0.01))    
+plot(t, sig, '.')
+yscale('log')
+plot(t, 10*exp(-10*t))
+\`\`\`
+
+*Explanation*: impulse response of a simple cont. LTI
+
+### Step 2: Implementation
+
+\`\`\`python
+ds = signal.dlti([1], [1, -0.5])
+n, h = ds.impulse()
+stem(n, h[0], 'o')
+show()
+\`\`\`
+
+### Step 3: Implementation
+
+\`\`\`python
+plot(n, h[0], 'o')
+ht = zeros(len(h[0]))
+ht[1:] = 0.5**arange(len(h[0]) - 1)
+plot(n, ht,'.-')
+plot(n, h[0], 'o')
+yscale('log')
+plot(n, h[0], 'o')
+show()
+\`\`\`
+
+### Step 4: Implementation
+
+\`\`\`python
+w, h = signal.freqz([1], [1, -1, 0.5])
+ds = signal.dlti([1], [1, -1, 0.5])
+n, hn = ds.impulse()
+stem(n, hn[0])
+show()
+\`\`\`
+
+### Step 5: Implementation
+
+\`\`\`python
+ds = signal.dlti([1], [1, -1, 0.5])
+n, h = ds.impulse()
+stem(n, h[0], 'o')
+ht = zeros(len(h[0]))
+# see from last week analytical approach
+ht[1:] = (lambda n: 2*sin((n-1)*pi/4)/sqrt(2)**(n-1))(arange(1, len(h[0])))
+stem(n, h[0])
+plot(n, ht, 'r-')
+\`\`\`
+
+*Explanation*: see from last week analytical approach
+
+### Step 6: Implementation
+
+\`\`\`python
+# to illustrate that it is an exponentially decaying oscillation
+semilogy(n, abs(ht))
+grid()
+\`\`\`
+
+*Explanation*: to illustrate that it is an exponentially decaying oscillation
+
+### Step 7: Implementation
+
+\`\`\`python
+# to_zpk() method of an LTI system returns the zeros and poles
+print(ds.to_zpk())
+\`\`\`
+
+*Explanation*: to_zpk() method of an LTI system returns the zeros and poles
+
+### Step 8: Implementation
+
+\`\`\`python
+# to verify the frequency response (magnitude and phase)
+w, H = ds.freqresp() # complex freq. response including both
+# compare freq. response and the output of the bode() method
+w, gain, phase = ds.bode(w = w)
+semilogy(w, 20*log10(abs(H)), 'r-', linewidth=15, alpha=0.3)
+semilogy(w, gain, 'k-', linewidth=2, alpha=1)
+\`\`\`
+
+*Explanation*: to verify the frequency response (magnitude and phase) compare freq. response and the output of the bode() method
 
 `,
 
@@ -515,7 +609,208 @@ answer: b
 explanation: In a recursive filter with finite-precision arithmetic, rounding or truncation of intermediate values introduces small nonlinear perturbations in the feedback path. These can trap the filter output in a repeating cycle of nonzero values even with zero input — a sustained parasitic oscillation called a limit cycle. This is a fundamentally nonlinear phenomenon that linear stability analysis cannot predict. Option (a) confuses limit cycles with the filter's natural modes (which decay for stable filters). Option (c) describes the Nyquist frequency constraint, unrelated to quantization. Option (d) is wrong because limit cycles are sustained indefinitely, not transient.
 \`\`\`
 `,
-    labWalkthrough: `
+    labWalkthrough: `## 🔬 Lab 11 Walkthrough
+
+This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
+
+### Step 1: Implementation
+
+\`\`\`python
+fs = 160
+fn = fs/2
+d = 1 - pi/40
+ds = signal.dlti([1, -sqrt(2), 1], [1, -sqrt(2)*d, d**2])
+w, gain, phase = ds.bode()
+f = w/(2*pi)*fs
+plot(f, gain, '.-', label='bode')
+hlines([-3], [0], [80], color='red')
+vlines([18, 22], [0, 0], [-200, -200],color='red')
+grid()
+\`\`\`
+
+### Step 2: Implementation
+
+\`\`\`python
+# Let's see the in detail how well we satisfied the requirements (DC gain + cut off freq. gain)
+plot(f, gain, '.-', label='bode')
+hlines([-3], [0], [80], color='red')
+vlines([18, 22], [0, 0], [-200, -200],color='red')
+xlim([0.0, 25])
+ylim([-10, 1])
+grid()
+
+--- Markdown Cell 3 ---
+## Normalizing the DC gain
+
+However, at 0 Hz the gain is not exactly unity. We can fix it by reintroducing \$k\$ such that \$|H(e^{j0})| = 1\$: 
+
+\$\$
+k = \\left|\\frac{1 - 0.92\\sqrt{2}+0.92^2}{2 - \\sqrt{2}}\\right|\\approx 0.965
+\$\$
+
+Thus the filter coefficients are
+\`\`\`
+
+*Explanation*: Let's see the in detail how well we satisfied the requirements (DC gain + cut off freq. gain) Normalizing the DC gain
+
+### Step 3: Implementation
+
+\`\`\`python
+k = (1+d**2 - 2*d/sqrt(2))/(2 - sqrt(2))
+print(k)
+ds = signal.dlti(k*array([1, -sqrt(2), 1]), [1, -sqrt(2)*d, d**2])
+w, gain, phase = ds.bode()
+f = w/(2*pi)*fs
+plot(f, gain, '.-', label='bode')
+axvline(18, linestyle=':', color='red')
+axvline(22, linestyle=':', color='red')
+axhline(-3, linestyle=':', color='red')
+xlim([0, 25])
+ylim([-10, 1])
+grid()
+
+--- Markdown Cell 5 ---
+Observe that by normalizing the DC gain we (negligibly) distorted the the gain at the cutoff frequency.
+
+--- Markdown Cell 6 ---
+---
+## Designing a lowpass FIR filter using the Fourier (window) method
+\`\`\`
+
+*Explanation*: Designing a lowpass FIR filter using the Fourier (window) method
+
+### Step 4: Implementation
+
+\`\`\`python
+from pylab import *
+from scipy import signal
+fs, fl, N = 100, 20, 51
+n = arange(N) - N//2 + 1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n/pi)
+w = signal.windows.hann(N)
+plot(n, w, '-', label='window')
+plot(n, b_l, 'o-', label='sinc')
+b_l *= w
+plot(n, b_l, 'k.-', label='sinc * window')
+legend()
+grid()
+\`\`\`
+
+### Step 5: Implementation
+
+\`\`\`python
+b_l /= b_l.sum() # Ensure that the gain at 0Hz is 1. 
+ds = signal.dlti(b_l, [1], dt=1/fs)
+o, gain, phase = ds.bode(w=1000)
+plot(o/(2*pi), gain)
+axvline(fc, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+\`\`\`
+
+### Step 6: Implementation
+
+\`\`\`python
+plot(o/(2*pi), phase)
+grid()
+
+--- Markdown Cell 10 ---
+## Designing a highpass FIR filter based on the above lowpass filter
+\`\`\`
+
+*Explanation*: Designing a highpass FIR filter based on the above lowpass filter
+
+### Step 7: Implementation
+
+\`\`\`python
+fh = 40
+n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+b_h = sin(2*pi*n*fh/fs)/(n*pi)
+# or
+n = arange(N) - N//2
+b_h[n!=0] = sin(2*pi*n[n!=0]*fh/fs)/(n[n!=0]*pi)
+b_h[n==0] = 2*fh/fs
+#------
+b_h *= w
+b_h *= -1
+b_h[N//2] += 1
+
+b_h /= np.abs(np.sum(b_h * (-1) ** np.arange(N)))# Ensure that the gain at Nyquist is 1. 
+ds = signal.dlti(b_h, [1], dt=1/fs)
+# alternative 1 ----
+o, gain, phase = ds.bode(w=1000)
+f = o/(2*pi)
+# alternative 2
+#o, H = ds.freqresp(w=1000)
+#gain, phase = 20*log10(abs(H)), angle(H)*180/pi
+#f = o/(2*pi)*fs
+#-------------------
+plot(f, gain)
+axvline(fh, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+\`\`\`
+
+*Explanation*: or ------ alternative 1 ---- alternative 2 o, H = ds.freqresp(w=1000) gain, phase = 20*log10(abs(H)), angle(H)*180/pi f = o/(2*pi)*fs -------------------
+
+### Step 8: Implementation
+
+\`\`\`python
+# gain at the highest freq. close to unity (0dB) because the last freq. is not exactly pi
+print(gain[-1])
+\`\`\`
+
+*Explanation*: gain at the highest freq. close to unity (0dB) because the last freq. is not exactly pi
+
+### Step 9: Implementation
+
+\`\`\`python
+plot(n, b_h)
+\`\`\`
+
+### Step 10: Implementation
+
+\`\`\`python
+# Checking that indeed the gain at Nyquist is unity
+o, H = signal.freqz(b_h, worN=array([pi]))
+print(abs(H))
+
+--- Markdown Cell 15 ---
+## Designing a bandpass FIR filter based on the above lowpass filter
+\`\`\`
+
+*Explanation*: Checking that indeed the gain at Nyquist is unity Designing a bandpass FIR filter based on the above lowpass filter
+
+### Step 11: Implementation
+
+\`\`\`python
+n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n*pi)
+b_h = sin(2*pi*n*fh/fs)/(n*pi)
+b = b_l - b_h
+# taper
+b *= w
+print(b)
+# normalization
+f0 = (fl + fh)/2
+omega0 = 2*pi*f0/fs
+H0 = np.sum(b * np.exp(-1j * omega0 * np.arange(N)))
+b /= abs(H0)
+#------
+ds = signal.dlti(b, [1], dt=1/fs)
+o, gain, phase = ds.bode(w=1000)
+f = o/(2*pi)
+plot(f, gain)
+axvline(fl, linestyle=':')
+axvline(fh, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+
+
+--- Markdown Cell 17 ---
+\`\`\`
+
+*Explanation*: taper normalization ------
 
 `,
 
@@ -724,7 +1019,242 @@ answer: b
 explanation: The time-frequency uncertainty principle (Δt · Δf ≥ 1/4π) is a fundamental limit. A short STFT window gives good time localization (you know when an event happened) but poor frequency resolution (wide frequency bins). A long window gives excellent frequency resolution but smears events in time. Option (a) is wrong — signal length affects total analysis duration, not the time-frequency tradeoff. Option (c) is wrong — the STFT is specifically designed for non-stationary signals by analyzing short quasi-stationary segments. Option (d) is wrong — increasing FFT size with a fixed window only zero-pads (interpolates the spectrum) without truly improving resolution; only a longer window improves frequency resolution, at the cost of time resolution.
 \`\`\`
 `,
-    labWalkthrough: `
+    labWalkthrough: `## 🔬 Lab 12 Walkthrough
+
+This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
+
+### Step 1: Implementation
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
+
+fs = 44100
+fc = 500
+order = 6
+
+# Butterworth low-pass filter
+b, a = signal.butter(
+    order,
+    fc,
+    btype='lowpass',
+    fs=fs
+)
+
+ds = signal.dlti(b, a,  dt=1/fs)
+w, gain, phase = ds.bode()
+plt.plot(w/2/np.pi, gain, '.-', label='default res.')
+# the same with higher resolution
+w, gain, phase = ds.bode(w=1000)
+plt.plot(w/2/np.pi, gain, label='high res.')
+plt.axhline(-3, linestyle=':')
+plt.axvline(fc, linestyle=':')
+plt.xlim([0, 5000])
+plt.ylim([-100, 10])
+plt.grid()
+plt.legend()
+\`\`\`
+
+*Explanation*: Butterworth low-pass filter the same with higher resolution
+
+### Step 2: Implementation
+
+\`\`\`python
+# Frequency response 
+w, h = signal.freqz(b, a, worN=1000, fs=fs)
+plt.figure(figsize=(8, 4))
+plt.plot(w, 20*np.log10(np.maximum(np.abs(h), 1e-12)))
+plt.axvline(fc, linestyle='--', label='2000 Hz cutoff')
+plt.axhline(-3.0103, linestyle=':', label='-3 dB')
+plt.xlabel("Frequency [Hz]")
+plt.ylabel("Magnitude [dB]")
+plt.title("Butterworth  filter")
+plt.grid(True)
+plt.legend()
+plt.xlim([0, 5000])
+plt.ylim([-100, 10])
+\`\`\`
+
+*Explanation*: Frequency response
+
+### Step 3: Implementation
+
+\`\`\`python
+from scipy.io import wavfile
+import scipy.io
+fs, data = wavfile.read("02. School Boy-9.wav")
+print(fs, data.shape)
+print(data[:,0])
+print(data.min(), data.max())
+\`\`\`
+
+### Step 4: Implementation
+
+\`\`\`python
+x = data[:, 0]
+plt.plot(x)
+y = signal.lfilter(b, a, x)
+plt.plot(y)
+plt.xlim([0,5000])
+\`\`\`
+
+### Step 5: Implementation
+
+\`\`\`python
+f, sx = signal.welch(
+    x,
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+f, sy = signal.welch(
+    y,
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+plt.loglog(f, sx)
+plt.loglog(f, sy)
+plt.grid()
+#plt.xlim([0, 250])
+#plt.ylim([10**(-5), 10**(7)])
+\`\`\`
+
+*Explanation*: plt.xlim([0, 250]) plt.ylim([10**(-5), 10**(7)])
+
+### Step 6: Implementation
+
+\`\`\`python
+data_filtered = signal.lfilter(b, a, data, axis=0)
+data_filtered /= np.max(np.abs(data_filtered))
+# normalize safely to int16 range
+
+stereo_int16 = np.int16(data_filtered * 32767)
+print(stereo_int16)
+wavfile.write("output_filtered.wav", fs, stereo_int16)
+\`\`\`
+
+*Explanation*: normalize safely to int16 range
+
+### Step 7: Implementation
+
+\`\`\`python
+f, sy = signal.welch(
+    data_filtered[:,0],
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+plt.loglog(f, sy)
+plt.grid()
+\`\`\`
+
+### Step 8: Implementation
+
+\`\`\`python
+from pylab import *
+from scipy import signal
+fs, fl, N = 44100, 500, 251
+n = arange(N) - N//2 + 1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n/pi)
+w = signal.windows.hann(N)
+b_l *= w
+b_l /= b_l.sum() # Ensure that the gain at 0Hz is 1. 
+
+ds = signal.dlti(b_l, [1], dt=1/fs)
+\`\`\`
+
+### Step 9: Implementation
+
+\`\`\`python
+data_filtered = signal.lfilter(b_l, [1], data, axis=0)
+data_filtered /= np.max(np.abs(data_filtered))
+
+stereo_int16 = np.int16(data_filtered * 32767)
+print(stereo_int16)
+wavfile.write("output_filtered.wav", fs, stereo_int16)
+\`\`\`
+
+### Step 10: Implementation
+
+\`\`\`python
+# Demonstrate the phase delay introduced by FIR filters
+# and fixing it by forward-backward filtering using 'signal.filtfilt'
+from pylab import *
+from scipy import signal
+
+# Load EEG
+fs = 200.0
+x = fromfile("eeg.bin", dtype=float32)
+
+# FIR low-pass design
+fc = 2.0
+fc = 2.0
+numtaps = 401              # odd length
+delay = (numtaps - 1) // 2 # samples
+
+b = signal.firwin(
+    numtaps,
+    fc,
+    fs=fs,
+    window="hamming",
+    pass_zero="lowpass"
+)
+
+# FIR band-pass design
+#fc = [9,15]
+#numtaps = 401              # odd length
+#delay = (numtaps - 1) // 2 # samples
+
+#b = signal.firwin(
+#    numtaps,
+#    fc,
+#    fs=fs,
+#    window="hamming",
+#    pass_zero="bandpass"
+#)
+
+# Causal (forward) FIR filtering: introduces linear phase delay 
+y = signal.lfilter(b, 1, x)
+
+# Delay-compensated version
+y_aligned = roll(y, -delay)
+y_aligned[-delay:] = nan
+
+# Zero-phase reference: forward-backward filtering
+y_zero = signal.filtfilt(b, 1, x)
+
+# Time axis
+t = arange(len(x)) / fs
+
+# Plot a short segment
+i0 = 1000
+i1 = int(15 * fs)
+
+figure(figsize=(12, 5))
+plot(t[i0:i1], x[i0:i1], alpha=0.4, label="raw EEG")
+plot(t[i0:i1], y[i0:i1], label="FIR output")
+plot(t[i0:i1], y_aligned[i0:i1], label="FIR shifted back")
+plot(t[i0:i1], y_zero[i0:i1], "--", label="filtfilt")
+xlabel("Time [s]")
+ylabel("Amplitude")
+title(f"Low-pass FIR, fc={fc} Hz, delay={delay} samples = {delay/fs:.3f} s")
+legend()
+grid()
+show()
+\`\`\`
+
+*Explanation*: Demonstrate the phase delay introduced by FIR filters and fixing it by forward-backward filtering using 'signal.filtfilt' Load EEG FIR low-pass design FIR band-pass design fc = [9,15] numtaps = 401              # odd length delay = (numtaps - 1) // 2 # samples b = signal.firwin( numtaps, fc, fs=fs, window="hamming", pass_zero="bandpass" ) Causal (forward) FIR filtering: introduces linear phase delay Delay-compensated version Zero-phase reference: forward-backward filtering Time axis Plot a short segment
 
 `,
 

@@ -1120,7 +1120,353 @@ answer: b
 explanation: Frequency resolution is determined by the observation time T = N/fs = 0.1 s, giving Δf = 1/T = 10 Hz. Zero-padding increases the number of DFT bins (reducing bin spacing to fs/N_padded = 1 Hz), creating a smoother-looking spectrum, but it does not add new information — you still cannot resolve two frequency components closer than 10 Hz apart. Option (a) incorrectly claims zero-padding improves true resolution. Option (c) miscalculates the resolution. Option (d) confuses bin spacing with true resolution — they are only equal when no zero-padding is applied.
 \`\`\`
 `,
-    labWalkthrough: `
+    labWalkthrough: `## 🔬 Lab 07 Walkthrough
+
+This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
+
+### Step 1: Implementation
+
+\`\`\`python
+#--------------------------------------------------------------------------------------------
+from pylab import *
+import numpy as np
+import types
+
+#----------------------------------------------------------------    
+def apply_window(x, window):
+    """
+    Apply a window to signal x.
+
+    'window' can be:
+    1. A function: window(x) returns a windowed version of x
+    2. An array: same shape as x, applied multiplicatively
+
+    In DSP terms:
+    x_w[n] = x[n] * w[n]
+    """
+    if type(window) == types.FunctionType:
+        # Window is a function that internally applies the weighting
+        return window(x)
+    else:
+        # Window is an array → pointwise multiplication
+        return window * x
+
+
+#----------------------------------------------------------------    
+def _spectral_helper(x, NFFT=256, Fs=2, detrend=detrend_none,
+                 window=window_hanning, noverlap=0, pad_to=None):
+
+    """
+    Compute windowed, segmented FFT slices of a signal.
+
+    This is a low-level routine used in spectral estimation (e.g. Welch PSD).
+
+    Pipeline:
+    1. Split signal into overlapping segments of length NFFT
+    2. Detrend each segment
+    3. Apply window (length NFFT!)
+    4. Zero-pad to length pad_to (>= NFFT, power of 2)
+    5. Compute FFT
+    6. Keep only positive frequencies (one-sided spectrum)
+    7. Apply proper normalization (window + Fs + one-sided scaling)
+
+    Returns:
+    - FFTSlices: normalized complex spectra (per segment)
+    - freqs: frequency axis (0 → Fs/2)
+    """
+
+    # Original signal length
+    n = len(x)
+
+    #------------------------------------------------------------
+    # Ensure we have at least one full segment
+    #------------------------------------------------------------
+    if len(x) < NFFT:
+        # Resize to NFFT and zero-pad the rest
+        x = np.resize(x, (NFFT,))
+        x[n:] = 0
+        # NOTE: np.resize may repeat data, but we overwrite with zeros
+
+    #------------------------------------------------------------
+    # FFT length selection
+    #------------------------------------------------------------
+    if pad_to is None:
+        pad_to = NFFT
+
+    # Force FFT length to next power of 2 (computational efficiency)
+    pad_to = 2**int(np.ceil(np.log2(pad_to)))
+
+    # Number of frequencies in one-sided spectrum
+    # (DC → Nyquist)
+    numFreqs = pad_to // 2 + 1
+
+    #------------------------------------------------------------
+    # Segment indexing (overlapping windows)
+    #------------------------------------------------------------
+    # Step size = hop = NFFT - noverlap
+    ind = list(range(0, n - NFFT + 1, NFFT - noverlap))
+
+    # Number of segments
+    numSlices = len(ind)
+
+    # Allocate array:
+    # rows → time segments
+    # cols → frequency bins
+    FFTSlices = np.zeros((numSlices, numFreqs), dtype=np.complex_)
+
+    # Simple list of indices for looping
+    slices = list(range(numSlices))
+
+    #------------------------------------------------------------
+    # Window normalization (VERY IMPORTANT)
+    #------------------------------------------------------------
+    # Apply window to a constant signal of ones → yields window itself
+    # Then compute L2 norm:
+    # normVal = sqrt(sum w[n]^2)
+    #
+    # This ensures energy normalization:
+    # compensates for attenuation introduced by the window
+    normVal = np.linalg.norm(apply_window(np.ones(NFFT), window))
+
+    #------------------------------------------------------------
+    # Main loop: process each segment
+    #------------------------------------------------------------
+    for iSlice in slices:
+
+        # Extract segment of length NFFT
+        segment = x[ind[iSlice]:ind[iSlice] + NFFT]
+
+        # Remove mean / trend if needed
+        segment = detrend(segment)
+
+        # Apply window (length NFFT!)
+        segment = apply_window(segment, window)
+
+        # Compute FFT:
+        # - zero-padded to length pad_to
+        # - gives finer frequency grid (interpolation), not higher resolution
+        spectrum = np.fft.fft(segment, n=pad_to)
+
+        # Keep only positive frequencies (one-sided spectrum)
+        FFTSlices[iSlice, :] = spectrum[:numFreqs]
+
+    #------------------------------------------------------------
+    # Frequency axis
+    #------------------------------------------------------------
+    # f_k = k * Fs / pad_to
+    freqs = float(Fs) / pad_to * np.arange(numFreqs)
+
+    #------------------------------------------------------------
+    # One-sided spectrum correction
+    #------------------------------------------------------------
+    # We removed negative frequencies.
+    # For real signals:
+    # |X(-f)|^2 = |X(f)|^2
+    #
+    # To preserve total energy:
+    # double the power of interior bins
+    # → multiply amplitudes by sqrt(2)
+    #
+    # DO NOT scale:
+    # - DC (index 0)
+    # - Nyquist (last index)
+    FFTSlices[:, 1:-1] *= np.sqrt(2)
+
+    #------------------------------------------------------------
+    # Final normalization
+    #------------------------------------------------------------
+    # Divide by:
+    # 1. normVal → window energy normalization
+    # 2. sqrt(Fs) → ensures PSD units (V^2 / Hz after squaring)
+    #
+    # After this:
+    # |FFTSlices|^2 behaves like a properly scaled PSD contribution
+    return FFTSlices / normVal / np.sqrt(Fs), freqs
+
+    #------------------------------------------------------------
+    # NOTE (commented original line):
+    # Pxx = mean(|Slices|^2)
+    #
+    # This function returns the building blocks for PSD:
+    # averaging over slices is done outside
+    #------------------------------------------------------------
+
+#--------------------------------------------------------------------------------------------
+def psd(x, NFFT=256, Fs=2, detrend=detrend_none, window=window_hanning, noverlap=0, pad_to=None):
+    X, f =     _spectral_helper(x, NFFT, Fs, detrend, window, noverlap, pad_to)
+    Pxx = np.abs(X)**2
+    return Pxx.mean(axis=0), f
+\`\`\`
+
+*Explanation*: -------------------------------------------------------------------------------------------- ---------------------------------------------------------------- Window is a function that internally applies the weighting Window is an array → pointwise multiplication ---------------------------------------------------------------- Original signal length ------------------------------------------------------------ Ensure we have at least one full segment ------------------------------------------------------------ Resize to NFFT and zero-pad the rest NOTE: np.resize may repeat data, but we overwrite with zeros ------------------------------------------------------------ FFT length selection ------------------------------------------------------------ Force FFT length to next power of 2 (computational efficiency) Number of frequencies in one-sided spectrum (DC → Nyquist) ------------------------------------------------------------ Segment indexing (overlapping windows) ------------------------------------------------------------ Step size = hop = NFFT - noverlap Number of segments Allocate array: rows → time segments cols → frequency bins Simple list of indices for looping ------------------------------------------------------------ Window normalization (VERY IMPORTANT) ------------------------------------------------------------ Apply window to a constant signal of ones → yields window itself Then compute L2 norm: normVal = sqrt(sum w[n]^2)  This ensures energy normalization: compensates for attenuation introduced by the window ------------------------------------------------------------ Main loop: process each segment ------------------------------------------------------------ Extract segment of length NFFT Remove mean / trend if needed Apply window (length NFFT!) Compute FFT: - zero-padded to length pad_to - gives finer frequency grid (interpolation), not higher resolution Keep only positive frequencies (one-sided spectrum) ------------------------------------------------------------ Frequency axis ------------------------------------------------------------ f_k = k * Fs / pad_to ------------------------------------------------------------ One-sided spectrum correction ------------------------------------------------------------ We removed negative frequencies. For real signals: |X(-f)|^2 = |X(f)|^2  To preserve total energy: double the power of interior bins → multiply amplitudes by sqrt(2)  DO NOT scale: - DC (index 0) - Nyquist (last index) ------------------------------------------------------------ Final normalization ------------------------------------------------------------ Divide by: 1. normVal → window energy normalization 2. sqrt(Fs) → ensures PSD units (V^2 / Hz after squaring)  After this: |FFTSlices|^2 behaves like a properly scaled PSD contribution ------------------------------------------------------------ NOTE (commented original line): Pxx = mean(|Slices|^2)  This function returns the building blocks for PSD: averaging over slices is done outside ------------------------------------------------------------ --------------------------------------------------------------------------------------------
+
+### Step 2: Implementation
+
+\`\`\`python
+from scipy.io import wavfile
+import scipy.io
+samplerate, data = wavfile.read("02. School Boy-9.wav")
+print(samplerate, data.shape)
+\`\`\`
+
+### Step 3: Implementation
+
+\`\`\`python
+plot(data[10000:50000, 0])
+\`\`\`
+
+### Step 4: Implementation
+
+\`\`\`python
+s, f = psd(data[:, 0], Fs=samplerate, NFFT=2**15, noverlap=2**14, detrend=detrend_none)
+figure(1)
+semilogy(f, s)
+#xlim([0, 10])
+#ylim([0,100])
+grid()
+s
+\`\`\`
+
+*Explanation*: xlim([0, 10]) ylim([0,100])
+
+### Step 5: Implementation
+
+\`\`\`python
+len(f) # NFFT//2 + 1
+\`\`\`
+
+### Step 6: Implementation
+
+\`\`\`python
+from scipy.signal import welch
+
+f, s = welch(
+    data[:, 0],
+    fs=samplerate,
+    window='hann',
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend=False,
+    nfft=2**15,          # matches pad_to = NFFT
+    return_onesided=True,
+    scaling='density'    # ensures V^2/Hz
+)
+s
+\`\`\`
+
+### Step 7: Implementation
+
+\`\`\`python
+semilogy(f, s)
+\`\`\`
+
+### Step 9: Implementation
+
+\`\`\`python
+freq, Pxx = signal.welch(data[:, 0], fs=samplerate, nperseg=2**10, noverlap=2**9, window='box', detrend='constant')
+semilogy(freq, Pxx)
+#semilogy(f, s)
+xlim([0, 5000])
+print(s, Pxx)
+print(len(s), len(Pxx))
+
+--- Markdown Cell 10 ---
+## Parseval theorem
+
+
+\$\$
+\\int_{-\\infty}^{\\infty} |x(t)|^2 \\, dt
+=
+\\int_{-\\infty}^{\\infty} |X(f)|^2 \\, df
+\$\$
+\$\$
+\\sum_{n=0}^{N-1} |x[n]|^2
+\`\`\`
+
+*Explanation*: semilogy(f, s) Parseval theorem
+
+### Step 10: Implementation
+
+\`\`\`python
+### Using FFT
+import numpy as np
+
+x = data[:, 0].astype(float)
+N = len(x)
+
+#------------------------------------------------------------
+# Time-domain energy
+#------------------------------------------------------------
+E_time = np.sum(np.abs(x)**2)
+
+#------------------------------------------------------------
+# Frequency-domain energy
+#------------------------------------------------------------
+X = np.fft.fft(x)
+
+E_freq = (1.0 / N) * np.sum(np.abs(X)**2)
+
+E_time,  E_freq
+\`\`\`
+
+*Explanation*: Using FFT ------------------------------------------------------------ Time-domain energy ------------------------------------------------------------ ------------------------------------------------------------ Frequency-domain energy ------------------------------------------------------------
+
+### Step 11: Implementation
+
+\`\`\`python
+### Using power spectral density
+
+import numpy as np
+
+x = data[:, 0].astype(float)
+N = len(x)
+
+# ------------------------------------------------------------
+# Time-domain average power
+# ------------------------------------------------------------
+P_time = np.mean(np.abs(x)**2)
+
+# ------------------------------------------------------------
+# PSD from your routine
+# no detrend, no window, no padding, no overlap
+# ------------------------------------------------------------
+s, f = psd(
+    x,
+    Fs=samplerate,
+    NFFT=N,
+    noverlap=0,
+    detrend=detrend_none,
+    window=ones(N),
+    pad_to=N
+)
+
+# ------------------------------------------------------------
+# Frequency-domain power from PSD
+# ------------------------------------------------------------
+P_freq_sum = np.sum(s) * (f[1] - f[0])
+
+P_time, P_freq_sum
+\`\`\`
+
+*Explanation*: Using power spectral density ------------------------------------------------------------ Time-domain average power ------------------------------------------------------------ ------------------------------------------------------------ PSD from your routine no detrend, no window, no padding, no overlap ------------------------------------------------------------ ------------------------------------------------------------ Frequency-domain power from PSD ------------------------------------------------------------
+
+### Step 12: Implementation
+
+\`\`\`python
+f, s = welch(
+    x,
+    fs=samplerate,
+    window='boxcar',
+    nperseg=N,
+    noverlap=0,
+    detrend=False,
+    nfft=N,          # matches pad_to = NFFT
+    return_onesided=True,
+    scaling='density'    # ensures V^2/Hz
+)
+P_freq_sum = np.sum(s) * (f[1] - f[0])
+P_time, P_freq_sum
+\`\`\`
 
 `,
 
@@ -1422,7 +1768,182 @@ answer: b
 explanation: For N = 8 = 2³, the radix-2 FFT requires log₂(8) = 3 stages. Each stage contains N/2 = 4 butterfly operations, and each butterfly requires 1 complex multiplication. Total multiplications = 3 × 4 = 12 = (N/2)·log₂(N). Compare this to the direct DFT which would require N² = 64 multiplications. Option (a) undercounts both stages and multiplications. Option (c) describes the brute-force DFT cost, not the FFT. Option (d) overcounts the stages — log₂(8) = 3, not 4.
 \`\`\`
 `,
-    labWalkthrough: `
+    labWalkthrough: `## 🔬 Lab 08 Walkthrough
+
+This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
+
+### Step 1: Implementation
+
+\`\`\`python
+from pylab import *
+from scipy import signal
+num, den = [1, 1], [1, 2]
+o, gain, phase = signal.bode((num, den))
+def gain_theory(o):
+    return 20*log10(sqrt(o**2 + 1)/sqrt(o**2+4))
+def phase_theory(o):
+    return (arctan(o) - arctan(o/2))*180/pi
+plot(o, gain           , linewidth=7, alpha=0.5, label='gain numeric') # o is omega in rad/s, gain in decibels
+plot(o, phase          , linewidth=7, alpha=0.5, label='phase numeric') # phase in degrees
+plot(o, gain_theory (o), 'k-'                  , label='gain theory'  )
+plot(o, phase_theory(o), 'b-'                  , label='phase theory' )
+plot([0], [gain_theory (0)], 'ro', [2], [gain_theory (2)], 'go')
+plot([0], [phase_theory(0)], 'ro', [2], [phase_theory(2)], 'go')
+grid()
+legend()
+print(10**(gain_theory(0)/20) , phase_theory (0),'deg', 10**(gain_theory(2)/20), phase_theory(2),'deg')
+\`\`\`
+
+### Step 2: Implementation
+
+\`\`\`python
+o
+\`\`\`
+
+### Step 3: Implementation
+
+\`\`\`python
+gain
+\`\`\`
+
+### Step 4: Implementation
+
+\`\`\`python
+phase
+\`\`\`
+
+### Step 5: Implementation
+
+\`\`\`python
+signal.bode?
+\`\`\`
+
+### Step 7: Implementation
+
+\`\`\`python
+# Let's create our own general Bode plot calculator
+# and compare it to the one in the 'signal' package
+def my_bode(transfer_function, omega = linspace(0.01, 10,100)):
+    return omega,\\
+           20*log10(abs(transfer_function(1j*omega))),\\
+           180/pi*angle(transfer_function(1j*omega))
+\`\`\`
+
+*Explanation*: Let's create our own general Bode plot calculator and compare it to the one in the 'signal' package
+
+### Step 8: Implementation
+
+\`\`\`python
+H = lambda s: (s+1)/(s+2)
+o1, gain1, phase1 = my_bode(H)
+print(o1, gain1, phase1)
+\`\`\`
+
+### Step 9: Implementation
+
+\`\`\`python
+plot(o, gain           , linewidth=7, alpha=0.5, label='gain (signal.bode)') # o is omega in rad/s, gain in decibels
+plot(o, phase          , linewidth=7, alpha=0.5, label='phase (signal.bode)') # phase in degrees
+plot(o1, gain1, 'k-'                  , label='gain (my_bode)'  )
+plot(o1, phase1, 'b-'                  , label='phase (my_bode)' )
+legend()
+
+--- Markdown Cell 11 ---
+<hr style="border:2px solid black;">
+
+--- Markdown Cell 12 ---
+## The \$z\$ transform
+
+--- Markdown Cell 13 ---
+## Power series recap:
+\$\$
+S_N = \\sum_{n=0}^{N} r^n
+\$\$
+
+Multiply by \$r\$:
+\$\$
+rS_N = \\sum_{n=0}^{N} r^{n+1}
+= \\sum_{n=1}^{N+1} r^n=S_{N} + r^{N+1} - 1
+\$\$
+
+
+--- Markdown Cell 14 ---
+---
+## Exercise
+Calculate the  \$z\$-transform of 
+\$\$		
+					u[n] = \\begin{cases}
+						0\\ , & n < 0\\\\
+						1\\ , & n\\geqslant 0	
+					\\end{cases}
+\$\$
+### Solution:
+
+
+--- Markdown Cell 15 ---
+---
+## Exercise
+Show that if sampled at intervals \$T\$ the \$z\$-transform of \$x(t) = t\$ is
+\$\\frac{Tz}{(z-1)^2}\$; 
+
+### Solution
+
+
+Sampling \$x(t)=t\$ at intervals \$T\$ gives
+\$\$
+
+
+--- Markdown Cell 16 ---
+---
+## Exercise
+Show that if sampled at intervals \$T\$ the \$z\$-transform of \$x(t) =e^{-at}\$ is \$\\frac{z}{z-e^{-aT}}\$
+
+### Solution
+
+Sampling \$x(t)=e^{-at}\$ at intervals \$T\$ gives
+\$\$
+x[n]=x(nT)=e^{-anT}=\\left(e^{-aT}\\right)^n,\\qquad n\\ge 0.
+\$\$
+
+
+--- Markdown Cell 17 ---
+---
+## Exercise
+Show that if sampled at intervals \$T\$, the \$z\$-transform of
+\$x(t)=\\sin \\omega t\$ is
+\$\$
+X_{\\sin}(z)=\\frac{z\\sin\\omega T}{z^2-2z\\cos\\omega T+1},
+\$\$
+and the \$z\$-transform of \$x(t)=\\cos \\omega t\$ is
+\$\$
+X_{\\cos}(z)=\\frac{z(z-\\cos\\omega T)}{z^2-2z\\cos\\omega T+1}.
+
+
+--- Markdown Cell 18 ---
+## Exercise
+If the input to a system, having a transfer function of \$ 1 + 2z^{-1} - z^{-2} \$, is a discrete unit step, show that the first four terms of the output sequence are 1, 3, 2, 2.
+
+### Solution 1
+\$\$
+H(z)=1+2z^{-1}-z^{-2}
+\$\$
+
+
+\$
+
+
+--- Markdown Cell 19 ---
+## Exercise
+When a discrete signal \\( 1, -2 \\) is inputted to a processing system, the output sequence is \\( 1, -5, 8, -4 \\).
+
+a. Derive the transfer function for the system.
+
+b. Find the first three terms of the output sequence in response to the finite input sequence of \\( 2, 2, 1 \\).
+
+### Solution 1
+\`\`\`
+
+*Explanation*: The \$z\$ transform Power series recap: Exercise Solution: Exercise Solution Exercise Solution Exercise Exercise Solution 1 Exercise Solution 1
 
 `,
 
@@ -1974,7 +2495,9 @@ answer: c
 explanation: For a causal system, BIBO stability requires that the impulse response be absolutely summable, which occurs when all poles have magnitude strictly less than 1 (inside the unit circle). Poles inside the unit circle produce exponentially decaying modes in the impulse response. Option (a) is wrong — poles on the unit circle (|z| = 1) produce sustained oscillations (marginally stable), and repeated poles on the unit circle cause growing oscillations (unstable). Option (b) describes s-plane instability conditions for continuous systems, not z-plane. Option (d) is unrelated — the number of poles vs. zeros affects the transfer function's high-frequency behavior but has nothing to do with stability.
 \`\`\`
 `,
-    labWalkthrough: `
+    labWalkthrough: `## 🔬 Lab 09 Walkthrough
+
+This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
 
 `,
 
