@@ -492,18 +492,34 @@ def show_fft(f0):
 With a sampling frequency $f_s = 1000$ and $N = 1000$ samples, the frequency resolution (bin spacing) is exactly $\\Delta f = 1 \\text{ Hz}$. 
 - If you call \`show_fft(10)\`, the input is exactly 10 Hz. This matches an FFT bin perfectly, meaning there are an integer number of cycles in the observation window. The plot will show a single, perfect vertical spike with zero spectral leakage.
 - If you call \`show_fft(10.5)\`, the frequency falls exactly between the 10 Hz and 11 Hz bins. Because an incomplete cycle ends the window abruptly, the signal's energy "leaks" out over all surrounding bins (Spectral Leakage), and the true peak amplitude is severely attenuated (Scalloping Loss). This hands-on function vividly demonstrates why applying window functions (like Hann or Blackman) is a fundamental prerequisite in practical signal processing.
-`,
-    labWalkthrough: `
+
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: What is the primary effect of zero-padding a signal before computing its FFT?
-a: It interpolates the frequency spectrum, providing a smoother visual representation.
-b: It fundamentally increases the true frequency resolution of the analysis.
-c: It removes spectral leakage and the need for a windowing function.
-answer: a
+question: According to the Nyquist-Shannon Sampling Theorem, what is the absolute minimum sampling frequency (fs) required to exactly reconstruct a baseband signal with a maximum frequency of f_max?
+a: fs = f_max
+b: fs = 2 * f_max (The Nyquist Rate)
+c: fs = 4 * f_max
+answer: b
 \`\`\`
+\`\`\`quiz
+question: What is aliasing in the context of signal sampling?
+a: The loss of high-frequency energy due to low-pass filtering.
+b: High-frequency components folding back and impersonating lower frequencies because the sampling rate was too low.
+c: The quantization noise introduced by analog-to-digital converters.
+answer: b
+\`\`\`
+\`\`\`quiz
+question: What is the primary purpose of an anti-aliasing filter placed before an Analog-to-Digital Converter (ADC)?
+a: To eliminate all background noise in the signal.
+b: To amplify the highest frequencies of the signal for better resolution.
+c: To strictly limit the bandwidth of the continuous signal to less than half the sampling rate.
+answer: c
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 6 Key Formulas
@@ -1034,18 +1050,34 @@ df = fs / nfft
 P_freq_sum = np.sum(Pxx_one_sided) * df
 \`\`\`
 By integrating the area under our one-sided PSD curve (\`Sum * df\`), we extract the total signal power \`P_freq_sum\`, mapping directly back to the time-domain mean squared value \`P_time\`.
-`,
-    labWalkthrough: `
+
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: Why is Welch's method preferred over a standard periodogram for spectral density estimation?
-a: It computes the FFT significantly faster than a standard periodogram.
-b: It reduces variance by averaging overlapping, windowed segments of the signal.
-c: It completely eliminates bias in the spectral estimate.
+question: What distinguishes the Discrete Fourier Transform (DFT) from the DTFT?
+a: The DFT operates on continuous signals, while the DTFT operates on discrete ones.
+b: Both the time-domain signal and the frequency-domain spectrum in the DFT are discrete and finite in length.
+c: The DFT produces a continuous spectrum, whereas the DTFT produces a discrete one.
 answer: b
 \`\`\`
+\`\`\`quiz
+question: In the context of the DFT, what does the phenomenon of "spectral leakage" refer to?
+a: Energy from a frequency component spreading into adjacent frequency bins because the signal length is not an integer multiple of the period.
+b: The loss of low-frequency components when using a high-pass filter.
+c: The aliasing of high frequencies into the low-frequency range.
+answer: a
+\`\`\`
+\`\`\`quiz
+question: How is spectral leakage typically mitigated when applying the DFT to real-world signals?
+a: By increasing the sampling rate.
+b: By multiplying the time-domain signal with a windowing function (e.g., Hamming or Hanning) before computing the DFT.
+c: By applying a high-pass filter.
+answer: b
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 7 Key Formulas
@@ -1296,18 +1328,34 @@ plt.show()
 *Observation:* The pole is situated at $0.8 + j0$. Because $0.8 < 1$, the pole resides entirely *inside* the unit circle. This guarantees that if the system is assumed to be causal (expanding outward), the ROC $|z|>0.8$ includes the unit circle, meaning the system is inherently **BIBO stable**.
 
 ### Conclusion
-Throughout Lab 08, we leveraged numerical libraries to validate our manual solutions from Homework 8. Python handles the rigorous algebraic computations, allowing us as DSP engineers to focus heavily on analyzing the geometry of poles, zeros, and regions of convergence. Ensure your plots are adequately documented with axes and units for your final lab submissions!`,
-    labWalkthrough: `
+Throughout Lab 08, we leveraged numerical libraries to validate our manual solutions from Homework 8. Python handles the rigorous algebraic computations, allowing us as DSP engineers to focus heavily on analyzing the geometry of poles, zeros, and regions of convergence. Ensure your plots are adequately documented with axes and units for your final lab submissions!
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: In the z-plane, where must all poles of a causal LTI system lie for the system to be stable?
-a: Strictly inside the unit circle (|z| < 1).
-b: Strictly outside the unit circle (|z| > 1).
-c: On the unit circle (|z| = 1).
-answer: a
+question: What is the Fast Fourier Transform (FFT)?
+a: A different mathematical transform that approximates the DFT.
+b: A highly efficient algorithm (like Cooley-Tukey) for computing the DFT, reducing computational complexity from O(N^2) to O(N log N).
+c: An analog hardware circuit for frequency analysis.
+answer: b
 \`\`\`
+\`\`\`quiz
+question: What is the primary effect of zero-padding a signal in the time domain before computing its FFT?
+a: It fundamentally increases the true frequency resolution (ability to distinguish close frequencies).
+b: It removes spectral leakage and the need for a windowing function.
+c: It interpolates the frequency spectrum, providing a smoother visual representation with more frequency bins, but does not improve true resolution.
+answer: c
+\`\`\`
+\`\`\`quiz
+question: Which structural property of the DFT matrix is exploited by radix-2 FFT algorithms?
+a: The fact that it is a sparse matrix with mostly zeros.
+b: The symmetry and periodicity of the "twiddle factors" (complex roots of unity).
+c: The fact that it only contains real numbers.
+answer: b
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 8 Key Formulas
@@ -1808,18 +1856,34 @@ plt.show()
 **Lab Exercise Takeaway:** The time-domain application perfectly reflects our frequency-domain analysis. Frequencies situated near our Zeros (the notches) are completely attenuated from the output \`y\`, while the remaining signal propagates through.
 
 **End of Lab 09 Walkthrough**
-`,
-    labWalkthrough: `
+
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
 question: What distinguishes an Infinite Impulse Response (IIR) filter from a Finite Impulse Response (FIR) filter?
 a: An IIR filter only requires feed-forward coefficients.
-b: An IIR filter has feedback (poles) and its impulse response continues indefinitely.
-c: An IIR filter can only be implemented in continuous time.
+b: An IIR filter utilizes feedback (poles), causing its impulse response to theoretically continue indefinitely.
+c: An IIR filter inherently possesses exactly linear phase.
 answer: b
 \`\`\`
+\`\`\`quiz
+question: The Bilinear Transform is a popular method for IIR filter design. What does it do?
+a: It converts a continuous-time (analog) filter transfer function H(s) into a discrete-time digital filter H(z).
+b: It transforms a time-domain signal directly into the frequency domain.
+c: It ensures that the resulting digital filter has finite impulse response.
+answer: a
+\`\`\`
+\`\`\`quiz
+question: Which of the following analog filter prototypes is characterized by a "maximally flat" passband with no ripple?
+a: Chebyshev Type I
+b: Elliptic
+c: Butterworth
+answer: c
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 9 Key Formulas

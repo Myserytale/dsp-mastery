@@ -233,18 +233,34 @@ plt.show()
 ### 💡 Lab Conclusion
 By executing this code, students can see directly how the theories discussed in Homework 10 map into digital reality. 
 1. The **Bilinear transform** inside \`butter\` successfully scaled the chirp off after 1 second (100 Hz mark).
-2. The **Notch filter**, utilizing complex conjugate zeros directly on the unit circle at precisely $50$ Hz, perfectly hollowed out the interference, validating our math on direct pole-zero placement.`,
-    labWalkthrough: `
+2. The **Notch filter**, utilizing complex conjugate zeros directly on the unit circle at precisely $50$ Hz, perfectly hollowed out the interference, validating our math on direct pole-zero placement.
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: In the context of the DFT, what does the phenomenon of spectral leakage refer to?
-a: Energy from a frequency component spreading into adjacent frequency bins due to finite observation windows.
-b: The loss of low-frequency components when using a high-pass filter.
-c: The aliasing of high frequencies into the low-frequency range.
+question: Which of the following is a major advantage of FIR filters over IIR filters?
+a: They require fewer coefficients to achieve the same sharp cutoff.
+b: They can be designed to have an exactly linear phase response, preserving waveform shapes.
+c: They are computationally cheaper than IIR filters for complex frequency responses.
+answer: b
+\`\`\`
+\`\`\`quiz
+question: In the Window Method for FIR filter design, what is the consequence of truncating the ideal infinite impulse response with a rectangular window?
+a: It produces the sharpest possible transition band but suffers from significant Gibbs phenomenon ripples in the passband and stopband.
+b: It produces a completely smooth transition band with no ripples.
+c: It forces the filter to become an IIR filter.
 answer: a
 \`\`\`
+\`\`\`quiz
+question: A linear-phase FIR filter requires its impulse response h[n] to have what specific property?
+a: It must be strictly positive.
+b: It must be an exponentially decaying sequence.
+c: It must be symmetric or anti-symmetric around its midpoint.
+answer: c
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 10 Key Formulas
@@ -425,18 +441,34 @@ Completed At: 2026-06-17T00:35:41Z
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":664,"LineContent":"    homeworkGuide: \`## 📝 Homework 2 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1039,"LineContent":"    homeworkGuide: \`## 📝 Homework 3 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1309,"LineContent":"    homeworkGuide: \`## 📝 Homework 4 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}`,
-    labWalkthrough: `
+{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: What happens to the Fourier transform of a signal if the signal is compressed in the time domain?
-a: Its frequency spectrum also compresses.
-b: Its frequency spectrum expands (stretches) and its amplitude scales.
-c: Its frequency spectrum remains completely unchanged.
+question: What is the main difference between Direct Form I and Direct Form II realizations of an IIR filter?
+a: Direct Form I requires double the number of multipliers compared to Direct Form II.
+b: Direct Form II shares the delay elements (memory) between the feedforward and feedback paths, saving memory compared to Direct Form I.
+c: Direct Form II can only be used for FIR filters.
 answer: b
 \`\`\`
+\`\`\`quiz
+question: When implementing digital filters in fixed-point hardware, what issue arises from the quantization of filter coefficients?
+a: The filter's phase response becomes non-linear.
+b: The actual poles and zeros shift from their designed locations, potentially causing instability in IIR filters.
+c: The sampling rate of the signal is unintentionally reduced.
+answer: b
+\`\`\`
+\`\`\`quiz
+question: Why might a cascade (series) realization of second-order sections (biquads) be preferred over a high-order Direct Form realization?
+a: It requires fewer overall multipliers and adders.
+b: It is significantly less sensitive to coefficient quantization errors and numerical instability.
+c: It automatically makes an IIR filter act like an FIR filter.
+answer: b
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 11 Key Formulas
@@ -594,18 +626,34 @@ Completed At: 2026-06-17T00:35:41Z
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":664,"LineContent":"    homeworkGuide: \`## 📝 Homework 2 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1039,"LineContent":"    homeworkGuide: \`## 📝 Homework 3 Solutions"}
 {"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1309,"LineContent":"    homeworkGuide: \`## 📝 Homework 4 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}`,
-    labWalkthrough: `
+{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: Which of the following best describes the difference between the Discrete-Time Fourier Transform (DTFT) and the Discrete Fourier Transform (DFT)?
-a: Both are discrete in frequency, but DTFT is continuous in time.
-b: The DTFT is continuous in frequency, while the DFT is discrete in frequency.
-c: The DFT is used for continuous-time signals, while the DTFT is for digital signals.
+question: What is the purpose of decimation in multirate digital signal processing?
+a: To increase the sampling rate of a signal by inserting zeros.
+b: To reduce the sampling rate of a signal by discarding samples, usually preceded by low-pass filtering to prevent aliasing.
+c: To convert a digital signal back into an analog signal.
 answer: b
 \`\`\`
+\`\`\`quiz
+question: In interpolation (upsampling), what is the crucial step immediately following the insertion of zero-valued samples between original samples?
+a: Applying a high-pass filter.
+b: Applying a low-pass (anti-imaging) filter to remove spectral replicas created by the zero-insertion.
+c: Performing a Fast Fourier Transform.
+answer: b
+\`\`\`
+\`\`\`quiz
+question: Why is Welch's method (periodogram averaging) often preferred over a single, standard periodogram for spectral density estimation of noisy signals?
+a: It computes the FFT significantly faster than a standard periodogram.
+b: It completely eliminates bias in the spectral estimate.
+c: It reduces the variance of the spectral estimate by averaging overlapping, windowed segments of the signal.
+answer: c
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 12 Key Formulas
@@ -875,17 +923,32 @@ Result: The reconstructed signal will have frequencies at **100 Hz** and **200 H
    $$H(z) = \\frac{1+z^{-1}}{2} = 0.5 + 0.5z^{-1}$$
    Result: The digital filter is $y[n] = 0.5x[n] + 0.5x[n-1]$ (a simple moving average!).
 
+
+
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: If a discrete-time sequence is purely real and even, what can be said about its Discrete Time Fourier Transform (DTFT)?
-a: It is purely imaginary and odd.
-b: It is purely real and even.
-c: It has a constant magnitude of 1.
+question: Across the entire DSP pipeline, if a discrete system is defined as y[n] = x[n] + 0.5*y[n-1], what kind of filter is this?
+a: An FIR filter because it has finite terms.
+b: An IIR filter because the current output depends on previous outputs (feedback).
+c: A non-causal filter.
 answer: b
 \`\`\`
+\`\`\`quiz
+question: Which of the following correctly orders the transforms from strictly continuous to strictly discrete (both time and frequency)?
+a: DFT -> DTFT -> CTFT
+b: CTFT (continuous time/freq) -> DTFT (discrete time, continuous freq) -> DFT (discrete time/freq)
+c: Z-Transform -> Laplace Transform -> Fourier Series
+answer: b
+\`\`\`
+\`\`\`quiz
+question: Ultimately, what is the fundamental mathematical operation at the heart of filtering a signal in the time domain?
+a: Cross-correlation
+b: Differentiation
+c: Convolution
+answer: c
+\`\`\`
 `,
-
     labWalkthrough: `## Course Lab Summary
 
 | Lab | Topic | Key Functions |

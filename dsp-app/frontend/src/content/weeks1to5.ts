@@ -455,14 +455,30 @@ For each system, we test four properties:
 | (g) hard limiter | ✗ | ✓ | ✓ | ✓ |
 | (h) $e^{x[n]}-1$ | ✗ | ✓ | ✓ | ✓ |
 
+
+
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: What is the primary advantage of Digital Signal Processing over Analog Signal Processing?
-a: DSP requires less power and is naturally faster than ASP.
-b: DSP guarantees perfect reproducibility and stability over time and temperature variations.
-c: DSP can process infinite-bandwidth signals without any filtering.
+question: What is the primary difference between continuous-time and discrete-time signals?
+a: Continuous-time signals are always periodic, while discrete-time signals are aperiodic.
+b: Continuous-time signals are defined for all real values of time, whereas discrete-time signals are defined only at integer indices.
+c: Continuous-time signals can only have positive amplitudes.
 answer: b
+\`\`\`
+\`\`\`quiz
+question: A system is considered Linear Time-Invariant (LTI) if it satisfies which two mathematical properties?
+a: Superposition (additivity/scaling) and shift-invariance.
+b: Causality and Bounded-Input Bounded-Output (BIBO) stability.
+c: Memoryless operation and invertibility.
+answer: a
+\`\`\`
+\`\`\`quiz
+question: How is a Power Signal distinguished from an Energy Signal?
+a: A power signal has finite energy and zero average power.
+b: A power signal has infinite average power and finite energy.
+c: A power signal has finite average power but infinite total energy (e.g., a continuous sine wave).
+answer: c
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 01: Python Basics for DSP
@@ -557,15 +573,6 @@ plt.stem(n, step[n])     # Plots the step
 - \`np.roll(array, shift)\` circularly shifts the array, useful for delaying signals.
 \`\`\`
 
-### 🧠 Knowledge Check
-
-\`\`\`quiz
-question: What is the primary advantage of Digital Signal Processing over Analog Signal Processing?
-a: DSP requires less power and is naturally faster than ASP.
-b: DSP guarantees perfect reproducibility and stability over time and temperature variations.
-c: DSP can process infinite-bandwidth signals without any filtering.
-answer: b
-\`\`\`
 `,
     keyFormulas: `## Week 1 Key Formulas
 
@@ -844,14 +851,30 @@ plt.show()
 \`\`\`
 
 
+
+
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: What property of the convolution sum indicates that the order of the signals does not matter?
+question: What property of the convolution sum indicates that the order of the signals does not matter (i.e., x[n] * h[n] = h[n] * x[n])?
 a: Associative Property
 b: Commutative Property
 c: Distributive Property
 answer: b
+\`\`\`
+\`\`\`quiz
+question: If you convolve a signal x[n] with a shifted unit impulse δ[n-k], what is the resulting output?
+a: The original signal x[n].
+b: The signal shifted by k, x[n-k].
+c: A single impulse at n=k with amplitude x[k].
+answer: b
+\`\`\`
+\`\`\`quiz
+question: In terms of its impulse response h[n], what is the condition for an LTI system to be causal?
+a: h[n] = 0 for all n < 0.
+b: The sum of the absolute values of h[n] is finite.
+c: h[n] must be purely real and even.
+answer: a
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 02: Convolution Implementations
@@ -930,15 +953,6 @@ print(convolve(x, impulse)) # Returns [1, 2, 3, 4, 5, 0...]
 
 **Explanation:** The empirical proof of the identity property $x * \\delta = x$.
 
-### 🧠 Knowledge Check
-
-\`\`\`quiz
-question: What property of the convolution sum indicates that the order of the signals does not matter?
-a: Associative Property
-b: Commutative Property
-c: Distributive Property
-answer: b
-\`\`\`
 `,
     keyFormulas: `## Week 2 Key Formulas
 
@@ -1198,17 +1212,32 @@ Thus, the sum of complex exponentials exactly yields the periodic Dirac comb.
 **(f) $f * q_T = \\sum f(t-nT)$**: $q_T(t) = T \\sum \\delta(t-nT)$. Convolving $f(t)$ with a sum of deltas yields a sum of shifted $f(t)$'s.
 
 
+
+
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: In the Fourier Series, what do the coefficients represent?
-a: The time delay of the signal at various points.
-b: The instantaneous frequency of the signal.
-c: The amplitude and phase of the individual sinusoidal frequency components.
-answer: c
+question: What does the Fourier Series represent?
+a: The conversion of a continuous-time signal into a sequence of discrete samples.
+b: The decomposition of a periodic signal into an infinite sum of harmonically related complex exponentials (sines and cosines).
+c: The time delay of a signal at various frequency points.
+answer: b
+\`\`\`
+\`\`\`quiz
+question: For a real-valued signal, what symmetry property do its Fourier coefficients exhibit?
+a: They are purely real and even.
+b: They exhibit conjugate symmetry (c_k = c_{-k}^*).
+c: They are purely imaginary and odd.
+answer: b
+\`\`\`
+\`\`\`quiz
+question: Which transform is used to analyze aperiodic, continuous-time signals?
+a: Continuous-Time Fourier Series (CTFS)
+b: Continuous-Time Fourier Transform (CTFT)
+c: Discrete Fourier Transform (DFT)
+answer: b
 \`\`\`
 `,
-
     labWalkthrough: `## 🔬 Lab 03: FFT as Numerical Fourier Transform
 
 > **Objective:** Understand how to compute continuous Fourier Transforms numerically using Python's discrete \`numpy.fft\` module, properly scaling axes to maintain physical units.
@@ -1519,13 +1548,29 @@ plot_pair(t, x_exp, f_ana, X_exp_ana, '(e) exp(-|t|)')
 \`\`\`
 
 
+
+
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: According to the Nyquist-Shannon Sampling Theorem, what is the minimum sampling frequency required to perfectly reconstruct a signal with maximum frequency f_max?
-a: f_max
-b: 2 * f_max
-c: 4 * f_max
+question: The Discrete-Time Fourier Transform (DTFT) takes a discrete-time signal and produces a spectrum that is:
+a: Discrete and periodic.
+b: Continuous and periodic with period 2π.
+c: Continuous and aperiodic.
+answer: b
+\`\`\`
+\`\`\`quiz
+question: What happens to the DTFT of a signal if the signal is delayed in the time domain by k samples (i.e., x[n-k])?
+a: The spectrum is multiplied by a linear phase shift e^{-jωk}.
+b: The spectrum is circularly shifted by k bins.
+c: The amplitude of the spectrum decreases by a factor of k.
+answer: a
+\`\`\`
+\`\`\`quiz
+question: If a discrete-time sequence is purely real and even, what can be said about its DTFT?
+a: It is purely imaginary and odd.
+b: It is purely real and even.
+c: It has a constant magnitude of 1 across all frequencies.
 answer: b
 \`\`\`
 `,
@@ -1599,15 +1644,6 @@ plt.show()
 **Explanation:** The FFT perfectly matches the theoretical analytic curve, provided we scale by $T$ and properly align the time-domain signal to index 0 using \`fftshift\` before passing it to \`fft\`.
 
 
-### 🧠 Knowledge Check
-
-\`\`\`quiz
-question: According to the Nyquist-Shannon Sampling Theorem, what is the minimum sampling frequency required to perfectly reconstruct a signal with maximum frequency f_max?
-a: f_max
-b: 2 * f_max
-c: 4 * f_max
-answer: b
-\`\`\`
 `,
     keyFormulas: `## Week 4 Key Formulas
 
@@ -1991,18 +2027,34 @@ for n in arange(-Nsamp//2, Nsamp//2):
     xrec += xhat[n]*sincpi(t/T - n)
 \\\`\\\`\\\`
 Finally, we iterate over the sampled discrete sequence \\\`xhat\\\` and multiply each point by a time-shifted continuous \\\`sinc\\\` function. When all these overlapping sinc functions are summed together across the temporal grid (\\\`xrec += ...\\\`), they perfectly blend to reconstruct our original continuous triangular-spectrum signal.
-`,
-    labWalkthrough: `
+
 
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
-question: What is the primary purpose of an anti-aliasing filter before analog-to-digital conversion?
-a: To eliminate noise in the signal.
-b: To strictly limit the bandwidth of the signal to less than half the sampling rate.
-c: To amplify the highest frequencies of the signal.
+question: The Z-transform is a generalization of which other transform?
+a: The Discrete Fourier Transform (DFT).
+b: The Discrete-Time Fourier Transform (DTFT), evaluated along the complex plane z = r*e^{jω}.
+c: The Laplace Transform for continuous-time signals.
 answer: b
 \`\`\`
+\`\`\`quiz
+question: For a causal LTI system to be Bounded-Input Bounded-Output (BIBO) stable, where must all its poles lie in the z-plane?
+a: Strictly outside the unit circle (|z| > 1).
+b: On the unit circle (|z| = 1).
+c: Strictly inside the unit circle (|z| < 1).
+answer: c
+\`\`\`
+\`\`\`quiz
+question: What defines the Region of Convergence (ROC) for a Z-transform?
+a: The set of all values of z for which the Z-transform summation converges to a finite value.
+b: The frequencies where the phase response is linear.
+c: The area inside the unit circle exclusively.
+answer: a
+\`\`\`
+`,
+    labWalkthrough: `
+
 `,
 
     keyFormulas: `## Week 5 Key Formulas
