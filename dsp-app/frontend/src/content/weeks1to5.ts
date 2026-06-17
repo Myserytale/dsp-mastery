@@ -2072,42 +2072,42 @@ This proves that applying the DFT and its inverse perfectly restores the origina
 This section conceptually breaks down the provided Python script to demonstrate the mathematics of the Whittaker-Shannon interpolation formula.
 
 ### 1. Setup & High-Resolution Frequency Domain
-\\\`\\\`\\\`python
+\`\`\`python
 dt = 0.001 
 fs = 1/dt # resolution of the 'continuous' signal
 fmax = 4.0 # maximum frequency (half width of the triangle)
 N = 4096 # the size of our 'continuous' signal: N points, i.e. N*T long
-\\\`\\\`\\\`
-We define a highly resolute temporal grid (\\\`dt = 0.001\\\`) to emulate a continuous analog signal on a digital computer.
+\`\`\`
+We define a highly resolute temporal grid (\`dt = 0.001\`) to emulate a continuous analog signal on a digital computer.
 
 ### 2. Creating the Triangular Spectrum
-\\\`\\\`\\\`python
+\`\`\`python
 f = fftfreq(N, dt)
 X = zeros(N)
 X[abs(f) <= fmax] = (1 - abs(f)/fmax)[abs(f) <= fmax] # triangle shape
-\\\`\\\`\\\`
-We use \\\`numpy.fft.fftfreq\\\` to generate the frequency axis. We then explicitly create a bounded, bandlimited triangular spectrum $X(f)$ which exists strictly within $|f| \\leq 4.0$ Hz. This perfectly limits $f_{max}$, satisfying the preconditions for the Nyquist theorem.
+\`\`\`
+We use \`numpy.fft.fftfreq\` to generate the frequency axis. We then explicitly create a bounded, bandlimited triangular spectrum $X(f)$ which exists strictly within $|f| \\leq 4.0$ Hz. This perfectly limits $f_{max}$, satisfying the preconditions for the Nyquist theorem.
 
 ### 3. Transforming to the Time Domain
-\\\`\\\`\\\`python
+\`\`\`python
 # get the signal as inverse Fourier transform
 x = fs*real(ifft(X)) # N*(fs/N)*ifft(X)
 t = fftfreq(N, fs/N)
-\\\`\\\`\\\`
-Using the Inverse Fast Fourier Transform (\\\`ifft\\\`), we convert $X(f)$ back into an analog time-domain signal $x(t)$. We scale the result by \\\`fs\\\` to maintain mathematical equivalence with the continuous Fourier transform amplitude scaling.
+\`\`\`
+Using the Inverse Fast Fourier Transform (\`ifft\`), we convert $X(f)$ back into an analog time-domain signal $x(t)$. We scale the result by \`fs\` to maintain mathematical equivalence with the continuous Fourier transform amplitude scaling.
 
 ### 4. The Sampling Process (Decimation)
-\\\`\\\`\\\`python
+\`\`\`python
 # Let's sample it by keeping only every 16th points
 m = 16
 T = dt*m # this is the sampling period
 xhat  = x[::m] # sampled (discrete time) signal
 tsamp = t[::m] # sampled time
-\\\`\\\`\\\`
+\`\`\`
 We simulate uniform sampling by keeping only every $16^{th}$ point of our continuous signal array. Our new physical sampling period is $T_{samp} = 0.016$ seconds, meaning our sampling frequency is roughly $62.5$ Hz. Since $62.5 > 2(4.0)$, the Nyquist requirement is easily satisfied, and aliasing is avoided.
 
 ### 5. Sinc Interpolation (Reconstruction)
-\\\`\\\`\\\`python
+\`\`\`python
 def sincpi(x):
     x[x == 0] = 1e-13 # to avoid problems when dividing with it
     return sin(pi*x)/(pi*x)
@@ -2116,8 +2116,8 @@ Nsamp = N//m # size of the sampled signal (the same as len(xhat))
 xrec = zeros(len(t)) # the reconstructed signal ('continuous')
 for n in arange(-Nsamp//2, Nsamp//2):
     xrec += xhat[n]*sincpi(t/T - n)
-\\\`\\\`\\\`
-Finally, we iterate over the sampled discrete sequence \\\`xhat\\\` and multiply each point by a time-shifted continuous \\\`sinc\\\` function. When all these overlapping sinc functions are summed together across the temporal grid (\\\`xrec += ...\\\`), they perfectly blend to reconstruct our original continuous triangular-spectrum signal.
+\`\`\`
+Finally, we iterate over the sampled discrete sequence \`xhat\` and multiply each point by a time-shifted continuous \`sinc\` function. When all these overlapping sinc functions are summed together across the temporal grid (\`xrec += ...\`), they perfectly blend to reconstruct our original continuous triangular-spectrum signal.
 
 
 ### 🧠 Knowledge Check
