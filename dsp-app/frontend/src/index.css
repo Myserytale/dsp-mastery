@@ -251,14 +251,14 @@ html, body, #root {
 /* ─── KaTeX overrides for dark theme ─── */
 .markdown-body .katex { 
   color: #ebcb8b !important; 
-  font-size: 1.4em !important;
+  font-size: 1.55em !important;
   text-shadow: 0 0 5px rgba(235, 203, 139, 0.15) !important;
   font-weight: 500 !important;
 }
 
 .markdown-body .katex-display {
-  margin: 1.8em 0 !important;
-  padding: 1.8em !important;
+  margin: 2em 0 !important;
+  padding: 2em !important;
   background: rgba(15, 18, 22, 0.85) !important;
   border-radius: 12px !important;
   border: 1px solid rgba(235, 203, 139, 0.4) !important;
@@ -269,7 +269,7 @@ html, body, #root {
 
 .markdown-body .katex-display > .katex {
   color: #eceff4 !important;
-  font-size: 1.9em !important;
+  font-size: 2.1em !important;
   text-shadow: 0 0 12px rgba(235, 203, 139, 0.3) !important;
 }
 

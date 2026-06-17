@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import remarkBreaks from 'remark-breaks';
+import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
 import 'katex/dist/katex.min.css';
@@ -281,7 +282,7 @@ export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRende
         </div>
       )}
       <ReactMarkdown
-        remarkPlugins={[remarkMath, remarkBreaks]}
+        remarkPlugins={[remarkMath, remarkBreaks, remarkGfm]}
         rehypePlugins={[
           rehypeKatex,
           [rehypeHighlight, { detect: true, ignoreMissing: true }],
