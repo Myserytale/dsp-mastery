@@ -32,7 +32,7 @@ const WEEK_META = [
   { id: 13, title: 'Review & Exam Prep', slide: 'dsp13.pdf', hw: null },
 ];
 
-const API_BASE = import.meta.env.VITE_API_BASE || '';
+const API_BASE = import.meta.env.VITE_API_BASE || import.meta.env.BASE_URL.replace(/\/$/, '');
 
 function App() {
   const [allWeeks, setAllWeeks] = useState<WeekContent[]>([]);
