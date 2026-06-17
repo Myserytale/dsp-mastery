@@ -202,19 +202,19 @@ function QuizCard({ rawCode }: { rawCode: string }) {
 
 export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRendererProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [tooltip, setTooltip] = useState<{ text: string; x: number; y: number; visible: boolean }>({
-    text: '', x: 0, y: 0, visible: false
+  const [tooltip, setTooltip] = useState<{ content: ReactNode; x: number; y: number; visible: boolean }>({
+    content: null, x: 0, y: 0, visible: false
   });
 
   useEffect(() => {
     if (!containerRef.current) return;
     const katexEls = containerRef.current.querySelectorAll('.katex');
     
-    const handleEnter = (e: Event, text: string) => {
+    const handleEnter = (e: Event, content: ReactNode) => {
       const target = e.currentTarget as HTMLElement;
       const rect = target.getBoundingClientRect();
       setTooltip({
-        text,
+        content,
         x: rect.left + rect.width / 2,
         y: rect.top - 10,
         visible: true
@@ -246,6 +246,30 @@ export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRende
               htmlNode.addEventListener('mouseleave', leave);
               listeners.push({ el: htmlNode, enter, leave });
             }
+          } else {
+            // Partial matching for larger equations
+            const foundKeys = Object.keys(MATH_GLOSSARY).filter(key => key.length > 2 && tex.includes(key));
+            if (foundKeys.length > 0) {
+              const htmlNode = el.querySelector('.katex-html') as HTMLElement;
+              if (htmlNode) {
+                htmlNode.classList.add('cursor-help', 'border-b', 'border-dashed', 'border-nord-aurora-yellow/70', 'hover:bg-nord-aurora-yellow/10', 'rounded', 'transition-colors');
+                const content = (
+                  <div className="flex flex-col gap-1">
+                    <div className="font-semibold text-nord-aurora-yellow/90 mb-1 border-b border-nord-border pb-1">Variables in equation:</div>
+                    {foundKeys.map(k => (
+                      <div key={k} className="text-nord-snow-1">
+                        <strong className="text-nord-frost-2 font-mono">{k}</strong>: {MATH_GLOSSARY[k]}
+                      </div>
+                    ))}
+                  </div>
+                );
+                const enter = (e: Event) => handleEnter(e, content);
+                const leave = () => handleLeave();
+                htmlNode.addEventListener('mouseenter', enter);
+                htmlNode.addEventListener('mouseleave', leave);
+                listeners.push({ el: htmlNode, enter, leave });
+              }
+            }
           }
         }
       }
@@ -273,12 +297,12 @@ export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRende
 
   return (
     <div className="markdown-body relative" ref={containerRef}>
-      {tooltip.visible && (
+      {tooltip.visible && tooltip.content && (
         <div 
-          className="fixed z-50 px-3 py-2 text-[0.75rem] max-w-xs leading-tight bg-nord-polar-1 text-nord-snow-1 rounded shadow-xl border border-nord-border pointer-events-none transform -translate-x-1/2 -translate-y-full transition-opacity"
+          className="fixed z-50 px-3 py-2 text-[0.75rem] max-w-sm leading-tight bg-nord-polar-1 text-nord-snow-1 rounded shadow-xl border border-nord-border pointer-events-none transform -translate-x-1/2 -translate-y-full transition-opacity"
           style={{ left: tooltip.x, top: tooltip.y }}
         >
-          {tooltip.text}
+          {tooltip.content}
           <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-full border-4 border-transparent border-t-nord-border"></div>
         </div>
       )}

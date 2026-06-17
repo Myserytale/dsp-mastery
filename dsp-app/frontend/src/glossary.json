@@ -23,6 +23,7 @@
     "X(f)": "Frequency domain representation (Fourier transform) of x(t).",
     "X[k]": "Discrete Fourier Transform (DFT).",
     "W_{kn}": "Twiddle factor e^{-2\\pi i n k / N}.",
+    "W_N^k": "Twiddle factor (phase factor representing roots of unity).",
     "P_x(f_k)": "Periodogram (estimate of the signal's power distribution).",
     "\\sigma_t \\sigma_\\nu \\ge \\frac{1}{4\\pi}": "Heisenberg uncertainty principle.",
     "\\psi(t)": "Mother-wavelet.",
