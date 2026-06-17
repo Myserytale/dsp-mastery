@@ -19,140 +19,36 @@ No feedback means **always stable** and can have **linear phase** (all frequenci
 
     concepts: [
       {
-        name: 'Window Method',
-        explanation: `### Designing FIR Filters by Truncation
-
-The ideal lowpass filter has impulse response:
-$$h_{\\text{ideal}}[n] = \\frac{\\sin(\\omega_c n)}{\\pi n} = \\omega_c / \\pi \\cdot \\text{sinc}(\\omega_c n / \\pi)$$
-
-This is infinite and non-causal. The **window method**:
-1. Truncate to $M+1$ samples
-2. Apply a window function to reduce ripple
-3. Shift by $M/2$ to make causal
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy.signal import freqz
-
-def fir_lowpass(M, wc, window='hamming'):
-    """Design FIR lowpass filter using window method."""
-    n = np.arange(M + 1)
-    mid = M / 2
-    
-    # Ideal impulse response (handle n=mid separately)
-    h = np.where(n == mid, wc/np.pi, 
-                 np.sin(wc * (n - mid)) / (np.pi * (n - mid)))
-    
-    # Apply window
-    if window == 'hamming':
-        w = np.hamming(M + 1)
-    elif window == 'blackman':
-        w = np.blackman(M + 1)
-    else:
-        w = np.ones(M + 1)  # rectangular
-    
-    return h * w
-
-# Compare windows
-fig, ax = plt.subplots(figsize=(10, 4))
-wc = 0.4 * np.pi  # cutoff frequency
-
-for win_name in ['rectangular', 'hamming', 'blackman']:
-    h = fir_lowpass(40, wc, win_name)
-    w, H = freqz(h, 1, worN=1024)
-    ax.plot(w/np.pi, 20*np.log10(np.abs(H)+1e-10), label=win_name.capitalize())
-
-ax.set_xlabel('Normalized frequency (×π)')
-ax.set_ylabel('Magnitude (dB)')
-ax.set_ylim(-80, 5)
-ax.legend()
-ax.grid(True, alpha=0.3)
-ax.set_title('Window method: tradeoff between main lobe and sidelobes')
-plt.show()
-\`\`\``
+        name: 'Filter Specifications and Terminology',
+        explanation: `Fundamental terminology is required to describe the frequency response of a filter:
+* **Passband**: The frequency range where the filter gain is approximately \$1\$.
+* **Stopband**: The frequency range where the filter gain is approximately \$0\$.
+* **Cutoff Frequency (\$f_C\$)**: The frequency at which the output signal has one-half the power of the input signal (also called the \$-3\$ dB frequency, corresponding to an amplitude multiplier of \$1/\sqrt{2}\$).
+* **Bandwidth**: The range between the higher (\$f_H\$) and lower (\$f_L\$) cutoff frequencies for band-pass or band-reject filters.
+* **Transition Band**: The finite-width frequency range between the passband and stopband.
+* **Order of a Filter**: Denotes the number of poles used in the \$z\$-domain, which directly corresponds to the number of delay elements required in its implementation.
+* **Ripple**: Variation in attenuation (in dB) within the pass-band or stop-band.
+* **Rolloff**: The slope of the filter's magnitude response in the transition region, specified in dB/octave or dB/decade.
+* **Insertion Loss (IL)**: The minimum attenuation in the pass-band.
+* **Notch Depth**: The maximum attenuation between two pass-bands in a notch filter, specified in dB.`
       },
       {
-        name: 'Window Functions Compared',
-        explanation: `### Choosing the Right Window
-
-Every window trades **main lobe width** (frequency resolution) for **sidelobe level** (spectral leakage):
-
-| Window | Main lobe width | First sidelobe | Use when |
-|--------|----------------|----------------|----------|
-| **Rectangular** | $4\\pi/(M+1)$ | -13 dB | Maximum resolution needed |
-| **Hamming** | $8\\pi/(M+1)$ | -43 dB | General purpose (most common) |
-| **Hanning** | $8\\pi/(M+1)$ | -32 dB | Spectral analysis |
-| **Blackman** | $12\\pi/(M+1)$ | -58 dB | Maximum sidelobe rejection |
-| **Kaiser** | Variable ($\\beta$) | Variable | Tunable tradeoff |
-
-> **Rule of thumb**: Start with Hamming. If sidelobes matter more (e.g., weak signal near strong one), use Blackman. If resolution matters more, use rectangular.
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-M = 64
-windows = {
-    'Rectangular': np.ones(M),
-    'Hamming': np.hamming(M),
-    'Hanning': np.hanning(M),
-    'Blackman': np.blackman(M),
-}
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
-for name, w in windows.items():
-    ax1.plot(w, label=name)
-    # Frequency response of window itself
-    W = np.fft.fft(w, 1024)
-    W_db = 20*np.log10(np.abs(np.fft.fftshift(W))/np.max(np.abs(W))+1e-10)
-    f = np.linspace(-0.5, 0.5, 1024)
-    ax2.plot(f, W_db, label=name)
-
-ax1.set_title('Window shapes')
-ax1.legend()
-ax2.set_title('Window spectra (dB)')
-ax2.set_ylim(-80, 5)
-ax2.set_xlim(-0.15, 0.15)
-ax2.legend()
-plt.tight_layout()
-plt.show()
-\`\`\``
+        name: 'Filter Classification',
+        explanation: `Filters can be classified based on multiple orthogonal properties:
+* **Domain**: Analog vs. Digital; Time vs. Frequency.
+* **Structure**: Finite Impulse Response (FIR) vs. Infinite Impulse Response (IIR).
+* **Frequency Type**: Low-pass, high-pass, band-pass, band-stop, and all-pass.
+* **Stability and Causality**: Stable/unstable, causal/non-causal.
+* **Phase Characteristics**: Linear-phase, minimum-phase, or all-pass (typically used for delay shaping).
+* **Design Family**: Classic forms such as Butterworth, Chebyshev (Type I and II), Elliptic, and Bessel.
+* **Realization Architecture**: Direct form, cascade (biquad sections), parallel, and lattice implementations.
+* **Adaptivity**: Fixed filters vs. Adaptive filters (e.g., LMS, RLS algorithms).`
       },
       {
-        name: 'Linear Phase & Filter Order',
-        explanation: `### Why Linear Phase Matters
-
-A filter has **linear phase** if $\\angle H(e^{j\\omega}) = -\\omega M/2$ — all frequencies are delayed by the same amount ($M/2$ samples). This means the signal shape is preserved; only the timing shifts.
-
-**Condition**: FIR filter has linear phase if $h[n]$ is **symmetric**: $h[n] = h[M-n]$.
-
-All FIR filters designed by the window method are symmetric → linear phase!
-
-### Choosing Filter Order
-More taps $M$ → sharper transition but more computation:
-- **Transition bandwidth** $\\approx \\Delta\\omega$: $M \\approx \\frac{4}{\\Delta\\omega / \\pi}$ (Hamming)
-- Need 1 Hz transition at 1000 Hz sampling? $\\Delta\\omega = 2\\pi/1000$, so $M \\approx 2000$ taps.
-
-\`\`\`python
-import numpy as np
-from scipy.signal import firwin, freqz
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplots(figsize=(10, 4))
-for M in [15, 31, 63, 127]:
-    h = firwin(M, 0.3)  # cutoff at 0.3*Nyquist
-    w, H = freqz(h, 1, worN=2048)
-    ax.plot(w/np.pi, 20*np.log10(np.abs(H)+1e-10), label=f'M={M}')
-
-ax.set_xlabel('Normalized frequency (×π)')
-ax.set_ylabel('Magnitude (dB)')
-ax.set_ylim(-80, 5)
-ax.legend()
-ax.grid(True, alpha=0.3)
-ax.set_title('More taps → sharper transition')
-plt.show()
-\`\`\``
+        name: 'Direct Design of Infinite Impulse Response (IIR) Filters',
+        explanation: `The direct design method for IIR filters involves manually placing poles and zeros on the complex \$z\$-plane to explicitly shape the frequency response. This approach is highly suitable for simple digital filters.
+* **Transfer Function Realization**: A digital filter transfer function takes the form \$H(z)\$. For example, a simple first-order lowpass filter can be formulated as \$H(z) = k \frac{z+a}{z+b}\$. By evaluating design constraints—such as demanding a unity DC gain (\$H(1) = 1\$) and a predefined cutoff frequency where the gain drops appropriately—the coefficients \$a\$, \$b\$, and the scaling factor \$k\$ can be analytically solved.
+* **Notch Filter Design Example**: To completely reject a specific notch frequency \$f_N\$, zeros are placed precisely on the unit circle at complex conjugate angles corresponding to \$f_N\$. To ensure the notch bandwidth is exceedingly narrow without affecting the rest of the passband, poles are placed closely behind the zeros on the exact same radial lines (e.g., at a radius of \$r = 0.92\$). The resulting transfer function will incorporate conjugate pairs to maintain strictly real-valued coefficients.`
       },
     ],
 
@@ -410,138 +306,24 @@ This week also covers **notch filters** — a practical design technique for rem
 
     concepts: [
       {
-        name: 'Direct Form I & II',
-        explanation: `### Implementing the Difference Equation
-
-**Direct Form I**: Directly implements
-$$y[n] = \\sum_{k=0}^{M} b_k x[n-k] - \\sum_{k=1}^{N} a_k y[n-k]$$
-
-Needs $M + N$ delay elements (memory).
-
-**Direct Form II** (transposed): Rearranges to use only $\\max(M, N)$ delay elements — saves memory!
-
-The key insight: factor $H(z) = B(z) / A(z)$ and compute in two stages:
-1. First pass through $1/A(z)$ (feedback section)
-2. Then through $B(z)$ (feedforward section)
-
-\`\`\`python
-import numpy as np
-
-def direct_form_1(b, a, x):
-    """Direct Form I implementation."""
-    M, N = len(b), len(a)
-    y = np.zeros(len(x))
-    
-    for n in range(len(x)):
-        # Feedforward (FIR part)
-        for k in range(M):
-            if n - k >= 0:
-                y[n] += b[k] * x[n - k]
-        # Feedback (IIR part)
-        for k in range(1, N):
-            if n - k >= 0:
-                y[n] -= a[k] * y[n - k]
-    return y
-
-# Test: simple first-order IIR
-b = np.array([1.0, 0.5])
-a = np.array([1.0, -0.8])
-x = np.zeros(20); x[0] = 1  # impulse
-
-y = direct_form_1(b, a, x)
-print("Impulse response (first 10):", np.round(y[:10], 4))
-
-# Verify with scipy
-from scipy.signal import lfilter
-y_scipy = lfilter(b, a, x)
-print("scipy verification:          ", np.round(y_scipy[:10], 4))
-\`\`\``
+        name: 'IIR Filter Design via Analogue Prototypes',
+        explanation: `For sophisticated digital IIR filters, direct \$z\$-plane design is too complex. Instead, established continuous-time analogue filter prototypes \$H_a(s)\$ are designed first, and then transformed into discrete-time digital filters \$H_d(z)\$ via \$s\$-to-\$z\$ mapping techniques. The main analogue prototype families are:
+* **Butterworth Filters**: Deliver a monotonically decreasing gain with absolutely no ripples in either the passband or stopband. However, they suffer from a relatively slow rolloff.
+* **Chebyshev Type I**: Distribute the gain error uniformly as equiripples in the passband while remaining monotonic in the stopband.
+* **Chebyshev Type II**: Distribute the gain error uniformly as equiripples in the stopband while remaining monotonic in the passband.
+* **Elliptic Filters**: Feature equiripple behavior in both the passband and stopband, yielding the mathematically steepest transition-band rolloff for any given filter order.`
       },
       {
-        name: 'Cascade & Parallel Forms',
-        explanation: `### Breaking Filters into Sections
-
-**Cascade (Series) Form**: Factor $H(z)$ into second-order sections (SOS):
-$$H(z) = \\prod_{i} \\frac{b_{0i} + b_{1i}z^{-1} + b_{2i}z^{-2}}{1 + a_{1i}z^{-1} + a_{2i}z^{-2}}$$
-
-Each 2nd-order section is called a **biquad**. Benefits:
-- Less sensitive to coefficient quantization
-- Each section is easy to implement and test
-- Industry standard for audio processing
-
-**Parallel Form**: Partial fraction expansion:
-$$H(z) = k + \\sum_i \\frac{r_i}{1 - p_i z^{-1}}$$
-
-\`\`\`python
-import numpy as np
-from scipy.signal import butter, zpk2sos, sosfilt, freqz, sosfreqz
-import matplotlib.pyplot as plt
-
-# Design a 6th-order Butterworth
-b, a = butter(6, 0.3)
-
-# Convert to second-order sections (cascade form)
-sos = butter(6, 0.3, output='sos')  # direct SOS output
-print(f"SOS shape: {sos.shape}")  # (3, 6) = 3 biquad sections
-print("Each row: [b0, b1, b2, 1, a1, a2]")
-
-# Compare frequency responses
-w1, h1 = freqz(b, a, worN=1024)
-w2, h2 = sosfreqz(sos, worN=1024)
-
-plt.figure(figsize=(10, 4))
-plt.plot(w1/np.pi, 20*np.log10(np.abs(h1)+1e-10), label='Direct form')
-plt.plot(w2/np.pi, 20*np.log10(np.abs(h2)+1e-10), '--', label='Cascade (SOS)')
-plt.legend()
-plt.title('Same filter, different structure — identical response')
-plt.ylabel('Magnitude (dB)')
-plt.xlabel('Normalized frequency (×π)')
-plt.grid(True, alpha=0.3)
-plt.show()
-\`\`\``
+        name: 'Bilinear Transform and Frequency Pre-warping',
+        explanation: `The Bilinear Transform is a standard \$s\$-to-\$z\$ domain mapping that converts the entire infinite continuous \$s\$-plane into the discrete \$z\$-plane by using the substitution \$s = \frac{2}{T}\frac{z-1}{z+1}\$. 
+* **Derivation**: It originates from the first-order Maclaurin series approximation of the exact logarithmic mapping \$s = \frac{1}{T}\ln(z)\$. It structurally preserves system stability because the left-half \$s\$-plane maps strictly to the inside of the unit circle in the \$z\$-plane.
+* **Frequency Warping**: Because the infinite frequency range \$(0, \infty)\$ of the analogue filter is non-linearly compressed into the finite Nyquist interval \$[0, f_s/2]\$, a severe frequency distortion occurs near the Nyquist limit.
+* **Pre-warping**: To ensure that a critical digital cutoff frequency \$\omega_c\$ perfectly matches the design target, the analogue prototype must be intentionally designed using an artificially pre-warped frequency: \$\omega_c' = \frac{2}{T}\tan\left(\frac{\omega_c T}{2}\right)\$.`
       },
       {
-        name: 'Notch Filter Design',
-        explanation: `### Removing a Specific Frequency
-
-A **notch filter** rejects a single frequency $f_0$ while passing everything else. Design strategy:
-
-1. Place **zeros on the unit circle** at the target frequency: $z = e^{\\pm j\\omega_0}$
-2. Place **poles just inside** at the same angle: $z = r \\cdot e^{\\pm j\\omega_0}$ with $r$ close to 1
-
-The closer $r$ is to 1, the narrower the notch:
-
-$$H(z) = \\frac{(1 - e^{j\\omega_0}z^{-1})(1 - e^{-j\\omega_0}z^{-1})}{(1 - re^{j\\omega_0}z^{-1})(1 - re^{-j\\omega_0}z^{-1})}$$
-
-$$= \\frac{1 - 2\\cos(\\omega_0)z^{-1} + z^{-2}}{1 - 2r\\cos(\\omega_0)z^{-1} + r^2z^{-2}}$$
-
-\`\`\`python
-import numpy as np
-from scipy.signal import freqz
-import matplotlib.pyplot as plt
-
-def notch_filter(f_notch, fs, r=0.95):
-    """Design a notch filter to remove frequency f_notch."""
-    w0 = 2 * np.pi * f_notch / fs
-    b = np.array([1, -2*np.cos(w0), 1])
-    a = np.array([1, -2*r*np.cos(w0), r**2])
-    return b, a
-
-# Remove 50 Hz hum from a signal sampled at 500 Hz
-fs = 500
-b, a = notch_filter(50, fs, r=0.95)
-w, H = freqz(b, a, worN=2048, fs=fs)
-
-plt.figure(figsize=(10, 4))
-plt.plot(w, 20*np.log10(np.abs(H)+1e-10))
-plt.axvline(50, color='r', linestyle='--', alpha=0.5, label='50 Hz')
-plt.xlabel('Frequency (Hz)')
-plt.ylabel('Magnitude (dB)')
-plt.title('Notch filter: removes 50 Hz, passes everything else')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.show()
-\`\`\``
+        name: 'Impulse-Invariant and Pole-Zero Matching Methods',
+        explanation: `* **Impulse-Invariant Method**: This mapping guarantees that the discrete impulse response perfectly matches the sampled continuous impulse response: \$h[n] = h(nT)\$. For a first-order pole \$H_a(s) = \frac{\omega_c}{s+\omega_c}\$, the continuous time-domain response \$h(t) = \omega_c e^{-\omega_c t}\$ translates in the \$z\$-domain to \$H_d(z) = \frac{\omega_c T}{1 - e^{-\omega_c T}z^{-1}}\$. While it preserves time-domain shape, it heavily suffers from spectral aliasing and requires normalization to maintain unity DC gain.
+* **Pole-Zero Matching Technique**: The analogue poles and zeros \$s_k\$ are directly mapped to digital poles and zeros using the exact exponential relation \$z_k = e^{s_k T}\$. Because this naive mapping does not natively place zeros at the Nyquist frequency (\$z = -1\$), artificial zeros are often manually appended to the transfer function, followed by the derivation of a gain scaling factor \$k\$ to perfectly match the filter gain at a chosen reference frequency (like \$\omega=0\$ or \$\omega_N\$).`
       },
     ],
 
@@ -842,116 +624,31 @@ Everything we've learned comes together when we process **real signals** — aud
 
     concepts: [
       {
-        name: 'Decimation & Interpolation',
-        explanation: `### Changing the Sampling Rate
-
-**Decimation** (downsample by $M$): Keep every $M$-th sample, discard the rest.
-- Must lowpass filter first to prevent aliasing!
-- Output rate: $f_s / M$
-
-**Interpolation** (upsample by $L$): Insert $L-1$ zeros between samples, then lowpass filter.
-- Output rate: $f_s \\times L$
-
-\`\`\`python
-import numpy as np
-from scipy.signal import resample, decimate
-import matplotlib.pyplot as plt
-
-# Original signal: 100 Hz + 200 Hz, sampled at 1000 Hz
-fs = 1000
-t = np.arange(0, 0.1, 1/fs)
-x = np.sin(2*np.pi*100*t) + 0.5*np.sin(2*np.pi*200*t)
-
-# Decimate by 4 (new rate: 250 Hz)
-x_dec = decimate(x, 4)  # includes anti-aliasing filter!
-t_dec = np.arange(len(x_dec)) / (fs/4)
-
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 5))
-ax1.plot(t*1000, x, 'b-')
-ax1.set_title(f'Original (fs={fs} Hz, {len(x)} samples)')
-ax1.set_xlabel('Time (ms)')
-
-ax2.plot(t_dec*1000, x_dec, 'r-o', markersize=3)
-ax2.set_title(f'Decimated by 4 (fs={fs//4} Hz, {len(x_dec)} samples)')
-ax2.set_xlabel('Time (ms)')
-plt.tight_layout()
-plt.show()
-\`\`\``
+        name: 'Finite Impulse Response (FIR) Filters Overview',
+        explanation: `FIR filters are non-recursive systems fully characterized by a difference equation evaluated over a finite history of inputs: \$y[n] = \sum_{k=0}^{M} b_k x[n-k]\$.
+* **Advantages**: They are unconditionally stable (as they entirely lack feedback poles), can be designed to possess exact linear phase (preventing phase distortion and providing a constant group delay across all frequencies), and are highly insensitive to numerical coefficient quantization.
+* **Disadvantages**: To achieve steep transition bands equivalent to IIR filters, FIR filters demand a drastically higher order. This leads to intensive computational overhead, elevated memory usage for delay lines, and a substantial group delay of exactly \$M/2\$ samples.
+* **Linear Phase Theorem**: A filter is mathematically guaranteed to exhibit a strictly linear phase response if its impulse response coefficients exhibit perfect symmetry (or perfect antisymmetry): \$h[n] = h[N-1-n]\$.`
       },
       {
-        name: 'STFT & Spectrogram',
-        explanation: `### Time-Frequency Analysis
-
-The FFT tells you **what** frequencies are present but not **when**. The **Short-Time Fourier Transform (STFT)** slides a window across the signal and computes FFT of each segment:
-
-$$\\text{STFT}\\{x[n]\\}(m, k) = \\sum_{n} x[n] \\, w[n-mR] \\, e^{-j2\\pi kn/N}$$
-
-A **spectrogram** displays $|\\text{STFT}|^2$ as a 2D image: time on x-axis, frequency on y-axis, color = magnitude.
-
-> **Uncertainty principle**: Short window → good time resolution but poor frequency resolution. Long window → opposite. You can't have both!
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Create a chirp signal (frequency increases with time)
-fs = 4000
-t = np.arange(0, 2, 1/fs)
-f_start, f_end = 100, 1000
-x = np.sin(2*np.pi * (f_start + (f_end-f_start)*t/(2*t[-1])) * t)
-
-plt.figure(figsize=(10, 5))
-plt.specgram(x, Fs=fs, NFFT=256, noverlap=200, cmap='magma')
-plt.xlabel('Time (s)')
-plt.ylabel('Frequency (Hz)')
-plt.title('Spectrogram of a chirp signal')
-plt.colorbar(label='Power/Freq (dB/Hz)')
-plt.show()
-\`\`\``
+        name: 'Fourier and Windowing Method for FIR Filter Design',
+        explanation: `FIR filters are systematically designed by taking the continuous infinite impulse response of an ideal filter and adapting it for discrete, causal implementation.
+* **Continuous Ideal Filter**: An ideal continuous low-pass filter with cutoff \$f_c\$ exhibits a perfectly rectangular frequency response \$H(f) = \text{rect}(f/2f_c)\$. The inverse Fourier transform yields an infinite \$sinc\$ impulse response: \$h(t) = 2f_c \text{sinc}(\pi(2tf_c))\$.
+* **Truncation and Shifting**: The continuous function is sampled at interval \$T\$. Because calculating an infinite series is impossible, it is symmetrically truncated to a finite range \$-N/2 \le n \le N/2\$. The sequence is then temporally shifted by \$N/2\$ samples to enforce causality: \$b_n = h[n-N/2]\$.
+* **Windowing Optimization**: Abrupt boxcar truncation introduces severe spectral leakage and rippling (Gibbs phenomenon). To vastly improve the frequency response—widening the main lobe slightly while aggressively suppressing side lobes—the truncated coefficients are multiplicatively smoothed by a taper window \$w[n]\$: \$b_{new}[n] = b[n] \cdot w[n]\$.
+* Through algebraic combination of rectangular frequency blocks, High-pass, Band-pass, and Band-stop filters are easily formulated using superposition of corresponding \$sinc\$ impulse responses.`
       },
       {
-        name: 'Real-World Filtering',
-        explanation: `### Processing Audio and Biomedical Signals
-
-**Audio**: Remove noise from recordings, equalize frequency bands, detect pitch.
-
-**EEG**: Extract brain rhythms (delta 1-4 Hz, theta 4-8 Hz, alpha 8-13 Hz, beta 13-30 Hz), detect sleep spindles, remove artifacts.
-
-\`\`\`python
-import numpy as np
-from scipy.signal import butter, sosfilt, welch
-import matplotlib.pyplot as plt
-
-# Simulate noisy EEG with alpha rhythm (10 Hz) + noise
-fs = 256  # typical EEG sampling rate
-t = np.arange(0, 5, 1/fs)
-alpha = 0.5 * np.sin(2*np.pi*10*t)  # alpha rhythm
-noise = 0.3 * np.random.randn(len(t))
-eeg = alpha + noise
-
-# Bandpass filter for alpha band (8-13 Hz)
-sos = butter(4, [8, 13], btype='bandpass', fs=fs, output='sos')
-alpha_filtered = sosfilt(sos, eeg)
-
-fig, axes = plt.subplots(3, 1, figsize=(10, 7))
-axes[0].plot(t, eeg, 'gray', alpha=0.7)
-axes[0].set_title('Raw EEG (alpha + noise)')
-
-axes[1].plot(t, alpha_filtered, 'b-')
-axes[1].set_title('Filtered: alpha band (8-13 Hz)')
-
-# PSD comparison
-f, psd_raw = welch(eeg, fs, nperseg=512)
-f, psd_filt = welch(alpha_filtered, fs, nperseg=512)
-axes[2].semilogy(f, psd_raw, alpha=0.5, label='Raw')
-axes[2].semilogy(f, psd_filt, label='Filtered')
-axes[2].set_xlim(0, 50)
-axes[2].set_xlabel('Frequency (Hz)')
-axes[2].set_title('Power Spectral Density')
-axes[2].legend()
-plt.tight_layout()
-plt.show()
-\`\`\``
+        name: 'Short Time Fourier Transform (STFT) and Heisenberg Uncertainty',
+        explanation: `The standard Fourier Transform completely integrates over time, losing all temporal localization of transient spectral phenomena. 
+* **STFT Framework**: To counter this, STFT utilizes a sliding temporal window \$w(t-\tau)\$ to analyze localized frequency content: \$X(\nu, \tau) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} x(t) e^{-2\pi i \nu t} w(t-\tau) dt\$. The magnitude square of STFT yields the spectrogram.
+* **Heisenberg Uncertainty Principle**: This principle dictates an immovable fundamental limit on time-frequency resolution: \$\sigma_t \sigma_\nu \ge \frac{1}{4\pi}\$. Consequently, a narrow window provides excellent time resolution but terrible frequency resolution, whereas a wide window isolates frequencies perfectly but obscures the precise timing of events.`
+      },
+      {
+        name: 'Wavelet Transforms (CWT and DWT)',
+        explanation: `Wavelet transforms resolve the fixed-window limitation of STFT by employing dynamic, scalable time-frequency atoms.
+* **Continuous Wavelet Transform (CWT)**: Utilizes a localized 'mother wavelet' \$\psi(t)\$ that is both translated by \$\tau\$ and scaled by \$s\$: \$\psi_{\tau, s}(t) = \frac{1}{\sqrt{s}} \psi\left(\frac{t-\tau}{s}\right)\$. This yields the projection: \$W_\psi[f](s, \tau) = \int_{-\infty}^{\infty} f(t) \psi_{\tau, s}^*(t) dt\$. The wavelet must satisfy the exact admissibility criterion \$\int \frac{|\hat{\psi}(\omega)|^2}{|\omega|} d\omega < \infty\$ (which forces zero mean: \$\int \psi(t) dt = 0\$). Increasing the number of vanishing moments (\$t^k \psi(t) dt = 0\$) improves noise suppression and polynomial trend elimination. CWT is a highly redundant, continuous representation equivalent to applying a bank of bandpass filters.
+* **Discrete Wavelet Transform (DWT)**: Formulates an orthonormal computational basis using strict dyadic scales (\$s = 2^m\$) and translations (\$\tau = n 2^m\$). Signal decomposition is efficiently performed using a dual-filter framework: a lowpass 'father wavelet' (scaling function \$\phi\$) that extracts smooth approximations, and a bandpass 'mother wavelet' (wavelet function \$\psi\$) that captures high-frequency details. Examples include the Haar and Daubechies families.`
       },
     ],
 
@@ -1303,169 +1000,41 @@ Every week taught one piece of this pipeline. Now you can go from a real signal 
 
     concepts: [
       {
-        name: 'Transform Comparison',
-        explanation: `### Which Transform When?
-
-| Transform | Input | Output | Key Use |
-|-----------|-------|--------|---------|
-| **FT** | $x(t)$ continuous | $X(f)$ continuous | Continuous signal analysis |
-| **DTFT** | $x[n]$ discrete | $X(e^{j\\omega})$ continuous, periodic | Discrete signal theory |
-| **DFT** | $x[n]$ length $N$ | $X[k]$ length $N$ | Computable spectral analysis |
-| **FFT** | Same as DFT | Same as DFT | Fast DFT algorithm |
-| **Z-Transform** | $x[n]$ discrete | $X(z)$ complex plane | System analysis, stability |
-
-### Key Relationships
-- **DFT** = sampled DTFT: $X[k] = X(e^{j\\omega})\\big|_{\\omega = 2\\pi k/N}$
-- **DTFT** = Z-transform on unit circle: $X(e^{j\\omega}) = X(z)\\big|_{z=e^{j\\omega}}$
-- **FFT** is an algorithm, not a transform — it computes the DFT in $O(N\\log N)$
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Show relationship: DFT samples the DTFT
-x = np.array([1, 2, 3, 2, 1, 0.5, 0.2, 0.1])  # 8-point signal
-
-# DTFT (dense)
-omega = np.linspace(-np.pi, np.pi, 500)
-X_dtft = np.zeros(len(omega), dtype=complex)
-for n in range(len(x)):
-    X_dtft += x[n] * np.exp(-1j * omega * n)
-
-# DFT (8 points)
-N = len(x)
-X_dft = np.fft.fft(x)
-omega_dft = 2 * np.pi * np.arange(N) / N
-# shift to [-pi, pi]
-omega_dft = np.where(omega_dft > np.pi, omega_dft - 2*np.pi, omega_dft)
-
-plt.figure(figsize=(10, 4))
-plt.plot(omega/np.pi, np.abs(X_dtft), 'b-', label='DTFT (continuous)')
-plt.scatter(omega_dft/np.pi, np.abs(X_dft), c='red', s=80, zorder=5, label='DFT (samples)')
-plt.xlabel('ω/π')
-plt.ylabel('|X|')
-plt.title('DFT samples the DTFT')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.show()
-\`\`\``
+        name: 'Taxonomy of Colored Noises',
+        explanation: `Random stochastic signals are rigorously classified by the shape of their Power Spectral Density (PSD), \$S(f)\$:
+* **White Noise**: Exhibits perfectly flat, equal power across all frequencies (\$S(f) \propto f^0\$). The signal is completely uncorrelated in time (impulsive autocorrelation).
+* **Pink Noise (1/f Noise)**: Distributes equal power across every octave (\$S(f) \propto 1/f\$). It is ubiquitous in biological systems, fractal mathematics, and music production.
+* **Brown / Red Noise**: Exhibits a steep spectral drop-off (\$S(f) \propto 1/f^2\$). Mathematically generated by taking the cumulative integral sum of white noise (Brownian motion), producing a deep, rumbling auditory character.
+* **Blue Noise**: Displays power proportional to frequency (\$S(f) \propto f\$), resulting in a harsh, high-pitched hiss.
+* **Violet / Purple Noise**: Exhibits power scaling with the square of frequency (\$S(f) \propto f^2\$), creating an extremely sharp and intense high-pitched sound.
+* **Gray Noise**: Sourced from white noise but heavily filtered via psychoacoustic curves to sound perceptually equally loud across all frequencies to the human ear.
+* **Green Noise**: A specialized band-limited variant of pink noise with a pronounced PSD peak concentrated in the mid-frequencies (\$500\$ Hz to \$2000\$ Hz), corresponding to the peak sensitivity of human hearing.`
       },
       {
-        name: 'IIR vs FIR Decision Guide',
-        explanation: `### Choosing Your Filter Type
-
-| Criterion | Choose IIR | Choose FIR |
-|-----------|-----------|-----------|
-| **Phase** | Non-linear OK | Need linear phase |
-| **Computation** | Minimal (few coefficients) | Can afford more taps |
-| **Stability** | Can verify | Need guaranteed stability |
-| **Sharp cutoff** | Yes, very efficient | Need many taps |
-| **Audio** | EQ, simple filters | Phase-critical processing |
-| **Control** | Common choice | Less common |
-| **Adaptive** | Rare | Standard (LMS, RLS) |
-
-### Design Checklist
-1. **Specs**: passband edge, stopband edge, ripple, attenuation
-2. **FIR path**: Window method or Parks-McClellan → choose window, compute order
-3. **IIR path**: Choose analog prototype → bilinear transform → verify stability
-4. **Verify**: Plot frequency response, check phase, test on real data
-
-\`\`\`python
-import numpy as np
-from scipy.signal import butter, firwin, freqz
-import matplotlib.pyplot as plt
-
-# Same spec, IIR vs FIR
-fc = 0.2  # cutoff at 0.2*Nyquist
-
-# IIR: 4th-order Butterworth (9 coefficients total)
-b_iir, a_iir = butter(4, fc)
-n_coef_iir = len(b_iir) + len(a_iir)
-
-# FIR: Hamming window (need ~74 taps for similar stopband)
-b_fir = firwin(74, fc)
-n_coef_fir = len(b_fir)
-
-w_iir, H_iir = freqz(b_iir, a_iir, worN=2048)
-w_fir, H_fir = freqz(b_fir, 1, worN=2048)
-
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6))
-ax1.plot(w_iir/np.pi, 20*np.log10(np.abs(H_iir)+1e-10), label=f'IIR ({n_coef_iir} coefs)')
-ax1.plot(w_fir/np.pi, 20*np.log10(np.abs(H_fir)+1e-10), label=f'FIR ({n_coef_fir} coefs)')
-ax1.set_ylabel('Magnitude (dB)')
-ax1.set_ylim(-80, 5)
-ax1.legend()
-ax1.set_title('Magnitude response')
-ax1.grid(True, alpha=0.3)
-
-ax2.plot(w_iir/np.pi, np.unwrap(np.angle(H_iir))*180/np.pi, label='IIR (nonlinear)')
-ax2.plot(w_fir/np.pi, np.unwrap(np.angle(H_fir))*180/np.pi, label='FIR (linear!)')
-ax2.set_xlabel('Normalized frequency (×π)')
-ax2.set_ylabel('Phase (degrees)')
-ax2.legend()
-ax2.set_title('Phase response — FIR is perfectly linear')
-ax2.grid(True, alpha=0.3)
-plt.tight_layout()
-plt.show()
-\`\`\``
+        name: 'Nonlinear Dynamical Systems and Attractors',
+        explanation: `Complex signals are often generated by deterministic nonlinear dynamical systems, modeled continuously via differential equations \$\dot{X} = \Phi(X, t)\$ or discretely via iterative maps \$X_{n+1} = \Phi(X_n, n)\$.
+* **Attractor Topology**: When a system dissipates energy, its long-term trajectories settle onto specific geometrical manifolds called attractors. These are classified into four distinct types: Fixed point attractors, periodic limit cycles, quasi-periodic tori, and chaotic (strange) attractors.
+* **Paradigmatic Examples**: The **Lorenz system** is a classic continuous 3D chaotic system initially developed for atmospheric convection modeling, defined by \$\dot{x} = \sigma(y-x)\$, \$\dot{y} = x(\rho-z)-y\$, \$\dot{z} = xy-\beta z\$. The **Henon map** serves as a fundamental 2D discrete chaotic attractor model defined by \$x_{n+1} = 1 - a x_n^2 + y_n\$.`
       },
       {
-        name: 'Problem-Solving Strategies',
-        explanation: `### Common Exam Patterns
-
-**1. "Compute the output"**
-- Given $x[n]$ and $h[n]$, find $y[n] = x * h$
-- Strategy: Use convolution table or frequency domain ($Y = X \\cdot H$)
-
-**2. "Find the frequency response"**
-- Given $H(z)$, substitute $z = e^{j\\omega}$
-- Plot magnitude: $|H(e^{j\\omega})|$ and phase: $\\angle H(e^{j\\omega})$
-
-**3. "Is the system stable?"**
-- Find poles (roots of denominator)
-- Check: all $|p_i| < 1$?
-
-**4. "Design a filter"**
-- Determine type (LP, HP, BP, notch)
-- Choose IIR or FIR
-- Compute coefficients
-- Verify the response meets specs
-
-**5. "What is the sampling rate?"**
-- Find $f_{\\max}$ in the signal
-- $f_s \\geq 2 f_{\\max}$ (Nyquist)
-- If aliasing: $f_{\\text{alias}} = |f - kf_s|$
-
-\`\`\`python
-# Quick reference: key numpy/scipy functions
-import numpy as np
-from scipy import signal
-
-# Convolution
-y = np.convolve(x, h)
-
-# FFT spectrum
-X = np.fft.fft(x)
-f = np.fft.fftfreq(len(x), 1/fs)
-
-# Filter design
-b, a = signal.butter(N, Wn)           # IIR Butterworth
-b = signal.firwin(numtaps, cutoff)     # FIR window method
-sos = signal.butter(N, Wn, output='sos')  # cascade form
-
-# Filter application  
-y = signal.lfilter(b, a, x)           # direct form
-y = signal.sosfilt(sos, x)            # cascade form (recommended)
-
-# Frequency response
-w, H = signal.freqz(b, a)
-
-# Pole-zero
-zeros, poles, gain = signal.tf2zpk(b, a)
-
-# Spectral analysis
-f, Pxx = signal.welch(x, fs)          # PSD
-\`\`\``
+        name: 'Time Delay Embedding and Takens\' Theorem',
+        explanation: `Often, only a single 1D scalar observation time series \$x(t)\$ is measurable from a highly complex, multidimensional system. **Takens' Embedding Theorem** provides a rigorous mathematical framework to perfectly reconstruct the hidden phase space topology of the original multidimensional dynamics.
+* **Reconstruction**: The multi-dimensional state vector is built using delayed copies of the scalar signal: \$X(t) = [x(t), x(t+\tau), \dots, x(t+(m-1)\tau)]\$.
+* **Parameter Selection**: The time delay lag \$\tau\$ is optimally chosen where the signal's autocorrelation function hits its first null point (ensuring linear independence of coordinates). The embedding dimension \$m\$ must satisfy \$m > 2d_A\$ (where \$d_A\$ is the true attractor dimension), effectively estimated using algorithmic approaches like the False Nearest Neighbors method.`
+      },
+      {
+        name: 'Surrogate Data Testing for Nonlinearity',
+        explanation: `To rigorously assert that a time series is driven by nonlinear chaotic dynamics rather than just correlated linear noise, one must employ Surrogate Data Testing.
+* **Methodology**: The original time series is subjected to a Fourier transform, its amplitude spectrum is exactly preserved, but its phase spectrum is uniformly randomized, followed by an inverse Fourier transform. 
+* **Null Hypothesis Testing**: The resulting 'surrogate' perfectly mimics all linear statistics of the original data—such as its exact Power Spectral Density and Autocorrelation function—but totally destroys any nonlinear determinism. By comparing nonlinear metrics (e.g., fractal dimension, predictability error) between the surrogate ensemble and the original data, one can statistically reject the null hypothesis of linearity.`
+      },
+      {
+        name: 'Functional Connectivity and Statistical Dependence Measures',
+        explanation: `To ascertain how multiple time series (like multi-channel EEG signals) interact, several mathematical connectivity measures are calculated:
+* **Covariance and Correlation**: Measures linear synchronization. Covariance is defined as \$c_{xy} = \langle (x-\langle x \rangle)(y-\langle y \rangle) \rangle\$. Pearson's correlation coefficient normalizes this to be scale-invariant: \$r_{xy} = \frac{c_{xy}}{\sigma_x \sigma_y} \in [-1, 1]\$.
+* **Cross-Correlation**: Evaluates signal similarity as a function of temporal lag \$\tau\$, defined strictly as \$c_{xy}(\tau) = \int_{-\infty}^{\infty} x^*(t)y(t+\tau) dt\$.
+* **Wiener-Khinchin Theorem**: A foundational proof establishing that the Power Spectral Density \$P_x(\nu)\$ is exactly equal to the Fourier transform of the signal's Autocorrelation function \$c_{xx}(\tau)\$.
+* **Phase Coherence**: Evaluates the stability of phase differences across independent frequency bands between two signals. It is defined in the frequency domain as \$\text{Coh}_{xy}(\nu) = \frac{|C_{xy}(\nu)|}{\sqrt{P_x(\nu) P_y(\nu)}} \in [0, 1]\$, where \$C_{xy}(\nu)\$ is the complex cross-spectral density.`
       },
     ],
 

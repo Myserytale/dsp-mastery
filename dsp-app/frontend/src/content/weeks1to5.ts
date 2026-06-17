@@ -30,155 +30,41 @@ This week we lay the foundation: what signals are, what systems do to them, and 
 
     concepts: [
       {
-        name: 'Signals: Continuous vs Discrete',
-        explanation: `### What is a Signal?
+        name: 'Signals and their Classifications',
+        explanation: `A signal is formally defined as any physical quantity that varies with time or position, serving as a flow of information. Mathematically, it is described as a function of one or more independent variables. Signals can be categorized into various types:
 
-A **signal** is any quantity that varies with one or more independent variables. A sound wave varies with time. An image varies with spatial coordinates.
+*   **Continuous-time signals** (often informally referred to as analog signals) are functions over the real numbers, denoted as \$s(t) : \mathbb{R} \rightarrow \mathbb{R}\$. The independent variable \$t\$ (time) and dependent variable \$s\$ (amplitude) take continuous values.
+*   **Discrete-time signals** (sequences) are functions over integers, denoted as \$s[n] : \mathbb{Z} \rightarrow \mathbb{R}\$. These are often obtained by uniform sampling of continuous signals: \$s[n] = s(nT)\$, where \$T\$ is the sampling period and \$F_s = 1/T\$ is the sampling frequency.
+*   **Digital signals** are defined over a discrete set of amplitudes, \$s_d[n] : \mathbb{Z} \rightarrow \mathbb{X}\$, obtained by quantizing the continuous amplitude range into discrete levels.
 
-**Continuous-time signal** $x(t)$: defined for every real value of $t$. Example: an analog microphone voltage.
-
-**Discrete-time signal** $x[n]$: defined only at integer indices $n = \\ldots, -1, 0, 1, 2, \\ldots$ — this is what computers actually work with.
-
-The entire point of DSP is that we **sample** continuous signals to get discrete ones, process them with algorithms, and (optionally) convert back.
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Continuous signal (simulated with dense sampling)
-t = np.linspace(0, 1, 1000)
-x_cont = np.sin(2 * np.pi * 5 * t)  # 5 Hz sine wave
-
-# Discrete signal (sampled at 20 Hz)
-n = np.arange(0, 1, 1/20)
-x_disc = np.sin(2 * np.pi * 5 * n)
-
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 5))
-ax1.plot(t, x_cont, 'b-')
-ax1.set_title('Continuous-time signal x(t)')
-ax1.set_xlabel('t (seconds)')
-
-ax2.stem(n, x_disc, linefmt='r-', markerfmt='ro', basefmt='k-')
-ax2.set_title('Discrete-time signal x[n]')
-ax2.set_xlabel('n (sample index)')
-plt.tight_layout()
-plt.show()
-\`\`\``
+Signals can also be classified physically (e.g., voltage levels, magnetic domains) or by their domain (temporal vs. spatial).`
       },
       {
-        name: 'System Properties',
-        explanation: `### What is a System?
+        name: 'Digital and Analog Signal Processing',
+        explanation: `A **System** transforms an input signal into an output signal. An **interface system** provides conversion between analog and digital domains (ADC and DAC).
 
-A **system** takes an input signal and produces an output signal: $y[n] = T\\{x[n]\\}$.
-
-The key properties that matter for DSP:
-
-| Property | Meaning | Why it matters |
-|----------|---------|---------------|
-| **Linearity** | $T\\{ax_1 + bx_2\\} = aT\\{x_1\\} + bT\\{x_2\\}$ | Superposition works — analyze one frequency at a time |
-| **Time-Invariance** | Shifting input shifts output by same amount | System behavior doesn't change over time |
-| **Causality** | Output depends only on present and past inputs | Can be implemented in real-time |
-| **Stability (BIBO)** | Bounded input → bounded output | Output doesn't blow up |
-
-A system that is **both Linear and Time-Invariant (LTI)** is the gold standard of DSP — it can be fully characterized by its **impulse response** $h[n]$.
-
-\`\`\`python
-import numpy as np
-
-# Example: Check if y[n] = 2*x[n] + 3 is linear
-# Test: T{x1 + x2} vs T{x1} + T{x2}
-x1 = np.array([1, 2, 3])
-x2 = np.array([4, 5, 6])
-
-def system(x):
-    return 2 * x + 3  # This is NOT linear (the +3 breaks it)
-
-T_sum = system(x1 + x2)         # T{x1 + x2}
-sum_T = system(x1) + system(x2) # T{x1} + T{x2}
-
-print(f"T{{x1+x2}}  = {T_sum}")
-print(f"T{{x1}}+T{{x2}} = {sum_T}")
-print(f"Linear? {np.allclose(T_sum, sum_T)}")  # False!
-\`\`\``
+**Signal processing** objectives include improving signal quality, undoing transmission distortions, compensating for sensor deficiencies, and extracting information.
+*   **Analog signal processing** involves processing continuous electrical signals using electronic circuits.
+*   **Digital signal processing (DSP)** represents signals as sequences of numbers processed by numerical computation. Mixed signal processing involves both analog and digital components on the same integrated circuit.`
       },
       {
-        name: 'Energy and Power Signals',
-        explanation: `### Energy vs Power
+        name: 'Properties of Discrete Sequences',
+        explanation: `Discrete sequences can be classified by their summation properties over infinite intervals:
 
-Every signal falls into one of these categories:
-
-**Energy signal**: Total energy is finite. These signals "die out" eventually.
-$$E = \\sum_{n=-\\infty}^{\\infty} |x[n]|^2 < \\infty$$
-
-**Power signal**: Average power is finite but total energy is infinite. These signals go on forever (like a sine wave).
-$$P = \\lim_{N \\to \\infty} \\frac{1}{2N+1} \\sum_{n=-N}^{N} |x[n]|^2$$
-
-> **Rule of thumb**: If a signal has finite duration, it's probably an energy signal. If it repeats forever, it's a power signal.
-
-\`\`\`python
-import numpy as np
-
-# Energy signal: decaying exponential
-n = np.arange(0, 50)
-x_energy = 0.9**n  # decays to zero
-
-E = np.sum(np.abs(x_energy)**2)
-print(f"Decaying exponential: Energy = {E:.4f} (finite → energy signal)")
-
-# Power signal: cosine (repeats forever, approximate with long sequence)
-N = 10000
-n2 = np.arange(-N, N+1)
-x_power = np.cos(2 * np.pi * 0.1 * n2)
-
-P = np.sum(np.abs(x_power)**2) / (2*N + 1)
-print(f"Cosine: Power = {P:.4f} (should be ~0.5)")
-\`\`\``
+*   **Absolutely Summable:** A sequence is absolutely summable if \$\sum_{n=-\infty}^{\infty} |x[n]| < \infty\$.
+*   **Square Summable (Energy Signal):** A sequence is square summable if its total energy is finite: \$\sum_{n=-\infty}^{\infty} |x[n]|^2 < \infty\$.
+*   **Periodic:** A sequence is periodic if there exists an integer \$k > 0\$ such that \$\forall n \in \mathbb{Z} : x[n] = x[n + k]\$.
+*   **Power Signal:** A non-square-summable sequence is a power signal if its average power exists and is finite:
+    \$\$ \lim_{k\rightarrow\infty} \frac{1}{1 + 2k} \sum_{n=-k}^{k} |x[n]|^2 < \infty \$\$`
       },
       {
-        name: 'Basic Signal Operations',
-        explanation: `### Manipulating Discrete Signals
+        name: 'Characteristics of Discrete-Time Systems',
+        explanation: `Discrete-time systems map an input sequence \$x[n]\$ to an output sequence \$y[n] = \mathcal{H}\{x[n]\}\$. They are characterized by several fundamental properties:
 
-Four fundamental operations you'll use constantly:
-
-1. **Time shift**: $y[n] = x[n - k]$ — delays the signal by $k$ samples
-2. **Time reversal**: $y[n] = x[-n]$ — flips the signal around $n=0$
-3. **Amplitude scaling**: $y[n] = a \\cdot x[n]$
-4. **Addition**: $y[n] = x_1[n] + x_2[n]$
-
-Two fundamental signals that are building blocks for everything:
-
-- **Unit impulse**: $\\delta[n] = 1$ if $n=0$, else $0$
-- **Unit step**: $u[n] = 1$ if $n \\geq 0$, else $0$
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-N = 21
-n = np.arange(N) - N//2  # centered around 0
-
-# Unit impulse
-delta = np.zeros(N)
-delta[N//2] = 1
-
-# Unit step
-step = np.zeros(N)
-step[N//2:] = 1
-
-# Shifted impulse: delta[n-3]
-delta_shifted = np.zeros(N)
-delta_shifted[N//2 + 3] = 1
-
-fig, axes = plt.subplots(1, 3, figsize=(12, 3))
-axes[0].stem(n, delta)
-axes[0].set_title('Unit impulse δ[n]')
-axes[1].stem(n, step)
-axes[1].set_title('Unit step u[n]')
-axes[2].stem(n, delta_shifted)
-axes[2].set_title('Shifted impulse δ[n-3]')
-plt.tight_layout()
-plt.show()
-\`\`\``
+*   **Causality:** A system is causal if the output depends only on present and past input values: \$y[n] = f(x[n], x[n-1], \dots)\$. It is **memory-less** if it only depends on the current input: \$y[n] = f(x[n])\$.
+*   **Time-Invariance:** A system is time-invariant if a time shift in the input causes an identical time shift in the output: \$\mathcal{H}(x[n-d]) = y[n-d]\$.
+*   **Linearity:** A system satisfies superposition (homogeneity and additivity) if \$\mathcal{H}(a_1 x_1[n] + a_2 x_2[n]) = a_1 \mathcal{H}(x_1[n]) + a_2 \mathcal{H}(x_2[n])\$.
+*   **Stability (BIBO):** A system is bounded-input bounded-output stable if a bounded input (\$|x[n]| < M_x < \infty\$) always produces a bounded output (\$|y[n]| < M_y < \infty\$).`
       },
     ],
 
@@ -625,99 +511,46 @@ Why? Because any signal can be written as a sum of shifted impulses: $x[n] = \\s
 
     concepts: [
       {
-        name: 'Convolution Sum',
-        explanation: `### The Convolution Formula
+        name: 'Block Diagrams and Signal Flow Graphs',
+        explanation: `System topologies can be visualized using two primary methods:
 
-The output of an LTI system with impulse response $h[n]$ when given input $x[n]$:
+*   **Block Diagrams:** Emphasize system structure. Nodes (blocks) represent operations or subsystems, while directed connections represent signals. Operations like addition require explicit summing junctions.
+*   **Signal Flow Graphs:** Emphasize algebraic relationships. Nodes represent variables (signals), and directed branches represent gains or multipliers. Addition occurs implicitly at the nodes.
 
-$$y[n] = (x * h)[n] = \\sum_{k=-\\infty}^{\\infty} x[k] \\cdot h[n-k]$$
-
-**How to think about it**: For each output sample $y[n]$:
-1. Flip $h[k]$ to get $h[-k]$
-2. Shift it to position $n$ to get $h[n-k]$
-3. Multiply element-wise with $x[k]$
-4. Sum all products
-
-\`\`\`python
-import numpy as np
-
-def convolve(x, y):
-    """Compute linear convolution of x and y."""
-    N, M = len(x), len(y)
-    result = np.zeros(N + M - 1)
-    for n in range(N + M - 1):
-        for k in range(N):
-            if 0 <= n - k < M:
-                result[n] += x[k] * y[n - k]
-    return result
-
-# Example
-x = np.array([1, 2, 3, 4, 5])
-h = np.array([-1, 2, 1])
-y = convolve(x, h)
-print(f"x = {x}")
-print(f"h = {h}")
-print(f"x * h = {y}")
-print(f"Verify with NumPy: {np.convolve(x, h)}")
-\`\`\`
-
-**Output length**: If $x$ has $N$ samples and $h$ has $M$ samples, then $y$ has $N + M - 1$ samples.`
+These representations are commonly used to model **Finite Impulse Response (FIR)** systems (which have finite support) and **Infinite Impulse Response (IIR)** systems (which use recursive feedback, implying infinite duration).`
       },
       {
-        name: 'Properties of Convolution',
-        explanation: `### Why These Properties Matter
+        name: 'Linear Time-Invariant (LTI) Systems and Convolution',
+        explanation: `LTI systems are both linear and time-invariant. Due to linearity, any discrete signal can be decomposed into a superposition of scaled and delayed impulses: \$x[n] = \sum_{k=-\infty}^{\infty} x[k]\delta[n-k]\$.
 
-| Property | Formula | Use case |
-|----------|---------|----------|
-| **Commutative** | $x * h = h * x$ | Order doesn't matter |
-| **Associative** | $(x * h_1) * h_2 = x * (h_1 * h_2)$ | Cascade systems |
-| **Distributive** | $x * (h_1 + h_2) = x*h_1 + x*h_2$ | Parallel systems |
-| **Identity** | $x * \\delta = x$ | Impulse does nothing |
-
-The **identity property** is powerful: convolving with $\\delta[n]$ gives back the original signal. This is why $h[n]$ is called the impulse response — it's literally what you get when you convolve $\\delta[n]$ with the system.
-
-\`\`\`python
-import numpy as np
-
-x = np.array([1, 2, 3, 4, 5])
-delta = np.array([0, 0, 1, 0, 0])  # delta[n] centered
-
-# Identity: x * delta = x
-result = np.convolve(x, [1])  # delta = [1]
-print(f"x * delta = {result}")  # Same as x!
-
-# Commutativity
-h = np.array([1, -1, 0.5])
-print(f"x * h = {np.convolve(x, h)}")
-print(f"h * x = {np.convolve(h, x)}")  # Same result!
-\`\`\``
+The response of an LTI system is uniquely determined by its **impulse response**, \$h[n]\$ (the output when the input is a Dirac delta \$\delta[n]\$). Applying superposition and time-invariance, the output \$y[n]\$ is the **convolution sum** of the input and the impulse response:
+\$\$ y[n] = x[n] * h[n] = \sum_{k=-\infty}^{\infty} x[k]h[n-k] \$\$
+Convolution is commutative, associative, bilinear, and satisfies the identity property with the Dirac delta: \$x[n] * \delta[n] = x[n]\$.`
       },
       {
-        name: 'BIBO Stability',
-        explanation: `### When Does an LTI System Blow Up?
+        name: 'Causality and Stability of LTI Systems',
+        explanation: `The impulse response \$h[n]\$ governs the fundamental properties of an LTI system:
 
-An LTI system is **BIBO stable** (Bounded Input → Bounded Output) if and only if its impulse response is **absolutely summable**:
+*   **Causality:** An LTI system is causal if and only if its impulse response is zero for negative time: \$h[n] = 0\$ for \$n < 0\$. This ensures the convolution sum only relies on current and past input values (\$k \le n\$).
+*   **Stability:** An LTI system is BIBO stable if and only if its impulse response is absolutely summable: \$\sum_{n=-\infty}^{\infty} |h[n]| < \infty\$. This ensures that bounded inputs produce bounded outputs.`
+      },
+      {
+        name: 'Continuous-Time LTI Systems and Dirac Delta Distribution',
+        explanation: `For continuous-time LTI systems, the output is given by the convolution integral: \$y(t) = \int_{-\infty}^{\infty} x(\tau)h(t-\tau)d\tau\$.
 
-$$\\sum_{n=-\\infty}^{\\infty} |h[n]| < \\infty$$
-
-**Intuition**: If the impulse response dies out fast enough, the system can't accumulate energy indefinitely, so bounded inputs stay bounded.
-
-**Example**: $h[n] = (0.5)^n u[n]$ is stable because $\\sum (0.5)^n = 2 < \\infty$.
-
-**Counterexample**: $h[n] = u[n]$ (integrator) is **unstable** because $\\sum 1 = \\infty$.
-
-\`\`\`python
-import numpy as np
-
-# Stable system: h[n] = 0.5^n * u[n]
-n = np.arange(0, 50)
-h_stable = 0.5**n
-print(f"Stable: sum|h| = {np.sum(np.abs(h_stable)):.4f} (finite)")
-
-# Unstable system: h[n] = u[n] (accumulator)
-h_unstable = np.ones(1000)
-print(f"Unstable: sum|h| = {np.sum(np.abs(h_unstable))} (grows forever)")
-\`\`\``
+The **Dirac delta function**, \$\delta(x)\$, is a generalized function (distribution) defined such that \$\delta(x) = 0\$ for \$x \ne 0\$ and \$\int_{-\infty}^{\infty} \delta(x) dx = 1\$. It can be represented as the limit of parameter-dependent families of functions.
+Key properties include:
+*   Sifting property: \$\int_{-\infty}^{\infty} f(x)\delta(x-x_0)dx = f(x_0)\$
+*   Scaling: \$\delta(ax) = \frac{1}{|a|}\delta(x)\$
+*   Composition: \$\delta(\phi(x)) = \sum_i \frac{\delta(x-x_i)}{|\phi'(x_i)|}\$ for roots \$x_i\$ of \$\phi(x)\$
+*   Derivative relation: \$\int_{-\infty}^{\infty} f(x)\delta'(x)dx = -f'(0)\$.
+The **Heaviside step function** \$H(x)\$ is related via its derivative: \$H'(x) = \delta(x)\$.`
+      },
+      {
+        name: 'Introduction to Fourier Series',
+        explanation: `A function \$f(x)\$ is periodic with period \$P\$ if \$f(x) = f(x \pm nP)\$ for integer \$n\$. According to Fourier's theorem, any \$2\pi\$-periodic function can be expanded into a trigonometric series:
+\$\$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} (a_n \cos nx + b_n \sin nx) \$\$
+The terms \$a_n\$ and \$b_n\$ are the Fourier coefficients. This expansion relies on the orthogonality of the trigonometric basis functions (sines and cosines) over the interval \$[0, 2\pi]\$ defined by the scalar product \$({\phi, \psi}) \equiv \int_0^{2\pi} \phi(x)\psi(x)dx\$.`
       },
     ],
 
@@ -1031,119 +864,45 @@ This is like a prism splitting white light into a rainbow — except instead of 
 
     concepts: [
       {
-        name: 'Fourier Series',
-        explanation: `### Decomposing Periodic Signals
-
-A **periodic** signal $x(t)$ with period $T_0$ can be written as a sum of harmonics:
-
-$$x(t) = \\sum_{k=-\\infty}^{\\infty} c_k \\, e^{j 2\\pi k f_0 t}$$
-
-where $f_0 = 1/T_0$ is the fundamental frequency and the coefficients are:
-
-$$c_k = \\frac{1}{T_0} \\int_{0}^{T_0} x(t) \\, e^{-j 2\\pi k f_0 t} \\, dt$$
-
-**Intuition**: Imagine a musical chord. It sounds like one complex tone, but it's actually 3+ pure notes (sinusoids) added together. The Fourier coefficients $c_k$ tell you the amplitude and phase of each note.
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Build a square wave from its Fourier series
-t = np.linspace(0, 2, 1000)
-f0 = 1  # 1 Hz fundamental
-
-# Square wave = sum of odd harmonics: sin(f) + sin(3f)/3 + sin(5f)/5 + ...
-x = np.zeros_like(t)
-for k in range(1, 20, 2):  # odd harmonics: 1, 3, 5, ...
-    x += (4 / (np.pi * k)) * np.sin(2 * np.pi * k * f0 * t)
-
-plt.figure(figsize=(10, 4))
-plt.plot(t, x, 'b-', label='Sum of 10 harmonics')
-plt.title('Square wave from Fourier Series')
-plt.xlabel('t (seconds)')
-plt.legend()
-plt.grid(True, alpha=0.3)
-plt.show()
-\`\`\``
+        name: 'Fourier Series for Arbitrary Periodic Functions',
+        explanation: `For functions with an arbitrary period \$L = 2\ell\$, the trigonometric basis functions are scaled to \$\cos(\frac{n\pi x}{\ell})\$ and \$\sin(\frac{n\pi x}{\ell})\$. The Fourier coefficients are calculated as:
+\$\$ a_n = \frac{1}{\ell} \int_{-\ell}^{\ell} f(x) \cos\left(\frac{n\pi x}{\ell}\right) dx \$\$
+\$\$ b_n = \frac{1}{\ell} \int_{-\ell}^{\ell} f(x) \sin\left(\frac{n\pi x}{\ell}\right) dx \$\$
+Symmetric functions (\$f(x) = f(-x)\$) have only cosine terms (\$b_n = 0\$), while antisymmetric functions (\$f(x) = -f(-x)\$) have only sine terms (\$a_n = 0\$). The fundamental frequency relates to the pitch, whereas higher harmonics dictate the timbre.`
       },
       {
-        name: 'Fourier Transform',
-        explanation: `### From Periodic to Aperiodic
-
-The **Fourier Transform** extends the Fourier Series to **non-periodic** signals:
-
-$$X(f) = \\int_{-\\infty}^{\\infty} x(t) \\, e^{-j 2\\pi f t} \\, dt$$
-
-$$x(t) = \\int_{-\\infty}^{\\infty} X(f) \\, e^{j 2\\pi f t} \\, df$$
-
-$X(f)$ is a **complex function** — its magnitude $|X(f)|$ is the **amplitude spectrum** and its angle $\\angle X(f)$ is the **phase spectrum**.
-
-### The Most Important FT Pair
-
-$$\\text{rect}(t) \\longleftrightarrow \\text{sinc}(f) = \\frac{\\sin(\\pi f)}{\\pi f}$$
-
-A rectangular pulse in time has a sinc shape in frequency, and vice versa. This is the foundation of all filtering.
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Compute FT of a rect pulse numerically using FFT
-dt = 0.001  # fine time resolution
-t = np.arange(-5, 5, dt)
-rect = np.where(np.abs(t) <= 0.5, 1.0, 0.0)  # rect(t)
-
-# FFT approximation of continuous FT
-X = dt * np.fft.fft(rect)
-f = np.fft.fftfreq(len(t), dt)
-
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4))
-ax1.plot(t, rect)
-ax1.set_title('Time domain: rect(t)')
-ax1.set_xlabel('t')
-
-ax2.plot(np.fft.fftshift(f), np.fft.fftshift(np.abs(X)))
-ax2.set_xlim(-10, 10)
-ax2.set_title('Frequency domain: |sinc(f)|')
-ax2.set_xlabel('f (Hz)')
-plt.tight_layout()
-plt.show()
-\`\`\``
+        name: 'Complex Fourier Series',
+        explanation: `Using Euler's formula, \$e^{ix} = \cos x + i\sin x\$, the trigonometric Fourier series can be expressed in a compact exponential form:
+\$\$ f(x) = \sum_{n=-\infty}^{\infty} c_n e^{i \frac{n\pi x}{\ell}} \$\$
+The complex coefficients \$c_n\$ encapsulate both amplitude and phase and are given by:
+\$\$ c_n = \frac{1}{2\ell} \int_{-\ell}^{\ell} f(y) e^{-i \frac{n\pi y}{\ell}} dy \$\$
+This exploits the orthogonality of the complex exponentials \$\int_{-\ell}^{\ell} e^{i(n-m)\frac{\pi x}{\ell}} dx = 2\ell\delta_{nm}\$.`
       },
       {
-        name: 'Key FT Properties',
-        explanation: `### Properties That Make Life Easy
+        name: 'The Dirac Comb Distribution',
+        explanation: `The **Dirac comb**, denoted \$\amalg_T(t)\$, is an infinite sum of Dirac delta functions spaced \$T\$ apart:
+\$\$ \amalg_T(t) \equiv T \sum_{n=-\infty}^{\infty} \delta(t - nT) \$\$
+This distribution is itself periodic and its complex Fourier series coefficients evaluate to 1. Thus, its Fourier series expansion is:
+\$\$ \amalg_T(t) = \sum_{n=-\infty}^{\infty} e^{in \frac{2\pi t}{T}} \$\$
+The Dirac comb is vital for mathematically modeling the sampling of continuous-time signals.`
+      },
+      {
+        name: 'Continuous-Time Fourier Transform',
+        explanation: `By extending the period \$2\ell \rightarrow \infty\$, a non-periodic function can be analyzed using the continuous-time Fourier transform. Transitioning to frequency variables \$\omega = 2\pi\nu\$, the Fourier transform \$\mathcal{F}\$ and its inverse \$\mathcal{F}^{-1}\$ are defined as:
+\$\$ \hat{f}(\omega) \equiv \mathcal{F}(f)(\omega) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} f(t) e^{i\omega t} dt \$\$
+\$\$ f(t) = \mathcal{F}^{-1}(\hat{f})(t) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} \hat{f}(\omega) e^{-i\omega t} d\omega \$\$
+These forms reveal that \$f(t)\$ and \$\hat{f}(\omega)\$ are dual representations of the same abstract entity in complementary domains (time and frequency). The normalization factors (e.g., \$1/\sqrt{2\pi}\$) can be adjusted as long as their product is \$1/(2\pi)\$.`
+      },
+      {
+        name: 'Properties of the Fourier Transform',
+        explanation: `The Fourier transform obeys several powerful properties facilitating signal analysis:
 
-| Property | Time Domain | Frequency Domain |
-|----------|-------------|------------------|
-| **Linearity** | $ax_1(t) + bx_2(t)$ | $aX_1(f) + bX_2(f)$ |
-| **Time shift** | $x(t - t_0)$ | $X(f) e^{-j2\\pi f t_0}$ |
-| **Frequency shift** | $x(t) e^{j2\\pi f_0 t}$ | $X(f - f_0)$ |
-| **Convolution** | $x(t) * h(t)$ | $X(f) \\cdot H(f)$ |
-| **Parseval** | $\\int |x(t)|^2 dt$ | $= \\int |X(f)|^2 df$ |
-
-The **convolution theorem** is the most important: filtering in time (convolution with $h$) is just multiplication by $H(f)$ in frequency. This is why we care about frequency domain — it turns a hard operation into an easy one!
-
-\`\`\`python
-import numpy as np
-
-# Demonstrate convolution theorem
-N = 256
-x = np.random.randn(N)
-h = np.array([0.25, 0.5, 0.25])  # simple smoothing filter
-
-# Time domain: convolution
-y_time = np.convolve(x, h, mode='same')
-
-# Frequency domain: multiply spectra
-X = np.fft.fft(x, N)
-H = np.fft.fft(h, N)  # zero-pad h to length N
-Y = X * H
-y_freq = np.real(np.fft.ifft(Y))
-
-print(f"Max difference: {np.max(np.abs(y_time - y_freq)):.2e}")
-# Should be very small (floating point precision)
-\`\`\``
+*   **Linearity:** \$\mathcal{F}(c_1f + c_2g) = c_1\hat{f} + c_2\hat{g}\$.
+*   **Time Shift:** A delay in the time domain corresponds to a linear phase shift in the frequency domain: \$\mathcal{F}(f(t+b)) = e^{-i\omega b}\hat{f}(\omega)\$.
+*   **Time/Frequency Scaling:** Compression in time leads to expansion in frequency: \$\mathcal{F}(f(at)) = \frac{1}{|a|}\hat{f}(\frac{\omega}{a})\$.
+*   **Frequency Shift:** \$\mathcal{F}(f(t)e^{iat}) = \hat{f}(\omega+a)\$.
+*   **Parseval's Theorem:** Total energy is conserved between domains: \$\int_{-\infty}^{\infty} |f(t)|^2 dt = \int_{-\infty}^{\infty} |\hat{f}(\omega)|^2 d\omega\$.
+*   **Differentiation:** The transform of the \$n\$-th derivative is \$\mathcal{F}(f^{(n)}(t)) = (-i)^n \omega^n \hat{f}(\omega)\$.`
       },
     ],
 
@@ -1394,76 +1153,43 @@ The DTFT output is a **continuous function of frequency** $\\omega$ (even though
 
     concepts: [
       {
-        name: 'DTFT Definition',
-        explanation: `### Analysis and Synthesis
+        name: 'Fourier Transform Symmetries',
+        explanation: `The Fourier transform exhibits specific symmetries depending on the properties of the time-domain signal \$x(t)\$. Letting \$X(f) = \mathcal{F}[x(t)](f)\$:
 
-**Analysis** (time → frequency):
-$$X(e^{j\\omega}) = \\sum_{n=-\\infty}^{\\infty} x[n] \\, e^{-j\\omega n}$$
-
-**Synthesis** (frequency → time):
-$$x[n] = \\frac{1}{2\\pi} \\int_{-\\pi}^{\\pi} X(e^{j\\omega}) \\, e^{j\\omega n} \\, d\\omega$$
-
-The variable $\\omega$ is the **normalized angular frequency** in radians/sample. It relates to physical frequency by $\\omega = 2\\pi f / f_s$.
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Compute DTFT of a finite sequence
-x = np.array([1, 2, 3, 2, 1])  # symmetric sequence
-omega = np.linspace(-np.pi, np.pi, 1000)
-
-# DTFT: sum x[n] * e^{-j*omega*n}
-X = np.zeros(len(omega), dtype=complex)
-for n in range(len(x)):
-    X += x[n] * np.exp(-1j * omega * n)
-
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 5))
-ax1.plot(omega/np.pi, np.abs(X))
-ax1.set_title('|X(e^{jω})| — Magnitude spectrum')
-ax1.set_xlabel('ω/π')
-ax2.plot(omega/np.pi, np.angle(X))
-ax2.set_title('∠X(e^{jω}) — Phase spectrum')
-ax2.set_xlabel('ω/π')
-plt.tight_layout()
-plt.show()
-\`\`\``
+*   If \$x(t)\$ is **real**, then \$X(-f) = X^*(f)\$ (Hermitian symmetry).
+*   If \$x(t)\$ is **imaginary**, then \$X(-f) = -X^*(f)\$.
+*   If \$x(t)\$ is **even** (\$x(t) = x(-t)\$), then \$X(f)\$ is even.
+*   If \$x(t)\$ is **odd** (\$x(t) = -x(-t)\$), then \$X(f)\$ is odd.
+Combining these implies that a real and even signal yields a real and even transform, whereas a real and odd signal yields an imaginary and odd transform.`
       },
       {
-        name: 'Frequency Response of LTI Systems',
-        explanation: `### The Power of H(e^{jω})
+        name: 'Cosine and Sine Transforms',
+        explanation: `For symmetric functions, the standard Fourier exponential kernel reduces to trigonometric kernels:
 
-For an LTI system with impulse response $h[n]$, the **frequency response** is just the DTFT of $h[n]$:
+*   **Cosine Transform:** For even functions (\$f(t) = f(-t)\$), the Fourier transform simplifies to \$\hat{f}_c(\omega) = \sqrt{\frac{2}{\pi}} \int_0^{\infty} f(t) \cos(\omega t) dt\$.
+*   **Sine Transform:** For odd functions (\$f(t) = -f(-t)\$), it reduces to \$\hat{f}_s(\omega) = \sqrt{\frac{2}{\pi}} \int_0^{\infty} f(t) \sin(\omega t) dt\$.
+These allow calculating half-range integrals over \$[0, \infty)\$ while capturing the entire frequency spectrum.`
+      },
+      {
+        name: 'Continuous Convolution Theorem',
+        explanation: `The continuous convolution of two functions is defined as \$[f * g](t) = \int_{-\infty}^{\infty} f(t')g(t - t') dt'\$. Convolution is commutative.
+Crucially, convolution in the time domain is equivalent to multiplication in the frequency domain:
+\$\$ \mathcal{F}[f * g](\omega) = \hat{f}(\omega) \cdot \hat{g}(\omega) \$\$
+Conversely, multiplication in the time domain equates to convolution in the frequency domain: \$f \cdot g = \mathcal{F}^{-1}[\hat{f} * \hat{g}]\$. This principle is foundational for modulation and filtering operations.`
+      },
+      {
+        name: 'Sampling and the Dirac Comb',
+        explanation: `Sampling a continuous signal \$x(t)\$ with a rate \$f_s = 1/T\$ produces a discrete sequence \$x[n] = x(nT)\$. This can be modeled continuously as multiplication with a Dirac comb:
+\$\$ \hat{x}(t) = x(t) \cdot \amalg_T(t) = x(t) \cdot T \sum_{n=-\infty}^{\infty} \delta(t - nT) \$\$
+In the frequency domain, this multiplication translates to convolution with the Fourier transform of the Dirac comb (which is another Dirac comb in the frequency domain). Consequently, the spectrum of the sampled signal, \$\hat{X}(f)\$, consists of infinite, periodically shifted copies (images) of the original baseband spectrum \$X(f)\$ spaced by intervals of \$f_s\$:
+\$\$ \hat{X}(f) = \sum_{n=-\infty}^{\infty} X(f - nf_s) \$\$`
+      },
+      {
+        name: 'Aliasing and the Nyquist-Shannon Sampling Theorem',
+        explanation: `A signal is **bandwidth limited** if its Fourier spectrum is strictly zero outside a finite frequency band \$[-f_{max}, f_{max}]\$.
 
-$$H(e^{j\\omega}) = \\sum_{n=-\\infty}^{\\infty} h[n] e^{-j\\omega n}$$
-
-If the input is a pure sinusoid $x[n] = e^{j\\omega_0 n}$, the output is:
-$$y[n] = H(e^{j\\omega_0}) \\cdot e^{j\\omega_0 n}$$
-
-The system **scales** the amplitude by $|H(e^{j\\omega_0})|$ and **shifts** the phase by $\\angle H(e^{j\\omega_0})$. This is filtering!
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Simple moving average filter: h[n] = [1/3, 1/3, 1/3]
-h = np.array([1/3, 1/3, 1/3])
-omega = np.linspace(-np.pi, np.pi, 1000)
-
-# Frequency response
-H = np.zeros(len(omega), dtype=complex)
-for n in range(len(h)):
-    H += h[n] * np.exp(-1j * omega * n)
-
-plt.figure(figsize=(10, 4))
-plt.plot(omega/np.pi, 20*np.log10(np.abs(H) + 1e-10))
-plt.title('Moving average filter: |H(e^{jω})| in dB')
-plt.xlabel('ω/π')
-plt.ylabel('Magnitude (dB)')
-plt.grid(True, alpha=0.3)
-plt.show()
-# Notice: it's a lowpass filter! Attenuates high frequencies.
-\`\`\``
+*   **Aliasing** occurs when a continuous signal is under-sampled, causing high-frequency components to disguise themselves as low frequencies. This manifests mathematically as overlapping images in the sampled spectrum \$\hat{X}(f)\$, permanently distorting the signal.
+*   **The Nyquist-Shannon Sampling Theorem** states that a bandwidth-limited signal can be perfectly reconstructed from its discrete samples if and only if the sampling rate \$f_s\$ strictly exceeds twice the highest frequency component: \$f_s > 2f_{max}\$. The threshold rate \$2f_{max}\$ is known as the **Nyquist rate**.`
       },
     ],
 
@@ -1761,109 +1487,31 @@ When you set $z = e^{j\\omega}$, you get back the DTFT. But the Z-transform is m
 
     concepts: [
       {
-        name: 'Z-Transform & ROC',
-        explanation: `### Definition and Region of Convergence
+        name: 'Signal Reconstruction Strategy',
+        explanation: `To reconstruct the original continuous signal \$x(t)\$ from its samples \$x[n]\$, the base image of the periodic sampled spectrum \$\hat{X}(f)\$ must be isolated.
 
-$$X(z) = \\sum_{n=-\\infty}^{\\infty} x[n] z^{-n}$$
-
-The **Region of Convergence (ROC)** is the set of $z$ values where the sum converges. The ROC determines which signal the Z-transform corresponds to!
-
-**Common pairs**:
-- $a^n u[n] \\leftrightarrow \\frac{1}{1-az^{-1}}$, ROC: $|z| > |a|$
-- $-a^n u[-n-1] \\leftrightarrow \\frac{1}{1-az^{-1}}$, ROC: $|z| < |a|$
-
-Same formula, different ROC → different signal! The ROC is essential.
-
-\`\`\`python
-import numpy as np
-import matplotlib.pyplot as plt
-
-# Z-transform of x[n] = (0.8)^n u[n]
-# X(z) = 1/(1 - 0.8*z^{-1}), ROC: |z| > 0.8
-
-a = 0.8
-n = np.arange(0, 30)
-x = a**n  # causal exponential
-
-# Verify: DTFT is Z-transform on unit circle
-omega = np.linspace(-np.pi, np.pi, 500)
-z = np.exp(1j * omega)
-X_z = 1 / (1 - a * z**(-1))  # closed-form
-
-# Compare with direct DTFT computation
-X_dtft = np.zeros(len(omega), dtype=complex)
-for ni in range(len(x)):
-    X_dtft += x[ni] * np.exp(-1j * omega * ni)
-
-plt.figure(figsize=(10, 4))
-plt.plot(omega/np.pi, np.abs(X_z), 'b-', label='Z-transform on unit circle')
-plt.plot(omega/np.pi, np.abs(X_dtft), 'r--', label='Direct DTFT')
-plt.title('Z-transform evaluated on unit circle = DTFT')
-plt.xlabel('ω/π')
-plt.legend()
-plt.show()
-\`\`\``
+This is achieved by applying a **reconstruction filter**, an ideal low-pass filter in the frequency domain represented by a rectangular window \$\text{rect}(f / f_s)\$. The isolated spectrum is:
+\$\$ X(f) = \hat{X}(f) \cdot \text{rect}(f / f_s) \$\$
+By taking the inverse Fourier transform, multiplication in frequency becomes convolution with a sinc function in time. The exact interpolation formula yields:
+\$\$ x(t) = \sum_{n=-\infty}^{\infty} x[n] \frac{\sin(\pi(t - nT)/T)}{\pi(t - nT)/T} = \sum_{n=-\infty}^{\infty} x[n] \text{sinc}_\pi((t - nT)/T) \$\$
+This means the continuous waveform is formed by a linear combination of shifted \$\text{sinc}\$ functions weighted by the sample values.`
       },
       {
-        name: 'Transfer Function H(z)',
-        explanation: `### From Difference Equation to Transfer Function
+        name: 'Anti-Aliasing Filters',
+        explanation: `If a signal contains frequencies above the Nyquist limit (\$f_{max} > f_s/2\$), perfect reconstruction fails due to overlapping spectral images. To prevent this, an **anti-aliasing filter** is applied *before* sampling.
 
-A difference equation like:
-$$y[n] = b_0 x[n] + b_1 x[n-1] - a_1 y[n-1]$$
-
-becomes, after Z-transform:
-$$Y(z) = b_0 X(z) + b_1 z^{-1} X(z) - a_1 z^{-1} Y(z)$$
-
-$$H(z) = \\frac{Y(z)}{X(z)} = \\frac{b_0 + b_1 z^{-1}}{1 + a_1 z^{-1}}$$
-
-The **poles** (roots of denominator) determine stability: system is stable if **all poles are inside the unit circle**.
-The **zeros** (roots of numerator) determine which frequencies are blocked.
-
-\`\`\`python
-import numpy as np
-
-# Transfer function: H(z) = (1 + 0.5z^{-1}) / (1 - 0.8z^{-1})
-b = [1, 0.5]    # numerator coefficients
-a = [1, -0.8]   # denominator coefficients
-
-zeros = np.roots(b)
-poles = np.roots(a)
-
-print(f"Zeros: {zeros}")
-print(f"Poles: {poles}")
-print(f"Stable? {all(np.abs(poles) < 1)}")  # All poles inside unit circle?
-\`\`\``
+This analog low-pass filter mathematically cuts off the continuous signal's spectrum at \$f_s/2\$:
+\$\$ \tilde{X}(f) = X(f) \cdot \text{rect}(f / f_s) \$\$
+Although some high-frequency information is irretrievably lost, the filtered signal \$\tilde{x}(t)\$ becomes strictly bandwidth-limited. Sampling and subsequently reconstructing this filtered signal yields a clean waveform without the spurious, unpredictable low-frequency artifacts caused by aliasing.`
       },
       {
-        name: 'Inverse Z-Transform',
-        explanation: `### Getting Back to Time Domain
+        name: 'Derivation of the Discrete Fourier Transform (DFT)',
+        explanation: `The DFT bridges the gap between discrete time and discrete frequency. A continuous aperiodic signal sampled yields a periodic spectrum. If the continuous signal is inherently periodic (period \$NT\$), its spectrum becomes discrete (sampled) while remaining periodic due to time sampling.
 
-The most common method: **partial fraction decomposition**.
-
-Given $X(z) = \\frac{z}{(z-0.5)(z-0.8)}$, decompose:
-
-$$\\frac{X(z)}{z} = \\frac{1}{(z-0.5)(z-0.8)} = \\frac{A}{z-0.5} + \\frac{B}{z-0.8}$$
-
-Find $A$ and $B$, then use the known pair $\\frac{z}{z-a} \\leftrightarrow a^n u[n]$.
-
-\`\`\`python
-import numpy as np
-from numpy.polynomial import polynomial as P
-
-# Partial fraction decomposition using residues
-# H(z) = z / ((z - 0.5)(z - 0.8))
-# scipy.signal has tools for this
-from scipy.signal import residuez
-
-b = [1, 0]          # numerator: z
-a = [1, -1.3, 0.4]  # denominator: z^2 - 1.3z + 0.4 = (z-0.5)(z-0.8)
-
-r, p, k = residuez(b, a)
-print("Residues:", r)
-print("Poles:", p)
-print("Direct term:", k)
-# x[n] = r[0]*p[0]^n + r[1]*p[1]^n  for n >= 0
-\`\`\``
+Letting \$f_s = N/T\$ and considering \$N\$ discrete frequency bins, the **Discrete Fourier Transform (DFT)** and its inverse are defined for a sequence of length \$N\$:
+\$\$ X[k] = \sum_{n=0}^{N-1} x[n] e^{-2\pi i \frac{nk}{N}} \$\$
+\$\$ x[n] = \frac{1}{N} \sum_{k=0}^{N-1} X[k] e^{2\pi i \frac{nk}{N}} \$\$
+The reciprocal factor \$1/N\$ ensures the transformation is exactly invertible, utilizing the fundamental orthogonality property of discrete complex exponentials: \$\frac{1}{N} \sum_{k=0}^{N-1} e^{\frac{2\pi i}{N} (m-n)k} = \delta_{mn}\$.`
       },
     ],
 
