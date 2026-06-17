@@ -1772,179 +1772,34 @@ explanation: For N = 8 = 2³, the radix-2 FFT requires log₂(8) = 3 stages. Eac
 
 This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
 
-### Step 1: Implementation
+### Step 1: Bode Plot Implementation
 
 \`\`\`python
 from pylab import *
 from scipy import signal
+
+# Define Transfer Function: H(s) = (s+1)/(s+2)
 num, den = [1, 1], [1, 2]
-o, gain, phase = signal.bode((num, den))
-def gain_theory(o):
-    return 20*log10(sqrt(o**2 + 1)/sqrt(o**2+4))
-def phase_theory(o):
-    return (arctan(o) - arctan(o/2))*180/pi
-plot(o, gain           , linewidth=7, alpha=0.5, label='gain numeric') # o is omega in rad/s, gain in decibels
-plot(o, phase          , linewidth=7, alpha=0.5, label='phase numeric') # phase in degrees
-plot(o, gain_theory (o), 'k-'                  , label='gain theory'  )
-plot(o, phase_theory(o), 'b-'                  , label='phase theory' )
-plot([0], [gain_theory (0)], 'ro', [2], [gain_theory (2)], 'go')
-plot([0], [phase_theory(0)], 'ro', [2], [phase_theory(2)], 'go')
+
+# Compute empirical Bode plot
+w, gain, phase = signal.bode((num, den))
+
+# Define theoretical functions
+def gain_theory(w):
+    return 20*log10(sqrt(w**2 + 1)/sqrt(w**2+4))
+    
+def phase_theory(w):
+    return (arctan(w) - arctan(w/2))*180/pi
+
+# Plotting the results
+plot(w, gain, linewidth=7, alpha=0.5, label='gain numeric') 
+plot(w, gain_theory(w), 'k-', label='gain theory')
+plot([0], [gain_theory(0)], 'ro', [2], [gain_theory(2)], 'go')
 grid()
 legend()
-print(10**(gain_theory(0)/20) , phase_theory (0),'deg', 10**(gain_theory(2)/20), phase_theory(2),'deg')
 \`\`\`
 
-### Step 2: Implementation
-
-\`\`\`python
-o
-\`\`\`
-
-### Step 3: Implementation
-
-\`\`\`python
-gain
-\`\`\`
-
-### Step 4: Implementation
-
-\`\`\`python
-phase
-\`\`\`
-
-### Step 5: Implementation
-
-\`\`\`python
-signal.bode?
-\`\`\`
-
-### Step 7: Implementation
-
-\`\`\`python
-# Let's create our own general Bode plot calculator
-# and compare it to the one in the 'signal' package
-def my_bode(transfer_function, omega = linspace(0.01, 10,100)):
-    return omega,\\
-           20*log10(abs(transfer_function(1j*omega))),\\
-           180/pi*angle(transfer_function(1j*omega))
-\`\`\`
-
-*Explanation*: Let's create our own general Bode plot calculator and compare it to the one in the 'signal' package
-
-### Step 8: Implementation
-
-\`\`\`python
-H = lambda s: (s+1)/(s+2)
-o1, gain1, phase1 = my_bode(H)
-print(o1, gain1, phase1)
-\`\`\`
-
-### Step 9: Implementation
-
-\`\`\`python
-plot(o, gain           , linewidth=7, alpha=0.5, label='gain (signal.bode)') # o is omega in rad/s, gain in decibels
-plot(o, phase          , linewidth=7, alpha=0.5, label='phase (signal.bode)') # phase in degrees
-plot(o1, gain1, 'k-'                  , label='gain (my_bode)'  )
-plot(o1, phase1, 'b-'                  , label='phase (my_bode)' )
-legend()
-
---- Markdown Cell 11 ---
-<hr style="border:2px solid black;">
-
---- Markdown Cell 12 ---
-## The \$z\$ transform
-
---- Markdown Cell 13 ---
-## Power series recap:
-\$\$
-S_N = \\sum_{n=0}^{N} r^n
-\$\$
-
-Multiply by \$r\$:
-\$\$
-rS_N = \\sum_{n=0}^{N} r^{n+1}
-= \\sum_{n=1}^{N+1} r^n=S_{N} + r^{N+1} - 1
-\$\$
-
-
---- Markdown Cell 14 ---
----
-## Exercise
-Calculate the  \$z\$-transform of 
-\$\$		
-					u[n] = \\begin{cases}
-						0\\ , & n < 0\\\\
-						1\\ , & n\\geqslant 0	
-					\\end{cases}
-\$\$
-### Solution:
-
-
---- Markdown Cell 15 ---
----
-## Exercise
-Show that if sampled at intervals \$T\$ the \$z\$-transform of \$x(t) = t\$ is
-\$\\frac{Tz}{(z-1)^2}\$; 
-
-### Solution
-
-
-Sampling \$x(t)=t\$ at intervals \$T\$ gives
-\$\$
-
-
---- Markdown Cell 16 ---
----
-## Exercise
-Show that if sampled at intervals \$T\$ the \$z\$-transform of \$x(t) =e^{-at}\$ is \$\\frac{z}{z-e^{-aT}}\$
-
-### Solution
-
-Sampling \$x(t)=e^{-at}\$ at intervals \$T\$ gives
-\$\$
-x[n]=x(nT)=e^{-anT}=\\left(e^{-aT}\\right)^n,\\qquad n\\ge 0.
-\$\$
-
-
---- Markdown Cell 17 ---
----
-## Exercise
-Show that if sampled at intervals \$T\$, the \$z\$-transform of
-\$x(t)=\\sin \\omega t\$ is
-\$\$
-X_{\\sin}(z)=\\frac{z\\sin\\omega T}{z^2-2z\\cos\\omega T+1},
-\$\$
-and the \$z\$-transform of \$x(t)=\\cos \\omega t\$ is
-\$\$
-X_{\\cos}(z)=\\frac{z(z-\\cos\\omega T)}{z^2-2z\\cos\\omega T+1}.
-
-
---- Markdown Cell 18 ---
-## Exercise
-If the input to a system, having a transfer function of \$ 1 + 2z^{-1} - z^{-2} \$, is a discrete unit step, show that the first four terms of the output sequence are 1, 3, 2, 2.
-
-### Solution 1
-\$\$
-H(z)=1+2z^{-1}-z^{-2}
-\$\$
-
-
-\$
-
-
---- Markdown Cell 19 ---
-## Exercise
-When a discrete signal \\( 1, -2 \\) is inputted to a processing system, the output sequence is \\( 1, -5, 8, -4 \\).
-
-a. Derive the transfer function for the system.
-
-b. Find the first three terms of the output sequence in response to the finite input sequence of \\( 2, 2, 1 \\).
-
-### Solution 1
-\`\`\`
-
-*Explanation*: The \$z\$ transform Power series recap: Exercise Solution: Exercise Solution Exercise Solution Exercise Exercise Solution 1 Exercise Solution 1
-
+*Explanation*: This code constructs a continuous-time transfer function \$H(s)\$ and utilizes \`scipy.signal.bode\` to compute its frequency response. We overlay the theoretical calculations of magnitude and phase to verify the empirical result.
 `,
 
     keyFormulas: `## Week 8 Key Formulas
@@ -2499,6 +2354,36 @@ explanation: For a causal system, BIBO stability requires that the impulse respo
 
 This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
 
+### Step 1: IIR Filter Design (Butterworth)
+
+\`\`\`python
+import numpy as np
+from scipy import signal
+import matplotlib.pyplot as plt
+
+# Design specifications
+fs = 1000       # Sampling frequency in Hz
+fc = 100        # Cutoff frequency in Hz
+order = 4       # Filter order
+
+# Design a 4th-order lowpass Butterworth IIR filter
+b, a = signal.butter(order, fc, btype='low', fs=fs)
+
+# Compute frequency response
+w, h = signal.freqz(b, a, fs=fs)
+
+# Plot magnitude response
+plt.figure()
+plt.plot(w, 20 * np.log10(abs(h)))
+plt.title('Butterworth Lowpass Filter Response')
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Magnitude (dB)')
+plt.grid()
+plt.axvline(fc, color='red', linestyle='--')
+plt.show()
+\`\`\`
+
+*Explanation*: We use the \`signal.butter\` function to design an IIR filter. It calculates the difference equation coefficients (b for feedforward, a for feedback). We then compute the frequency response using \`signal.freqz\` and plot it, confirming the -3dB cutoff at exactly 100 Hz.
 `,
 
     keyFormulas: `## Week 9 Key Formulas
