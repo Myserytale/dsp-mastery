@@ -250,27 +250,27 @@ html, body, #root {
 
 /* ─── KaTeX overrides for dark theme ─── */
 .katex { 
-  color: #88c0d0; 
-  font-size: 1.25em;
-  text-shadow: 0 0 5px rgba(136, 192, 208, 0.1);
+  color: #ebcb8b; 
+  font-size: 1.4em;
+  text-shadow: 0 0 5px rgba(235, 203, 139, 0.15);
   font-weight: 500;
 }
 
 .katex-display {
-  margin: 1.5em 0;
-  padding: 1.5em;
-  background: rgba(15, 18, 22, 0.8);
-  border-radius: 8px;
-  border: 1px solid rgba(136, 192, 208, 0.4);
-  border-left: 4px solid #88c0d0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(136, 192, 208, 0.15);
+  margin: 1.8em 0;
+  padding: 1.8em;
+  background: rgba(15, 18, 22, 0.85);
+  border-radius: 12px;
+  border: 1px solid rgba(235, 203, 139, 0.4);
+  border-left: 6px solid #ebcb8b;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(235, 203, 139, 0.1);
   overflow-x: auto;
 }
 
 .katex-display > .katex {
   color: #eceff4;
-  font-size: 1.45em;
-  text-shadow: 0 0 10px rgba(236, 239, 244, 0.2);
+  font-size: 1.9em;
+  text-shadow: 0 0 12px rgba(235, 203, 139, 0.3);
 }
 
 /* ─── Code block copy button ─── */
