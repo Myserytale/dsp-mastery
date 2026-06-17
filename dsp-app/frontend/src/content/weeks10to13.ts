@@ -242,21 +242,45 @@ question: Which of the following is a major advantage of FIR filters over IIR fi
 a: They require fewer coefficients to achieve the same sharp cutoff.
 b: They can be designed to have an exactly linear phase response, preserving waveform shapes.
 c: They are computationally cheaper than IIR filters for complex frequency responses.
+d: They always have a narrower transition band for a given filter order.
 answer: b
+explanation: FIR filters can guarantee exactly linear phase when their impulse response is symmetric, meaning all frequencies experience identical group delay and the waveform shape is perfectly preserved. Option (a) is backwards — IIR filters need fewer coefficients for the same sharpness; FIR filters typically require many more taps. Option (c) is also incorrect because FIR filters generally require more multiply-accumulate operations. Option (d) is wrong because IIR filters achieve narrower transition bands for a given order.
 \`\`\`
 \`\`\`quiz
 question: In the Window Method for FIR filter design, what is the consequence of truncating the ideal infinite impulse response with a rectangular window?
 a: It produces the sharpest possible transition band but suffers from significant Gibbs phenomenon ripples in the passband and stopband.
 b: It produces a completely smooth transition band with no ripples.
 c: It forces the filter to become an IIR filter.
+d: It eliminates all sidelobes in the frequency response.
 answer: a
+explanation: A rectangular window simply chops off the ideal impulse response, which is equivalent to convolving the ideal frequency response with a sinc function in frequency. This yields the narrowest possible main lobe (sharpest transition) but introduces Gibbs phenomenon — oscillatory ripples of about 9% overshoot that do not diminish as filter order increases. Option (b) is wrong because smoothness requires tapered windows like Hamming or Blackman. Option (c) is wrong because truncation still yields a finite-length (FIR) filter. Option (d) is wrong because the rectangular window has the worst sidelobes (-13 dB) of all standard windows.
 \`\`\`
 \`\`\`quiz
 question: A linear-phase FIR filter requires its impulse response h[n] to have what specific property?
 a: It must be strictly positive.
 b: It must be an exponentially decaying sequence.
 c: It must be symmetric or anti-symmetric around its midpoint.
+d: It must have an even number of taps.
 answer: c
+explanation: Linear phase requires that all frequency components experience the same group delay. This is guaranteed when h[n] = h[M-n] (symmetric, Types I and II) or h[n] = -h[M-n] (anti-symmetric, Types III and IV). Option (a) is wrong — coefficients can be negative. Option (b) describes IIR-like decay, not FIR symmetry. Option (d) is wrong because both even and odd length FIR filters can have linear phase (Type I is odd length, Type II is even length).
+\`\`\`
+\`\`\`quiz
+question: A Type II linear-phase FIR filter (even number of taps, symmetric coefficients) has a guaranteed zero in its frequency response at which frequency?
+a: At DC (ω = 0)
+b: At the passband center frequency
+c: At ω = π (the Nyquist frequency)
+d: It has no guaranteed zeros at any specific frequency
+answer: c
+explanation: For a Type II FIR filter (even length M+1, symmetric h[n] = h[M-n]), the frequency response can be written as H(e^{jω}) = e^{-jωM/2} · H_r(ω), where H_r(π) = 0 always. This built-in zero at ω = π means Type II filters cannot be used as highpass or bandstop filters. Option (a) is wrong — the zero at DC occurs for Type IV (odd anti-symmetric). Option (b) is wrong — the passband center is where the response is near unity. Option (d) is wrong because this zero is a fundamental structural property.
+\`\`\`
+\`\`\`quiz
+question: In the Parks-McClellan (Remez exchange) algorithm for FIR filter design, what key property distinguishes it from the window method?
+a: It minimizes the maximum error (equiripple design) over the passband and stopband, achieving the optimal filter for a given order.
+b: It always produces filters with fewer taps than the window method.
+c: It can only design lowpass filters.
+d: It uses an IIR prototype filter and converts it to FIR.
+answer: a
+explanation: The Parks-McClellan algorithm uses the Chebyshev approximation (minimax criterion) to produce an equiripple FIR filter — one where the approximation error oscillates equally between its maximum and minimum values across the bands. This is provably optimal: no other FIR filter of the same order can achieve a smaller maximum error. Option (b) is misleading — while equiripple designs are often shorter than window-based designs for the same specs, this is a consequence, not the defining property. Option (c) is wrong because Parks-McClellan can design any filter type. Option (d) describes IIR-to-FIR conversion techniques, not the Remez algorithm.
 \`\`\`
 `,
     labWalkthrough: `
@@ -450,21 +474,45 @@ question: What is the main difference between Direct Form I and Direct Form II r
 a: Direct Form I requires double the number of multipliers compared to Direct Form II.
 b: Direct Form II shares the delay elements (memory) between the feedforward and feedback paths, saving memory compared to Direct Form I.
 c: Direct Form II can only be used for FIR filters.
+d: Direct Form I always has better numerical precision than Direct Form II.
 answer: b
+explanation: Direct Form I uses M + N separate delay elements (one set for the input history, another for the output history), while Direct Form II rearranges the computation so both paths share a single set of max(M, N) delay elements. Option (a) is wrong — both forms use the same number of multipliers; it's the memory (delays) that differs. Option (c) is wrong — Direct Form II works for both IIR and FIR filters. Option (d) is actually backwards — Direct Form II can have worse numerical behavior due to large intermediate values in the shared state, which is why the Transposed Direct Form II is often preferred.
 \`\`\`
 \`\`\`quiz
 question: When implementing digital filters in fixed-point hardware, what issue arises from the quantization of filter coefficients?
 a: The filter's phase response becomes non-linear.
 b: The actual poles and zeros shift from their designed locations, potentially causing instability in IIR filters.
 c: The sampling rate of the signal is unintentionally reduced.
+d: The filter automatically converts from IIR to FIR type.
 answer: b
+explanation: Quantizing coefficients to finite precision means the polynomial coefficients change slightly, which moves the roots (poles and zeros) of the transfer function. For IIR filters, if a pole that was just inside the unit circle gets pushed outside, the filter becomes unstable. This is especially dangerous for high-order direct-form implementations where small coefficient changes cause large pole movements. Option (a) is misleading — while quantization affects phase indirectly through pole/zero shifts, non-linear phase is a design property, not a quantization artifact. Option (c) is wrong — coefficient quantization doesn't affect sampling rate. Option (d) is wrong — the filter structure type doesn't change.
 \`\`\`
 \`\`\`quiz
 question: Why might a cascade (series) realization of second-order sections (biquads) be preferred over a high-order Direct Form realization?
 a: It requires fewer overall multipliers and adders.
 b: It is significantly less sensitive to coefficient quantization errors and numerical instability.
 c: It automatically makes an IIR filter act like an FIR filter.
+d: It eliminates the need for feedback paths in IIR filters.
 answer: b
+explanation: In a high-order direct form, all poles are determined jointly by all denominator coefficients, so quantizing any single coefficient shifts every pole. In the cascade form, each biquad controls only its own pair of poles, and second-order polynomials are far less sensitive to coefficient perturbation. This dramatically reduces the risk of instability. Option (a) is wrong — cascade form actually uses slightly more multipliers due to gain factors between sections. Option (c) is wrong — each biquad section still has its own feedback (denominator). Option (d) is wrong — feedback is still present within each second-order section.
+\`\`\`
+\`\`\`quiz
+question: In a notch filter designed by placing zeros on the unit circle at z = e^{±jω₀} and poles at z = r·e^{±jω₀}, what happens to the notch bandwidth as r approaches 1?
+a: The notch bandwidth increases, rejecting a wider range of frequencies.
+b: The filter becomes unstable because the poles reach the unit circle.
+c: The notch becomes narrower, rejecting only a very small band around ω₀.
+d: The notch disappears and the filter becomes all-pass.
+answer: c
+explanation: The poles pull the magnitude response back up toward unity on either side of the notch frequency. As r → 1, the poles get closer to the zeros on the unit circle, so they "cancel" the zeros' effect at frequencies very close to (but not exactly at) ω₀, making the notch extremely narrow. At exactly ω₀, the zeros still force the response to zero. Option (a) is wrong — closer poles mean narrower notch, not wider. Option (b) is wrong — r < 1 keeps poles strictly inside the unit circle, so the filter remains stable (instability only at r = 1 exactly). Option (d) is wrong — the zeros on the unit circle always create a null at ω₀ regardless of r.
+\`\`\`
+\`\`\`quiz
+question: What is "limit cycle oscillation" in the context of recursive (IIR) digital filter implementations?
+a: The natural oscillation frequency of the filter at its pole locations.
+b: A sustained, low-level parasitic oscillation caused by nonlinear effects of rounding or truncation in the feedback loop, even when the input is zero.
+c: The maximum frequency a digital filter can process before aliasing occurs.
+d: An oscillation that occurs only during the transient startup phase of the filter.
+answer: b
+explanation: In a recursive filter with finite-precision arithmetic, rounding or truncation of intermediate values introduces small nonlinear perturbations in the feedback path. These can trap the filter output in a repeating cycle of nonzero values even with zero input — a sustained parasitic oscillation called a limit cycle. This is a fundamentally nonlinear phenomenon that linear stability analysis cannot predict. Option (a) confuses limit cycles with the filter's natural modes (which decay for stable filters). Option (c) describes the Nyquist frequency constraint, unrelated to quantization. Option (d) is wrong because limit cycles are sustained indefinitely, not transient.
 \`\`\`
 `,
     labWalkthrough: `
@@ -635,21 +683,45 @@ question: What is the purpose of decimation in multirate digital signal processi
 a: To increase the sampling rate of a signal by inserting zeros.
 b: To reduce the sampling rate of a signal by discarding samples, usually preceded by low-pass filtering to prevent aliasing.
 c: To convert a digital signal back into an analog signal.
+d: To apply a bandpass filter centered at the decimation frequency.
 answer: b
+explanation: Decimation reduces the effective sampling rate by keeping only every M-th sample. However, downsampling alone would cause aliasing if the original signal has content above the new Nyquist frequency (π/M), so a lowpass anti-aliasing filter must be applied first. Option (a) describes interpolation (upsampling), the opposite operation. Option (c) describes D/A conversion, which is a separate process entirely. Option (d) is fabricated — decimation is about rate reduction, not bandpass filtering.
 \`\`\`
 \`\`\`quiz
 question: In interpolation (upsampling), what is the crucial step immediately following the insertion of zero-valued samples between original samples?
 a: Applying a high-pass filter.
 b: Applying a low-pass (anti-imaging) filter to remove spectral replicas created by the zero-insertion.
 c: Performing a Fast Fourier Transform.
+d: Applying a median filter to smooth the inserted zeros.
 answer: b
+explanation: Zero-insertion creates L-1 spectral images (replicas of the original spectrum) between 0 and 2π. A lowpass filter with cutoff π/L and gain L removes these images, effectively interpolating smooth values in place of the inserted zeros. Option (a) is wrong — a highpass filter would remove the baseband signal and keep the images. Option (c) is wrong — the FFT is an analysis tool, not a filtering step. Option (d) is wrong — a median filter is nonlinear and does not properly remove spectral images; only a linear lowpass filter correctly shapes the interpolated spectrum.
 \`\`\`
 \`\`\`quiz
 question: Why is Welch's method (periodogram averaging) often preferred over a single, standard periodogram for spectral density estimation of noisy signals?
 a: It computes the FFT significantly faster than a standard periodogram.
 b: It completely eliminates bias in the spectral estimate.
 c: It reduces the variance of the spectral estimate by averaging overlapping, windowed segments of the signal.
+d: It increases the frequency resolution compared to a single long FFT.
 answer: c
+explanation: A single periodogram of a noisy signal has high variance — the estimate fluctuates wildly. Welch's method divides the signal into overlapping, windowed segments, computes a periodogram for each, and averages them. By the law of large numbers, averaging K segments reduces the variance by approximately 1/K. Option (a) is wrong — Welch actually computes multiple FFTs, so it is computationally more expensive. Option (b) is wrong — windowing introduces some bias through spectral leakage, which Welch does not eliminate. Option (d) is wrong — shorter segments actually reduce frequency resolution (Δf = fs/segment_length); this is the fundamental tradeoff of the method.
+\`\`\`
+\`\`\`quiz
+question: When performing sampling rate conversion by a non-integer factor L/M (e.g., converting 44.1 kHz to 48 kHz), what is the correct order of operations?
+a: Decimate by M first, then interpolate by L.
+b: Interpolate by L first, then decimate by M, with a single lowpass filter at cutoff min(π/L, π/M).
+c: Apply the FFT, resample in the frequency domain, then apply the inverse FFT.
+d: Simply drop or duplicate samples to approximate the new rate.
+answer: b
+explanation: The correct approach is to first upsample by L (inserting L-1 zeros) and then downsample by M (keeping every M-th sample), with a lowpass filter at cutoff min(π/L, π/M) applied between the two stages (in practice, a single combined filter). Interpolating first avoids aliasing because the intermediate rate is L·fs, which is higher than both the input and output rates. Option (a) is wrong — decimating first could cause aliasing if the signal bandwidth exceeds π/M at the original rate. Option (c) is not standard multirate processing and introduces circular artifacts. Option (d) produces severe distortion and is not a valid DSP technique.
+\`\`\`
+\`\`\`quiz
+question: What is the "uncertainty principle" tradeoff in Short-Time Fourier Transform (STFT) / spectrogram analysis?
+a: Longer signals always produce better spectrograms than shorter signals.
+b: You cannot simultaneously achieve arbitrarily good time resolution and frequency resolution — improving one degrades the other.
+c: The spectrogram can only be computed for stationary signals.
+d: Increasing the FFT size always improves both time and frequency resolution.
+answer: b
+explanation: The time-frequency uncertainty principle (Δt · Δf ≥ 1/4π) is a fundamental limit. A short STFT window gives good time localization (you know when an event happened) but poor frequency resolution (wide frequency bins). A long window gives excellent frequency resolution but smears events in time. Option (a) is wrong — signal length affects total analysis duration, not the time-frequency tradeoff. Option (c) is wrong — the STFT is specifically designed for non-stationary signals by analyzing short quasi-stationary segments. Option (d) is wrong — increasing FFT size with a fixed window only zero-pads (interpolates the spectrum) without truly improving resolution; only a longer window improves frequency resolution, at the cost of time resolution.
 \`\`\`
 `,
     labWalkthrough: `
@@ -932,21 +1004,45 @@ question: Across the entire DSP pipeline, if a discrete system is defined as y[n
 a: An FIR filter because it has finite terms.
 b: An IIR filter because the current output depends on previous outputs (feedback).
 c: A non-causal filter.
+d: A non-linear filter because it combines input and output.
 answer: b
+explanation: The equation y[n] = x[n] + 0.5·y[n-1] has a feedback term (y[n-1] on the right side), making the impulse response infinite in duration: h[n] = (0.5)^n · u[n], which never exactly reaches zero. This is the hallmark of an IIR filter. Option (a) is wrong — having finite terms in the difference equation does not make it FIR; what matters is whether the impulse response is finite. Option (c) is wrong — the system only uses past outputs (n-1), so it is causal. Option (d) is wrong — the system is linear because it satisfies superposition; linearity is about scaling and additivity, not about mixing input and output.
 \`\`\`
 \`\`\`quiz
 question: Which of the following correctly orders the transforms from strictly continuous to strictly discrete (both time and frequency)?
 a: DFT -> DTFT -> CTFT
 b: CTFT (continuous time/freq) -> DTFT (discrete time, continuous freq) -> DFT (discrete time/freq)
 c: Z-Transform -> Laplace Transform -> Fourier Series
+d: DFT -> Z-Transform -> CTFT -> Laplace Transform
 answer: b
+explanation: The CTFT (Continuous-Time Fourier Transform) operates on continuous-time signals and produces a continuous frequency spectrum. The DTFT takes discrete-time signals but still produces a continuous (and periodic) frequency spectrum. The DFT takes finite-length discrete sequences and produces discrete frequency samples. This progression — continuous→discrete in time, then continuous→discrete in frequency — is the correct ordering. Option (a) reverses the order. Option (c) mixes transforms that serve different purposes (Z-transform is the discrete analog of the Laplace transform, not a step in the same continuum). Option (d) jumbles the hierarchy arbitrarily.
 \`\`\`
 \`\`\`quiz
 question: Ultimately, what is the fundamental mathematical operation at the heart of filtering a signal in the time domain?
 a: Cross-correlation
 b: Differentiation
 c: Convolution
+d: Matrix inversion
 answer: c
+explanation: For any LTI system, the output y[n] = Σ x[k]·h[n-k] is convolution of the input with the impulse response. This is the defining operation of linear time-invariant filtering. In the frequency domain, convolution becomes multiplication: Y(ω) = H(ω)·X(ω). Option (a) is close — cross-correlation is similar to convolution but without time-reversal of one signal; it measures similarity rather than filtering. Option (b) is wrong — differentiation is one specific system, not the general filtering operation. Option (d) is wrong — while matrix methods appear in adaptive filtering and least-squares problems, the fundamental filtering operation is convolution.
+\`\`\`
+\`\`\`quiz
+question: A system has transfer function H(z) = (1 - z^{-1}) / (1 - 0.9z^{-1}). At DC (ω = 0) and at Nyquist (ω = π), what are the magnitude responses?
+a: |H(e^{j0})| = 0, |H(e^{jπ})| = 2/1.9 ≈ 1.05 — this is a highpass filter.
+b: |H(e^{j0})| = 1, |H(e^{jπ})| = 1 — this is an allpass filter.
+c: |H(e^{j0})| = 2, |H(e^{jπ})| = 0 — this is a lowpass filter.
+d: |H(e^{j0})| = 0, |H(e^{jπ})| = 0 — this filter blocks all frequencies.
+answer: a
+explanation: Substitute z = e^{j0} = 1: H(1) = (1-1)/(1-0.9) = 0/0.1 = 0. Substitute z = e^{jπ} = -1: H(-1) = (1-(-1))/(1-(-0.9)) = 2/1.9 ≈ 1.05. Zero gain at DC and near-unity gain at Nyquist means this is a highpass filter. The zero at z = 1 blocks DC, and the pole at z = 0.9 boosts frequencies near Nyquist. Option (b) is wrong — the gains are clearly different at DC vs Nyquist. Option (c) reverses the filter type. Option (d) is wrong — the filter passes high frequencies.
+\`\`\`
+\`\`\`quiz
+question: You need to design a filter that preserves the shape of a QRS complex in an ECG signal while removing 50 Hz power line interference. Which approach is most appropriate?
+a: A high-order IIR bandpass filter with very sharp cutoffs.
+b: A linear-phase FIR notch filter centered at 50 Hz.
+c: An IIR allpass filter with poles near z = 1.
+d: Decimation by a factor of 50 to remove the 50 Hz component.
+answer: b
+explanation: Preserving the QRS waveform shape requires linear phase (equal group delay at all frequencies), which rules out IIR filters for this critical application. A notch filter at 50 Hz removes only the interference while passing all other frequencies including the QRS complex components. FIR design guarantees the linear phase needed for waveform fidelity. Option (a) is wrong — IIR filters have non-linear phase, which distorts the QRS shape, and a bandpass is the wrong topology for removing a single frequency. Option (c) is wrong — an allpass filter changes phase but not magnitude, so it cannot remove the 50 Hz interference. Option (d) is wrong — decimation reduces the sampling rate and would cause aliasing, not frequency-selective removal.
 \`\`\`
 `,
     labWalkthrough: `## Course Lab Summary

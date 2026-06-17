@@ -464,21 +464,45 @@ question: What is the primary difference between continuous-time and discrete-ti
 a: Continuous-time signals are always periodic, while discrete-time signals are aperiodic.
 b: Continuous-time signals are defined for all real values of time, whereas discrete-time signals are defined only at integer indices.
 c: Continuous-time signals can only have positive amplitudes.
+d: Discrete-time signals must be quantized in amplitude, while continuous-time signals are not.
 answer: b
+explanation: Continuous-time signals x(t) are defined for every real value of t, while discrete-time signals x[n] exist only at integer indices n. Option (a) is wrong because periodicity is independent of signal type — both can be periodic or aperiodic. Option (c) is wrong because amplitude can be any real value for either type. Option (d) confuses discrete-time with digital signals; a discrete-time signal can still take continuous amplitude values.
 \`\`\`
 \`\`\`quiz
 question: A system is considered Linear Time-Invariant (LTI) if it satisfies which two mathematical properties?
 a: Superposition (additivity/scaling) and shift-invariance.
 b: Causality and Bounded-Input Bounded-Output (BIBO) stability.
 c: Memoryless operation and invertibility.
+d: Linearity and energy conservation.
 answer: a
+explanation: An LTI system must satisfy (1) linearity — meaning T{ax₁ + bx₂} = aT{x₁} + bT{x₂} (superposition) — and (2) time-invariance — meaning a shifted input produces an equally shifted output. Option (b) describes desirable properties but not the defining ones; a system can be LTI yet unstable. Option (c) is wrong because LTI systems can have memory (e.g., FIR filters). Option (d) is wrong because energy conservation is not a requirement for LTI systems.
 \`\`\`
 \`\`\`quiz
 question: How is a Power Signal distinguished from an Energy Signal?
 a: A power signal has finite energy and zero average power.
 b: A power signal has infinite average power and finite energy.
 c: A power signal has finite average power but infinite total energy (e.g., a continuous sine wave).
+d: A power signal must be periodic, while an energy signal must be aperiodic.
 answer: c
+explanation: A power signal has finite nonzero average power but infinite total energy — it persists forever without dying out (e.g., a sine wave). Option (a) describes an energy signal (finite energy, zero average power). Option (b) inverts the relationship — power signals have finite average power, not infinite. Option (d) is wrong because while many power signals are periodic, it is not a strict requirement, and non-periodic signals can also be power signals.
+\`\`\`
+\`\`\`quiz
+question: The system y[n] = x[n] · x[n-1] is tested for linearity. What is the correct conclusion?
+a: It is linear because it uses only past and present input values.
+b: It is nonlinear because the output involves a product of two input terms, violating superposition.
+c: It is linear because it satisfies time-invariance.
+d: It is nonlinear because it has memory.
+answer: b
+explanation: Multiplying two input-dependent terms creates a nonlinear operation. If you test superposition with input ax₁[n] + bx₂[n], the product (ax₁[n]+bx₂[n])(ax₁[n-1]+bx₂[n-1]) expands to cross-terms that violate additivity. Option (a) confuses causality with linearity. Option (c) confuses time-invariance with linearity — they are independent properties. Option (d) is wrong because having memory does not imply nonlinearity (e.g., moving average filters have memory but are linear).
+\`\`\`
+\`\`\`quiz
+question: Which of the following signals is an energy signal?
+a: x[n] = cos(0.2πn) for all n
+b: x[n] = (0.7)ⁿ u[n], where u[n] is the unit step
+c: x[n] = 3 for all n
+d: x[n] = (-1)ⁿ for all n
+answer: b
+explanation: The decaying exponential x[n] = (0.7)ⁿu[n] has finite total energy E = Σ(0.7)²ⁿ = 1/(1-0.49) ≈ 1.96, making it an energy signal. Option (a) is a cosine that persists forever — it has infinite energy but finite average power (power signal). Option (c) is a constant for all n, giving infinite energy and finite power P = 9 (power signal). Option (d) alternates ±1 forever — it also has infinite energy and finite power P = 1 (power signal).
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 01: Python Basics for DSP
@@ -860,21 +884,45 @@ question: What property of the convolution sum indicates that the order of the s
 a: Associative Property
 b: Commutative Property
 c: Distributive Property
+d: Identity Property
 answer: b
+explanation: The commutative property states x * h = h * x — you can swap the roles of input and impulse response. This is proven by variable substitution in the convolution sum. Option (a), the associative property, concerns grouping of cascaded convolutions: (x*h₁)*h₂ = x*(h₁*h₂). Option (c), the distributive property, concerns parallel systems: x*(h₁+h₂) = x*h₁ + x*h₂. Option (d), the identity property, states x*δ = x, which is about the unit impulse acting as an identity element.
 \`\`\`
 \`\`\`quiz
 question: If you convolve a signal x[n] with a shifted unit impulse δ[n-k], what is the resulting output?
 a: The original signal x[n].
 b: The signal shifted by k, x[n-k].
 c: A single impulse at n=k with amplitude x[k].
+d: The signal x[n] scaled by the factor k.
 answer: b
+explanation: The sifting property of convolution gives x[n]*δ[n-k] = x[n-k]. The impulse "picks out" the signal and shifts it to position k. Option (a) would be the result of convolving with δ[n] (unshifted). Option (c) confuses convolution with the sifting property of the delta under multiplication/inner product. Option (d) is incorrect — convolving with a shifted delta never scales the signal; it only shifts it.
 \`\`\`
 \`\`\`quiz
 question: In terms of its impulse response h[n], what is the condition for an LTI system to be causal?
 a: h[n] = 0 for all n < 0.
 b: The sum of the absolute values of h[n] is finite.
 c: h[n] must be purely real and even.
+d: h[n] must be nonzero only at n = 0.
 answer: a
+explanation: A causal system’s output depends only on present and past inputs, which requires the impulse response to be zero for all negative time indices. Option (b) is the condition for BIBO stability, not causality — a system can be causal but unstable. Option (c) would describe a very specific symmetric filter, unrelated to causality. Option (d) describes a memoryless system (y[n] = h[0]·x[n]), which is a special case of causal but far too restrictive.
+\`\`\`
+\`\`\`quiz
+question: Two finite-length sequences x[n] of length N=4 and h[n] of length M=3 are convolved. What is the length of the output y[n] = x[n] * h[n]?
+a: 4 (same as the longer input)
+b: 3 (same as the shorter input)
+c: 7 (N + M = 4 + 3)
+d: 6 (N + M - 1 = 4 + 3 - 1)
+answer: d
+explanation: The linear convolution of two finite sequences of lengths N and M produces a result of length N + M - 1. Here, 4 + 3 - 1 = 6. This comes from the fact that the first non-zero output occurs when the two sequences first overlap, and the last non-zero output occurs when they last overlap. Option (a) would suggest no spreading of the output, which is wrong. Option (b) is too short. Option (c) applies N+M instead of N+M-1 — a common off-by-one error.
+\`\`\`
+\`\`\`quiz
+question: An LTI system has impulse response h[n] = u[n] (the unit step function). Is this system BIBO stable?
+a: Yes, because u[n] is bounded (it never exceeds 1).
+b: Yes, because it is causal.
+c: No, because Σ|h[n]| = Σu[n] = ∞, violating the absolute summability condition.
+d: No, because h[n] has values at negative indices.
+answer: c
+explanation: BIBO stability requires the impulse response to be absolutely summable: Σ|h[n]| < ∞. For h[n] = u[n], the sum is 1+1+1+... = ∞, so the system is unstable. A bounded constant input like x[n]=1 produces y[n] that grows without bound (accumulator). Option (a) confuses boundedness of h[n] with absolute summability — being bounded is necessary but not sufficient. Option (b) confuses causality with stability; they are independent properties. Option (d) is factually wrong — u[n] = 0 for n < 0.
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 02: Convolution Implementations
@@ -1221,21 +1269,45 @@ question: What does the Fourier Series represent?
 a: The conversion of a continuous-time signal into a sequence of discrete samples.
 b: The decomposition of a periodic signal into an infinite sum of harmonically related complex exponentials (sines and cosines).
 c: The time delay of a signal at various frequency points.
+d: The approximation of any signal using polynomial basis functions.
 answer: b
+explanation: The Fourier Series expresses a periodic signal x(t) as a weighted sum of complex exponentials e^{j2πkf₀t} at integer multiples of the fundamental frequency f₀ = 1/T₀. Option (a) describes sampling (A/D conversion), not Fourier analysis. Option (c) is not what any Fourier representation does. Option (d) describes polynomial approximation (e.g., Taylor series), which uses powers of t rather than sinusoidal/exponential basis functions.
 \`\`\`
 \`\`\`quiz
 question: For a real-valued signal, what symmetry property do its Fourier coefficients exhibit?
 a: They are purely real and even.
 b: They exhibit conjugate symmetry (c_k = c_{-k}^*).
 c: They are purely imaginary and odd.
+d: They satisfy c_k = c_{k+1} for all k.
 answer: b
+explanation: When x(t) is real, taking the complex conjugate of the Fourier Series shows that c_{-k} = c_k*. This means the magnitude spectrum |c_k| is even and the phase ∠c_k is odd. Option (a) is only true for the special case of real and even signals. Option (c) is only true for real and odd signals. Option (d) would imply all coefficients are equal, which has no basis in Fourier theory.
 \`\`\`
 \`\`\`quiz
 question: Which transform is used to analyze aperiodic, continuous-time signals?
 a: Continuous-Time Fourier Series (CTFS)
 b: Continuous-Time Fourier Transform (CTFT)
 c: Discrete Fourier Transform (DFT)
+d: Z-Transform
 answer: b
+explanation: The CTFT extends the Fourier Series to non-periodic (aperiodic) continuous-time signals by letting the period T₀ → ∞, turning the discrete harmonics into a continuous spectrum X(f). Option (a) is specifically for periodic signals. Option (c) is for finite-length discrete sequences. Option (d) is a generalization of the DTFT to the complex z-plane, not for continuous-time signals.
+\`\`\`
+\`\`\`quiz
+question: The convolution theorem states that convolution in the time domain corresponds to what operation in the frequency domain?
+a: Convolution in the frequency domain as well.
+b: Differentiation in the frequency domain.
+c: Multiplication in the frequency domain.
+d: Integration in the frequency domain.
+answer: c
+explanation: The convolution theorem is one of the most powerful results in signal processing: if y(t) = x(t)*h(t), then Y(f) = X(f)·H(f). This is why filtering is so efficient in the frequency domain — instead of computing a costly convolution sum, you just multiply spectra point by point. Option (a) is the dual result: multiplication in time corresponds to convolution in frequency. Options (b) and (d) correspond to different FT properties (time-domain differentiation/integration), not convolution.
+\`\`\`
+\`\`\`quiz
+question: If a real-valued signal x(t) is also an odd function (x(-t) = -x(t)), what can be said about its Fourier Transform X(f)?
+a: X(f) is purely real and even.
+b: X(f) is purely imaginary and odd.
+c: X(f) has constant magnitude across all frequencies.
+d: X(f) is a real and odd function.
+answer: b
+explanation: For a real signal, X(-f) = X*(f) (conjugate symmetry). For an odd signal, X(-f) = -X(f) (the FT of an odd function is odd). Combining these: X*(f) = -X(f), which means X(f) = -X*(f). This is only possible if X(f) is purely imaginary. Since X(-f) = -X(f), it is also odd. Option (a) would be true for a real and even signal. Option (c) describes an allpass system, unrelated to signal symmetry. Option (d) would require X(f) to be real, but conjugate symmetry plus oddness forces it to be imaginary.
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 03: FFT as Numerical Fourier Transform
@@ -1557,21 +1629,45 @@ question: The Discrete-Time Fourier Transform (DTFT) takes a discrete-time signa
 a: Discrete and periodic.
 b: Continuous and periodic with period 2π.
 c: Continuous and aperiodic.
+d: Discrete and aperiodic.
 answer: b
+explanation: The DTFT sums x[n]e^{-jωn} over all integer n, producing a continuous function of the real variable ω. This function is inherently periodic with period 2π because e^{-j(ω+2π)n} = e^{-jωn} for integer n. Option (a) describes the DFT, which samples the DTFT at N equally-spaced points. Option (c) describes the continuous-time Fourier Transform. Option (d) does not correspond to any standard transform.
 \`\`\`
 \`\`\`quiz
 question: What happens to the DTFT of a signal if the signal is delayed in the time domain by k samples (i.e., x[n-k])?
 a: The spectrum is multiplied by a linear phase shift e^{-jωk}.
 b: The spectrum is circularly shifted by k bins.
 c: The amplitude of the spectrum decreases by a factor of k.
+d: The magnitude spectrum changes but the phase remains the same.
 answer: a
+explanation: The time-shift property of the DTFT states that if x[n] has DTFT X(e^{jω}), then x[n-k] has DTFT e^{-jωk}·X(e^{jω}). The magnitude |X(e^{jω})| is unchanged — only the phase is affected by the linear term -ωk. Option (b) describes circular shift, which applies to the DFT, not general DTFT delays. Option (c) is wrong because delay doesn’t attenuate. Option (d) has it backwards — the magnitude stays the same while the phase changes.
 \`\`\`
 \`\`\`quiz
 question: If a discrete-time sequence is purely real and even, what can be said about its DTFT?
 a: It is purely imaginary and odd.
 b: It is purely real and even.
 c: It has a constant magnitude of 1 across all frequencies.
+d: It is complex with nonzero imaginary part.
 answer: b
+explanation: For real signals, the DTFT has conjugate symmetry: X(e^{jω}) = X*(e^{-jω}). For even signals, X(e^{jω}) = X(e^{-jω}). Combining these: X(e^{jω}) = X*(e^{jω}), which means X is equal to its own conjugate — i.e., it must be purely real. And since X(e^{jω}) = X(e^{-jω}), it is even. Option (a) would apply to a real and odd sequence. Option (c) describes an allpass filter, unrelated to time-domain symmetry. Option (d) contradicts the conjugate symmetry constraint.
+\`\`\`
+\`\`\`quiz
+question: A continuous signal with maximum frequency f_max = 4 kHz is sampled at f_s = 6 kHz. What happens?
+a: Perfect reconstruction is possible since f_s > f_max.
+b: Aliasing occurs because f_s < 2·f_max, causing frequency components above 3 kHz to fold back into the 0–3 kHz range.
+c: The signal is automatically bandlimited to 3 kHz with no distortion.
+d: The sampling process amplifies frequencies near f_max.
+answer: b
+explanation: The Nyquist theorem requires f_s > 2f_max = 8 kHz for alias-free sampling. At f_s = 6 kHz, the Nyquist frequency is only 3 kHz. Frequency content between 3–4 kHz folds (aliases) back into the 2–3 kHz range, corrupting the signal irreversibly. Option (a) is wrong because f_s = 6 kHz < 8 kHz. Option (c) is wrong because sampling doesn’t filter — it creates spectral copies that overlap. Option (d) is wrong because sampling doesn’t amplify any frequencies.
+\`\`\`
+\`\`\`quiz
+question: The frequency response H(e^{jω}) of a 3-point moving average filter h[n] = [1/3, 1/3, 1/3] behaves as what type of filter?
+a: A highpass filter that attenuates low frequencies.
+b: A bandpass filter centered at ω = π.
+c: A lowpass filter that attenuates high frequencies.
+d: An allpass filter with unity magnitude at all frequencies.
+answer: c
+explanation: The moving average filter averages neighboring samples, which smooths out rapid fluctuations (high frequencies) while preserving slow variations (low frequencies). Its frequency response is H(e^{jω}) = (1/3)(1 + e^{-jω} + e^{-2jω}), which has maximum magnitude at ω=0 (DC) and nulls at ω = ±2π/3. Option (a) is the opposite behavior. Option (b) is wrong — there is no passband centered at π. Option (d) is wrong because |H| clearly varies with ω.
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 04: FFT of Rect and Gaussian
@@ -2036,21 +2132,45 @@ question: The Z-transform is a generalization of which other transform?
 a: The Discrete Fourier Transform (DFT).
 b: The Discrete-Time Fourier Transform (DTFT), evaluated along the complex plane z = r*e^{jω}.
 c: The Laplace Transform for continuous-time signals.
+d: The Continuous-Time Fourier Transform (CTFT).
 answer: b
+explanation: The Z-transform X(z) = Σx[n]z^{-n} generalizes the DTFT by allowing z to be any complex number, not just z = e^{jω}. When you restrict z to the unit circle (r=1), you recover the DTFT exactly. Option (a) is wrong because the DFT is a sampled version of the DTFT, not the parent transform. Option (c) describes the continuous-time analog of the Z-transform, but the Z-transform is not a generalization of it — they operate in different domains. Option (d) is for continuous-time signals, while the Z-transform is for discrete-time.
 \`\`\`
 \`\`\`quiz
 question: For a causal LTI system to be Bounded-Input Bounded-Output (BIBO) stable, where must all its poles lie in the z-plane?
 a: Strictly outside the unit circle (|z| > 1).
 b: On the unit circle (|z| = 1).
 c: Strictly inside the unit circle (|z| < 1).
+d: At the origin (z = 0).
 answer: c
+explanation: For a causal system, the ROC extends outward from the outermost pole. For the ROC to include the unit circle (required for BIBO stability, since the DTFT must exist), all poles must satisfy |p| < 1. Option (a) would place the poles outside the ROC for a causal system, making it unstable. Option (b) means the ROC boundary touches the unit circle, leading to marginally unstable behavior (e.g., undamped oscillations). Option (d) is too restrictive — poles at z=0 correspond to pure delay elements, which is a special case.
 \`\`\`
 \`\`\`quiz
 question: What defines the Region of Convergence (ROC) for a Z-transform?
 a: The set of all values of z for which the Z-transform summation converges to a finite value.
 b: The frequencies where the phase response is linear.
 c: The area inside the unit circle exclusively.
+d: The set of z values where the transfer function H(z) equals zero.
 answer: a
+explanation: The ROC is the set of complex values z for which the infinite sum Σx[n]z^{-n} converges absolutely. The ROC is critical because different signals can share the same algebraic Z-transform expression but differ only in their ROC. Option (b) is about linear phase filters, which is unrelated to convergence. Option (c) is wrong because the ROC can be inside, outside, or a ring in the z-plane depending on the signal. Option (d) describes zeros, not the ROC.
+\`\`\`
+\`\`\`quiz
+question: Two signals share the same Z-transform expression X(z) = 1/(1 - 0.5z^{-1}), but have different ROCs. What distinguishes them?
+a: They have different magnitudes but the same phase.
+b: One is a right-sided (causal) signal a^n u[n] with ROC |z| > 0.5, and the other is a left-sided (anti-causal) signal -a^n u[-n-1] with ROC |z| < 0.5.
+c: They are actually the same signal — the ROC does not matter.
+d: They differ only in their DC values (at n=0).
+answer: b
+explanation: The ROC uniquely determines which time-domain signal corresponds to a given Z-transform. For X(z) = 1/(1-0.5z^{-1}), ROC: |z|>0.5 gives the causal signal (0.5)^n u[n], while ROC: |z|<0.5 gives the anti-causal signal -(0.5)^n u[-n-1]. These are completely different signals! Option (a) is wrong because they differ in their entire time-domain behavior, not just magnitude/phase. Option (c) is fundamentally wrong — the ROC is essential. Option (d) is wrong because the signals differ at all time indices.
+\`\`\`
+\`\`\`quiz
+question: When the DFT is applied to a finite-length signal with rectangular windowing, spectral leakage occurs. What causes this leakage?
+a: The sampling rate is too low, causing aliasing.
+b: Truncating an infinite-duration signal with a rectangular window convolves its spectrum with a sinc function, spreading energy to adjacent frequency bins.
+c: The DFT computes the wrong frequencies due to quantization error.
+d: Leakage only occurs when the signal contains noise.
+answer: b
+explanation: Multiplying a signal by a rectangular window (i.e., observing only a finite segment) is multiplication in time, which becomes convolution with the window’s spectrum (a sinc function) in frequency. The sinc’s sidelobes spread spectral energy beyond the true frequency bins, creating leakage. Option (a) confuses aliasing (too-low sample rate) with leakage (finite observation). Option (c) is wrong — the DFT computes exact frequencies; leakage is a windowing artifact. Option (d) is wrong because leakage occurs even for perfectly clean sinusoidal signals.
 \`\`\`
 `,
     labWalkthrough: `

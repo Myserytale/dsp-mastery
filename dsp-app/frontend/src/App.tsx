@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import PdfViewer from './PdfViewer';
 import MarkdownRenderer from './MarkdownRenderer';
 import type { WeekContent } from './content';
 import { getAllWeeks } from './content';
+import { EXAM_BANK } from './content/examBank';
 
 // Global Pyodide instance
 declare global {
@@ -13,7 +14,7 @@ declare global {
   }
 }
 
-type ContentTab = 'lesson' | 'homework' | 'lab' | 'formulas';
+type ContentTab = 'lesson' | 'homework' | 'lab' | 'formulas' | 'exam';
 type RightTab = 'pdf' | 'editor';
 
 const WEEK_META = [
@@ -39,6 +40,62 @@ function App() {
   const [activeWeekId, setActiveWeekId] = useState<number | null>(null);
   const [contentTab, setContentTab] = useState<ContentTab>('lesson');
   const [rightTab, setRightTab] = useState<RightTab>('pdf');
+  
+  // Exam State
+  const [examTimer, setExamTimer] = useState(5400); // 90 minutes
+  const [isExamActive, setIsExamActive] = useState(false);
+  const [revealedSolutions, setRevealedSolutions] = useState<Set<number>>(new Set());
+  const [revealedCoding, setRevealedCoding] = useState<Set<number>>(new Set());
+  const timerRef = useRef<any>(null);
+
+  const startExam = () => {
+    setIsExamActive(true);
+    setExamTimer(5400);
+    setContentTab('exam');
+    setRevealedSolutions(new Set());
+    setRevealedCoding(new Set());
+  };
+
+  const stopExam = () => {
+    setIsExamActive(false);
+    clearInterval(timerRef.current);
+  };
+
+  const toggleSolution = (idx: number) => {
+    setRevealedSolutions(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  const toggleCodingSolution = (idx: number) => {
+    setRevealedCoding(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (isExamActive && examTimer > 0) {
+      timerRef.current = setInterval(() => {
+        setExamTimer(t => t - 1);
+      }, 1000);
+    } else {
+      clearInterval(timerRef.current);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [isExamActive, examTimer]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
   const [expandedConcept, setExpandedConcept] = useState<number | null>(null);
 
   const [activePdfUrl, setActivePdfUrl] = useState<string | null>(null);
@@ -236,6 +293,7 @@ json.dumps({"output": output, "figures": figures})
     { key: 'homework', label: '📝 Homework', accent: 'bg-nord-aurora-yellow' },
     { key: 'lab', label: '🧪 Lab Code', accent: 'bg-nord-aurora-green' },
     { key: 'formulas', label: '📐 Formulas', accent: 'bg-nord-aurora-purple' },
+    { key: 'exam', label: '🎯 Exam Sim', accent: 'bg-nord-aurora-red' },
   ];
 
   const renderContent = () => {
@@ -255,7 +313,155 @@ json.dumps({"output": output, "figures": figures})
       );
     }
 
+    const examData = EXAM_BANK[activeWeekId || 0];
+
     switch (contentTab) {
+      case 'exam':
+        if (!examData) {
+          return (
+            <div className="flex-1 flex items-center justify-center p-12">
+              <div className="text-center max-w-sm">
+                <div className="text-4xl mb-4">🚧</div>
+                <h3 className="text-lg font-bold text-nord-snow-1 mb-2">No Exam Content Yet</h3>
+                <p className="text-xs text-nord-polar-3 leading-relaxed">
+                  Exam questions for Week {activeWeekId} are not available. Try a different week or check back later.
+                </p>
+              </div>
+            </div>
+          );
+        }
+        return (
+          <div className="p-6 space-y-6">
+            <div className="flex items-center justify-between bg-nord-aurora-red/10 border border-nord-aurora-red/20 p-4 rounded-xl">
+              <div>
+                <h2 className="text-sm font-bold text-nord-aurora-red uppercase tracking-wider">Exam Simulator Mode</h2>
+                <p className="text-[0.65rem] text-nord-polar-3 mt-1">Solving mutations of Homework {activeWeekId}</p>
+              </div>
+              <div className="text-right">
+                <div className={`text-xl font-mono font-bold ${examTimer < 600 ? 'text-nord-aurora-red animate-pulse' : 'text-nord-snow-2'}`}>
+                  {formatTime(examTimer)}
+                </div>
+                <p className="text-[0.55rem] text-nord-polar-3 uppercase">Time Remaining</p>
+              </div>
+            </div>
+
+            {!isExamActive ? (
+              <div className="text-center py-10 border-2 border-dashed border-nord-border rounded-2xl">
+                <div className="text-4xl mb-4">⏱️</div>
+                <h3 className="text-lg font-bold text-nord-snow-1">Ready for the challenge?</h3>
+                <p className="text-xs text-nord-polar-3 mb-3 max-w-sm mx-auto">
+                  You will get {examData.theoretical.length} theoretical exercise{examData.theoretical.length !== 1 ? 's' : ''} and {examData.coding.length} coding challenge{examData.coding.length !== 1 ? 's' : ''} for Week {activeWeekId}.
+                </p>
+                <p className="text-[0.6rem] text-nord-polar-3/60 mb-6 max-w-sm mx-auto">
+                  Solutions are hidden until you choose to reveal them individually.
+                </p>
+                <button onClick={startExam} className="px-6 py-2.5 bg-nord-aurora-red text-nord-bg font-bold rounded-xl hover:scale-105 transition-transform">
+                  Start Timer & Simulator
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-8 animate-fade-in">
+                {/* Stop Exam Button */}
+                <div className="flex justify-end">
+                  <button 
+                    onClick={stopExam}
+                    className="text-[0.65rem] font-semibold text-nord-polar-3 hover:text-nord-aurora-red border border-nord-border hover:border-nord-aurora-red/30 px-3 py-1.5 rounded-lg transition-all"
+                  >
+                    ■ Stop Exam
+                  </button>
+                </div>
+
+                {/* Theoretical Part */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-nord-frost-1/20 text-nord-frost-1 text-[0.6rem] font-bold rounded uppercase">Part 1: Theoretical ({examData.theoretical.length} questions)</span>
+                  </div>
+                  {examData.theoretical.map((prob, idx) => (
+                    <div key={idx} className="bg-nord-elevated p-5 rounded-2xl border border-nord-border">
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="w-6 h-6 rounded-lg bg-nord-frost-1/15 text-nord-frost-1 text-[0.65rem] font-bold flex items-center justify-center">{idx + 1}</span>
+                        <h4 className="text-sm font-bold text-nord-snow-1">{prob.title}</h4>
+                      </div>
+                      <MarkdownRenderer content={prob.problem} />
+                      
+                      <div className="mt-6 pt-4 border-t border-nord-border/50">
+                        <div className="bg-nord-aurora-yellow/5 p-3 rounded-lg border border-nord-aurora-yellow/20 mb-3">
+                          <p className="text-[0.65rem] font-bold text-nord-aurora-yellow uppercase mb-1">💡 Professor's Hint (Exam Trap)</p>
+                          <p className="text-xs text-nord-snow-2 italic">{prob.trap_hint}</p>
+                        </div>
+                        
+                        {!revealedSolutions.has(idx) ? (
+                          <button onClick={() => toggleSolution(idx)} className="text-xs font-bold text-nord-frost-1 hover:text-nord-frost-2 transition-colors">
+                            Reveal Step-by-Step Solution →
+                          </button>
+                        ) : (
+                          <div className="space-y-3 animate-slide-up">
+                            <p className="text-[0.65rem] font-bold text-nord-aurora-green uppercase">✅ Detailed Derivation</p>
+                            <div className="bg-nord-bg/50 p-4 rounded-xl text-xs leading-relaxed text-nord-snow-0">
+                              <MarkdownRenderer content={prob.solution} />
+                            </div>
+                            <button onClick={() => toggleSolution(idx)} className="text-[0.65rem] text-nord-polar-3 hover:text-nord-snow-0 underline">Hide solution</button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Coding Part */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 bg-nord-aurora-green/20 text-nord-aurora-green text-[0.6rem] font-bold rounded uppercase">Part 2: Coding ({examData.coding.length} challenges)</span>
+                  </div>
+                  {examData.coding.map((task, idx) => (
+                    <div key={idx} className="bg-nord-elevated p-5 rounded-2xl border border-nord-border">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="w-6 h-6 rounded-lg bg-nord-aurora-green/15 text-nord-aurora-green text-[0.65rem] font-bold flex items-center justify-center">{idx + 1}</span>
+                        <h4 className="text-sm font-bold text-nord-snow-1">{task.title}</h4>
+                      </div>
+                      <p className="text-xs text-nord-snow-0 mb-4 leading-relaxed">{task.description}</p>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleCopyToIDE(task.starter_code)}
+                          className="text-[0.65rem] font-bold text-nord-aurora-green bg-nord-aurora-green/10 px-3 py-1.5 rounded-lg hover:bg-nord-aurora-green/20 transition-all"
+                        >
+                          ⚡ Load Starter Code in IDE
+                        </button>
+                      </div>
+                      
+                      <div className="mt-4 pt-3 border-t border-nord-border/50">
+                        {!revealedCoding.has(idx) ? (
+                          <button onClick={() => toggleCodingSolution(idx)} className="text-xs font-bold text-nord-frost-1 hover:text-nord-frost-2 transition-colors">
+                            Reveal Solution Code →
+                          </button>
+                        ) : (
+                          <div className="space-y-3 animate-slide-up">
+                            <div className="flex items-center justify-between">
+                              <p className="text-[0.65rem] font-bold text-nord-aurora-green uppercase">✅ Solution</p>
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => handleCopyToIDE(task.solution_code)}
+                                  className="text-[0.6rem] font-semibold text-nord-aurora-green hover:text-nord-aurora-green/80 transition-colors"
+                                >
+                                  → Load in IDE
+                                </button>
+                                <button onClick={() => toggleCodingSolution(idx)} className="text-[0.6rem] text-nord-polar-3 hover:text-nord-snow-0 underline">Hide</button>
+                              </div>
+                            </div>
+                            <div className="bg-nord-bg/50 p-4 rounded-xl">
+                              <MarkdownRenderer content={'```python\n' + task.solution_code + '\n```'} onCopyToIDE={handleCopyToIDE} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+
       case 'lesson':
         return (
           <div className="p-6 space-y-4">
@@ -344,6 +550,12 @@ json.dumps({"output": output, "figures": figures})
               <p className="text-[0.55rem] text-nord-polar-3 font-medium tracking-wider uppercase">Interactive Tutor</p>
             </div>
           </div>
+          <button 
+            onClick={() => setContentTab('exam')}
+            className="w-full mt-3 py-2 bg-nord-aurora-red/10 text-nord-aurora-red text-[0.65rem] font-bold uppercase rounded-lg border border-nord-aurora-red/30 hover:bg-nord-aurora-red/20 transition-all flex items-center justify-center gap-2"
+          >
+            🎯 Exam Simulator
+          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto py-1.5 px-1.5 space-y-0.5">

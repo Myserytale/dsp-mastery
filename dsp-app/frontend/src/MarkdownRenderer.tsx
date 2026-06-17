@@ -97,25 +97,28 @@ function CodeBlock({ children, rawCode, className, onCopyToIDE }: {
 }
 
 function QuizCard({ rawCode }: { rawCode: string }) {
-  // Parse simple format:
+  // Parse format:
   // question: What is...
   // a: option 1
   // b: option 2
   // answer: a
+  // explanation: Why a is correct...
   const [selected, setSelected] = useState<string | null>(null);
 
   const lines = rawCode.split('\n').filter(l => l.trim());
   let question = '';
   let answer = '';
+  let explanation = '';
   const options: { key: string; text: string }[] = [];
 
   lines.forEach(line => {
-    const match = line.match(/^([a-z]+|question|answer):\s*(.*)$/i);
+    const match = line.match(/^([a-z]+|question|answer|explanation):\s*(.*)$/i);
     if (match) {
       const key = match[1].toLowerCase();
       const val = match[2];
       if (key === 'question') question = val;
       else if (key === 'answer') answer = val;
+      else if (key === 'explanation') explanation = val;
       else options.push({ key, text: val });
     }
   });
@@ -126,6 +129,8 @@ function QuizCard({ rawCode }: { rawCode: string }) {
 
   const isCorrect = selected === answer;
   const isAnswered = selected !== null;
+
+  const handleReset = () => setSelected(null);
 
   return (
     <div className="my-6 p-5 border border-nord-border rounded-xl bg-nord-surface shadow-sm">
@@ -141,7 +146,7 @@ function QuizCard({ rawCode }: { rawCode: string }) {
           let btnClass = "w-full text-left px-4 py-2.5 rounded-lg border text-sm transition-all ";
           
           if (!isAnswered) {
-            btnClass += "border-nord-border hover:border-nord-frost-1/50 bg-nord-polar-0/30 hover:bg-nord-polar-0/60 text-nord-snow-0";
+            btnClass += "border-nord-border hover:border-nord-frost-1/50 bg-nord-polar-0/30 hover:bg-nord-polar-0/60 text-nord-snow-0 cursor-pointer";
           } else {
             if (isCorrectOption) {
               btnClass += "border-nord-aurora-green bg-nord-aurora-green/10 text-nord-aurora-green font-medium";
@@ -160,17 +165,45 @@ function QuizCard({ rawCode }: { rawCode: string }) {
               className={btnClass}
             >
               <div className="flex items-center justify-between">
-                <span>{opt.text}</span>
-                {isAnswered && isCorrectOption && <span>✓</span>}
-                {isAnswered && isSelected && !isCorrectOption && <span>✗</span>}
+                <div className="flex items-center gap-2">
+                  <span className={`w-5 h-5 rounded-full border flex items-center justify-center text-[0.6rem] font-bold shrink-0 ${
+                    isAnswered && isCorrectOption ? 'border-nord-aurora-green bg-nord-aurora-green/20 text-nord-aurora-green' :
+                    isAnswered && isSelected && !isCorrectOption ? 'border-nord-aurora-red bg-nord-aurora-red/20 text-nord-aurora-red' :
+                    isAnswered ? 'border-nord-border/30 text-nord-polar-3/50' :
+                    'border-nord-polar-3/40 text-nord-polar-3'
+                  }`}>{opt.key.toUpperCase()}</span>
+                  <span>{opt.text}</span>
+                </div>
+                {isAnswered && isCorrectOption && <span className="text-nord-aurora-green">✓</span>}
+                {isAnswered && isSelected && !isCorrectOption && <span className="text-nord-aurora-red">✗</span>}
               </div>
             </button>
           );
         })}
       </div>
       {isAnswered && (
-        <div className={`mt-4 text-xs font-semibold ${isCorrect ? 'text-nord-aurora-green' : 'text-nord-aurora-red'}`}>
-          {isCorrect ? '✨ Correct!' : '❌ Incorrect. The right answer was highlighted above.'}
+        <div className="mt-4 space-y-3 animate-slide-up">
+          <div className={`flex items-center gap-2 text-xs font-semibold ${isCorrect ? 'text-nord-aurora-green' : 'text-nord-aurora-red'}`}>
+            {isCorrect ? '✨ Correct!' : `❌ Incorrect — the answer is ${answer.toUpperCase()}.`}
+          </div>
+          {explanation && (
+            <div className={`p-3.5 rounded-lg border text-xs leading-relaxed ${
+              isCorrect 
+                ? 'bg-nord-aurora-green/5 border-nord-aurora-green/20 text-nord-snow-0' 
+                : 'bg-nord-aurora-red/5 border-nord-aurora-red/20 text-nord-snow-0'
+            }`}>
+              <p className={`text-[0.65rem] font-bold uppercase tracking-wider mb-1.5 ${isCorrect ? 'text-nord-aurora-green' : 'text-nord-aurora-red'}`}>
+                💡 Explanation
+              </p>
+              {explanation}
+            </div>
+          )}
+          <button 
+            onClick={handleReset}
+            className="text-[0.7rem] font-semibold text-nord-frost-1 hover:text-nord-frost-2 transition-colors flex items-center gap-1"
+          >
+            ↻ Try Again
+          </button>
         </div>
       )}
     </div>

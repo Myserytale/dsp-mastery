@@ -501,21 +501,45 @@ question: According to the Nyquist-Shannon Sampling Theorem, what is the absolut
 a: fs = f_max
 b: fs = 2 * f_max (The Nyquist Rate)
 c: fs = 4 * f_max
+d: fs = π * f_max
 answer: b
+explanation: The Nyquist-Shannon theorem states that perfect reconstruction requires fs ≥ 2·f_max. Option (a) fs = f_max would only provide one sample per cycle, which is insufficient to distinguish a sine from a constant. Option (c) fs = 4·f_max is more than necessary (oversampling). Option (d) fs = π·f_max has no theoretical basis in sampling theory.
 \`\`\`
 \`\`\`quiz
 question: What is aliasing in the context of signal sampling?
 a: The loss of high-frequency energy due to low-pass filtering.
 b: High-frequency components folding back and impersonating lower frequencies because the sampling rate was too low.
 c: The quantization noise introduced by analog-to-digital converters.
+d: The time delay introduced when converting between analog and digital domains.
 answer: b
+explanation: Aliasing occurs when the sampling rate violates the Nyquist criterion (fs < 2·f_max), causing frequencies above fs/2 to "fold" back into the baseband and become indistinguishable from lower frequencies. Option (a) describes the effect of a filter, not aliasing itself. Option (c) refers to quantization error, a separate phenomenon. Option (d) describes latency, which is unrelated to frequency misrepresentation.
 \`\`\`
 \`\`\`quiz
 question: What is the primary purpose of an anti-aliasing filter placed before an Analog-to-Digital Converter (ADC)?
 a: To eliminate all background noise in the signal.
 b: To amplify the highest frequencies of the signal for better resolution.
 c: To strictly limit the bandwidth of the continuous signal to less than half the sampling rate.
+d: To convert the analog signal into a digital representation before sampling.
 answer: c
+explanation: An anti-aliasing filter is a lowpass filter that attenuates all frequency components above the Nyquist frequency (fs/2) before sampling occurs, preventing those components from folding back as aliases. Option (a) is incorrect because the filter targets bandwidth limitation, not general noise removal. Option (b) is the opposite of what the filter does — it attenuates, not amplifies, high frequencies. Option (d) confuses the filter's role with that of the ADC itself.
+\`\`\`
+\`\`\`quiz
+question: A continuous signal contains frequency components at 200 Hz, 800 Hz, and 1400 Hz. If sampled at fs = 1000 Hz, which frequencies will appear in the sampled signal?
+a: 200 Hz, 800 Hz, and 1400 Hz (all preserved)
+b: 200 Hz, 200 Hz, and 400 Hz (aliased versions)
+c: 200 Hz, 200 Hz, and 600 Hz (aliased versions)
+d: Only 200 Hz survives; the others are eliminated
+answer: b
+explanation: The Nyquist frequency is fs/2 = 500 Hz. The 200 Hz component is below Nyquist and passes through unchanged. The 800 Hz component aliases to |800 - 1000| = 200 Hz. The 1400 Hz component aliases to |1400 - 1000| = 400 Hz. So the sampled signal contains 200 Hz (appearing twice, from the original 200 Hz and the aliased 800 Hz) and 400 Hz. Option (a) is wrong because frequencies above 500 Hz cannot be faithfully represented. Option (c) miscalculates the alias of 1400 Hz. Option (d) is wrong because aliased components still appear, they are not removed.
+\`\`\`
+\`\`\`quiz
+question: In ideal sinc interpolation reconstruction, why is the sinc function used specifically as the interpolation kernel?
+a: Because sinc is computationally cheap and easy to implement in hardware.
+b: Because the sinc function is the time-domain representation of an ideal rectangular (brick-wall) lowpass filter, which is exactly what perfect reconstruction requires.
+c: Because sinc functions have finite support, making them practical for real-time systems.
+d: Because the sinc function eliminates quantization noise during reconstruction.
+answer: b
+explanation: The Fourier transform of a rectangular function in frequency (an ideal brick-wall lowpass filter passing everything below fs/2) is the sinc function in time. Since perfect reconstruction requires an ideal lowpass filter, sinc interpolation is the theoretically exact method. Option (a) is wrong — sinc is actually impractical because it extends to infinity and requires infinite computation. Option (c) is wrong because sinc has infinite support (it never truly reaches zero), which is one of its main practical drawbacks. Option (d) confuses reconstruction with quantization error correction, which are separate concerns.
 \`\`\`
 `,
     labWalkthrough: `
@@ -1059,21 +1083,45 @@ question: What distinguishes the Discrete Fourier Transform (DFT) from the DTFT?
 a: The DFT operates on continuous signals, while the DTFT operates on discrete ones.
 b: Both the time-domain signal and the frequency-domain spectrum in the DFT are discrete and finite in length.
 c: The DFT produces a continuous spectrum, whereas the DTFT produces a discrete one.
+d: The DFT requires infinite-length input sequences, while the DTFT works on finite ones.
 answer: b
+explanation: The DFT takes N time-domain samples and produces N frequency-domain samples — both are discrete and finite. The DTFT, by contrast, produces a continuous frequency spectrum from a discrete-time input. Option (a) reverses the relationship — the DFT operates on discrete, finite signals. Option (c) swaps the properties of DFT and DTFT. Option (d) is backwards — the DFT specifically handles finite-length sequences while the DTFT can handle infinite ones.
 \`\`\`
 \`\`\`quiz
 question: In the context of the DFT, what does the phenomenon of "spectral leakage" refer to?
 a: Energy from a frequency component spreading into adjacent frequency bins because the signal length is not an integer multiple of the period.
 b: The loss of low-frequency components when using a high-pass filter.
 c: The aliasing of high frequencies into the low-frequency range.
+d: The reduction in frequency resolution caused by using too few samples.
 answer: a
+explanation: Spectral leakage occurs when a signal's frequency doesn't align exactly with a DFT bin, meaning the observation window truncates non-integer cycles. This abrupt truncation creates discontinuities that spread energy across many bins in the frequency domain. Option (b) describes filtering, not leakage. Option (c) describes aliasing, a different sampling artifact. Option (d) describes poor frequency resolution, which is related to short observation time but is conceptually distinct from leakage — leakage is about energy spreading, not bin spacing.
 \`\`\`
 \`\`\`quiz
 question: How is spectral leakage typically mitigated when applying the DFT to real-world signals?
 a: By increasing the sampling rate.
 b: By multiplying the time-domain signal with a windowing function (e.g., Hamming or Hanning) before computing the DFT.
 c: By applying a high-pass filter.
+d: By performing zero-padding to increase the number of frequency bins.
 answer: b
+explanation: Window functions taper the signal smoothly to zero at its edges, reducing the abrupt discontinuities that cause leakage. This trades a wider main lobe (slightly worse resolution) for dramatically lower sidelobes. Option (a) increases the Nyquist frequency but does nothing about the truncation discontinuity. Option (c) is unrelated — filtering removes frequency content rather than addressing spectral spreading. Option (d) interpolates the spectrum for smoother visualization but does not reduce leakage; the underlying sinc-like spreading remains.
+\`\`\`
+\`\`\`quiz
+question: Why does multiplying two DFTs and taking the inverse DFT produce circular convolution rather than linear convolution?
+a: Because the FFT algorithm introduces rounding errors that corrupt the convolution result.
+b: Because the DFT implicitly treats the input sequence as periodic with period N, so the convolution wraps around at the boundaries.
+c: Because the DFT only computes positive frequencies, discarding the negative frequency information needed for linear convolution.
+d: Because circular convolution is simply the frequency-domain equivalent of multiplication, and they are identical operations.
+answer: b
+explanation: The DFT assumes the input signal is one period of a periodic sequence with period N. When you multiply DFTs and invert, the resulting convolution "wraps around" — the tail of the convolution folds back to the beginning, as if the signal repeated. To obtain linear convolution via DFT, you must zero-pad both sequences to length ≥ N + M − 1 to prevent this overlap. Option (a) is wrong — this is a mathematical property, not a numerical artifact. Option (c) is wrong — the DFT computes all N frequency points representing the full spectrum of one period. Option (d) confuses the issue — circular and linear convolution are different operations that only coincide when there is sufficient zero-padding.
+\`\`\`
+\`\`\`quiz
+question: A signal of length N = 100 is analyzed with a DFT at sampling rate fs = 1000 Hz. What is the frequency resolution (bin spacing), and can zero-padding to N = 1000 improve it?
+a: Δf = 10 Hz; yes, zero-padding to 1000 improves resolution to 1 Hz.
+b: Δf = 10 Hz; no, zero-padding only interpolates the spectrum — true resolution remains 10 Hz.
+c: Δf = 100 Hz; no, resolution is fixed by the sampling rate alone.
+d: Δf = 1 Hz; yes, the resolution is always fs/N regardless of the original signal length.
+answer: b
+explanation: Frequency resolution is determined by the observation time T = N/fs = 0.1 s, giving Δf = 1/T = 10 Hz. Zero-padding increases the number of DFT bins (reducing bin spacing to fs/N_padded = 1 Hz), creating a smoother-looking spectrum, but it does not add new information — you still cannot resolve two frequency components closer than 10 Hz apart. Option (a) incorrectly claims zero-padding improves true resolution. Option (c) miscalculates the resolution. Option (d) confuses bin spacing with true resolution — they are only equal when no zero-padding is applied.
 \`\`\`
 `,
     labWalkthrough: `
@@ -1337,21 +1385,45 @@ question: What is the Fast Fourier Transform (FFT)?
 a: A different mathematical transform that approximates the DFT.
 b: A highly efficient algorithm (like Cooley-Tukey) for computing the DFT, reducing computational complexity from O(N^2) to O(N log N).
 c: An analog hardware circuit for frequency analysis.
+d: A lossy compression of the DFT that trades accuracy for speed.
 answer: b
+explanation: The FFT computes the exact same result as the DFT — it is an algorithm, not a different transform. The Cooley-Tukey algorithm exploits symmetries in the twiddle factors to reduce O(N²) multiplications to O(N log N). Option (a) is wrong because the FFT produces exactly the same output as the direct DFT, not an approximation. Option (c) is wrong — the FFT is a computational algorithm, not hardware. Option (d) is wrong because the FFT is lossless; it gives bit-identical results to the naive DFT computation.
 \`\`\`
 \`\`\`quiz
 question: What is the primary effect of zero-padding a signal in the time domain before computing its FFT?
 a: It fundamentally increases the true frequency resolution (ability to distinguish close frequencies).
 b: It removes spectral leakage and the need for a windowing function.
 c: It interpolates the frequency spectrum, providing a smoother visual representation with more frequency bins, but does not improve true resolution.
+d: It increases the signal-to-noise ratio of the FFT output.
 answer: c
+explanation: Zero-padding appends zeros to the time-domain signal, increasing the DFT length and thus reducing bin spacing (more frequency samples). This produces a smoother-looking spectrum by interpolating between the original frequency samples, but the underlying resolution — determined by the original signal duration — remains unchanged. Option (a) is a common misconception; true resolution depends on observation time, not DFT length. Option (b) is wrong because leakage is caused by truncation, which zero-padding does not fix. Option (d) is wrong — adding zeros doesn't add signal information, so SNR doesn't improve.
 \`\`\`
 \`\`\`quiz
 question: Which structural property of the DFT matrix is exploited by radix-2 FFT algorithms?
 a: The fact that it is a sparse matrix with mostly zeros.
 b: The symmetry and periodicity of the "twiddle factors" (complex roots of unity).
 c: The fact that it only contains real numbers.
+d: The orthogonality of the DFT matrix rows, which allows parallel row computation.
 answer: b
+explanation: The radix-2 FFT exploits two key properties of twiddle factors W_N^k = e^{-j2πk/N}: (1) periodicity — W_N^{k+N} = W_N^k, and (2) symmetry — W_N^{k+N/2} = -W_N^k. These properties allow the N-point DFT to be recursively split into two N/2-point DFTs, reusing computed values. Option (a) is wrong — the DFT matrix is dense (all entries are nonzero complex exponentials). Option (c) is wrong — the DFT matrix contains complex numbers. Option (d) describes a real property of the DFT matrix but is not what enables the FFT's divide-and-conquer speedup.
+\`\`\`
+\`\`\`quiz
+question: In the radix-2 DIT-FFT butterfly operation, the two outputs are computed as X[k] = G[k] + W_N^k · H[k] and X[k+N/2] = G[k] - W_N^k · H[k]. Why does the second equation use subtraction instead of a different twiddle factor?
+a: Subtraction is used as an approximation to save computation, introducing a small acceptable error.
+b: Because W_N^{k+N/2} = -W_N^k due to the half-period symmetry of complex exponentials, so the second half naturally uses the negated twiddle factor.
+c: Because the odd-indexed samples are always subtracted from even-indexed samples by convention.
+d: Because the imaginary parts of twiddle factors are always zero for the second half of the DFT.
+answer: b
+explanation: The critical identity W_N^{k+N/2} = e^{-j2π(k+N/2)/N} = e^{-j2πk/N} · e^{-jπ} = -W_N^k means that the twiddle factor for index k+N/2 is simply the negative of the twiddle factor for index k. This eliminates the need for a separate multiplication — you compute W_N^k · H[k] once and use it twice (added and subtracted). Option (a) is wrong — there is no approximation; the result is exact. Option (c) is wrong — it's not a convention but a mathematical identity. Option (d) is wrong — twiddle factors are generally complex numbers with nonzero imaginary parts.
+\`\`\`
+\`\`\`quiz
+question: An 8-point radix-2 FFT requires how many stages of butterfly operations, and how many complex multiplications total?
+a: 2 stages, 8 multiplications
+b: 3 stages, 12 multiplications
+c: 8 stages, 64 multiplications
+d: 4 stages, 16 multiplications
+answer: b
+explanation: For N = 8 = 2³, the radix-2 FFT requires log₂(8) = 3 stages. Each stage contains N/2 = 4 butterfly operations, and each butterfly requires 1 complex multiplication. Total multiplications = 3 × 4 = 12 = (N/2)·log₂(N). Compare this to the direct DFT which would require N² = 64 multiplications. Option (a) undercounts both stages and multiplications. Option (c) describes the brute-force DFT cost, not the FFT. Option (d) overcounts the stages — log₂(8) = 3, not 4.
 \`\`\`
 `,
     labWalkthrough: `
@@ -1865,21 +1937,45 @@ question: What distinguishes an Infinite Impulse Response (IIR) filter from a Fi
 a: An IIR filter only requires feed-forward coefficients.
 b: An IIR filter utilizes feedback (poles), causing its impulse response to theoretically continue indefinitely.
 c: An IIR filter inherently possesses exactly linear phase.
+d: An IIR filter is always unstable, while an FIR filter is always stable.
 answer: b
+explanation: IIR filters have feedback paths (nonzero denominator coefficients a_k), which create poles in the transfer function. These poles cause the impulse response to decay exponentially but never truly reach zero — hence "infinite" impulse response. Option (a) is wrong — IIR filters require both feed-forward (b_k) and feedback (a_k) coefficients; it's FIR filters that only use feed-forward coefficients. Option (c) is wrong — IIR filters generally have nonlinear phase; it's FIR filters that can achieve exactly linear phase. Option (d) is wrong — IIR filters can be stable if all poles lie inside the unit circle, which is the normal design goal.
 \`\`\`
 \`\`\`quiz
 question: The Bilinear Transform is a popular method for IIR filter design. What does it do?
 a: It converts a continuous-time (analog) filter transfer function H(s) into a discrete-time digital filter H(z).
 b: It transforms a time-domain signal directly into the frequency domain.
 c: It ensures that the resulting digital filter has finite impulse response.
+d: It maps the unit circle of the z-plane to the imaginary axis of the s-plane.
 answer: a
+explanation: The bilinear transform substitutes s = (2/Ts)·(1 - z⁻¹)/(1 + z⁻¹) into an analog prototype H(s) to produce a digital filter H(z). This mapping takes a well-understood analog design (e.g., Butterworth) and converts it to a digital implementation. Option (b) describes the Fourier transform, not the bilinear transform. Option (c) is wrong — the bilinear transform preserves the IIR nature of analog filters (they become digital IIR, not FIR). Option (d) has the mapping direction reversed — the bilinear transform maps the imaginary axis of the s-plane to the unit circle of the z-plane (stable analog → stable digital).
 \`\`\`
 \`\`\`quiz
 question: Which of the following analog filter prototypes is characterized by a "maximally flat" passband with no ripple?
 a: Chebyshev Type I
 b: Elliptic
 c: Butterworth
+d: Bessel
 answer: c
+explanation: The Butterworth filter is defined by its maximally flat magnitude response — the first 2N−1 derivatives of |H(jΩ)|² are zero at Ω = 0, ensuring no passband ripple. Option (a) is wrong — Chebyshev Type I deliberately introduces equiripple in the passband to achieve a steeper rolloff. Option (b) is wrong — Elliptic (Cauer) filters have ripple in both passband and stopband for the sharpest possible transition. Option (d) is a good distractor — the Bessel filter is maximally flat in its group delay (phase), not its magnitude response.
+\`\`\`
+\`\`\`quiz
+question: When using the bilinear transform, why is "pre-warping" the critical frequency necessary?
+a: To compensate for the nonlinear frequency mapping between the analog Ω-axis and the digital ω-axis, ensuring the cutoff frequency lands at the correct digital frequency.
+b: To prevent the digital filter from becoming unstable due to pole migration.
+c: To convert the filter from lowpass to highpass or bandpass configurations.
+d: To reduce the computational complexity of the resulting digital filter.
+answer: a
+explanation: The bilinear transform compresses the entire infinite analog frequency axis (−∞ to ∞) onto the finite digital frequency range (−π to π). This mapping is nonlinear: ω = 2·arctan(Ω·Ts/2). Without pre-warping, the designed cutoff frequency would shift to the wrong location in the digital domain. Pre-warping adjusts the analog prototype's cutoff to Ω_pre = (2/Ts)·tan(ω_c/2) so that after the nonlinear mapping, the digital cutoff lands exactly where intended. Option (b) is wrong — the bilinear transform inherently preserves stability (left half-plane maps to inside unit circle). Option (c) describes frequency transformation, not pre-warping. Option (d) is wrong — pre-warping affects accuracy, not complexity.
+\`\`\`
+\`\`\`quiz
+question: For a causal digital IIR filter to be BIBO (Bounded-Input Bounded-Output) stable, what condition must its poles satisfy?
+a: All poles must lie on the unit circle in the z-plane.
+b: All poles must have positive real parts.
+c: All poles must lie strictly inside the unit circle (|z| < 1) in the z-plane.
+d: The number of poles must equal the number of zeros.
+answer: c
+explanation: For a causal system, BIBO stability requires that the impulse response be absolutely summable, which occurs when all poles have magnitude strictly less than 1 (inside the unit circle). Poles inside the unit circle produce exponentially decaying modes in the impulse response. Option (a) is wrong — poles on the unit circle (|z| = 1) produce sustained oscillations (marginally stable), and repeated poles on the unit circle cause growing oscillations (unstable). Option (b) describes s-plane instability conditions for continuous systems, not z-plane. Option (d) is unrelated — the number of poles vs. zeros affects the transfer function's high-frequency behavior but has nothing to do with stability.
 \`\`\`
 `,
     labWalkthrough: `
