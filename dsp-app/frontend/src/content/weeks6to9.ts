@@ -18,51 +18,51 @@ The answer is the **Nyquist-Shannon Sampling Theorem**: if you sample at rate $f
     concepts: [
       {
         name: 'Fast Fourier Transform (FFT) - Cooley-Tukey Algorithm',
-        explanation: `The Cooley-Tukey Radix-2 Decimation-In-Time (DIT) algorithm reduces the computational complexity of the Discrete Fourier Transform (DFT) from \$O(N^2)\$ to \$O(N \log_2 N)\$. This is achieved by dividing the sequence \$x[n]\$ into even and odd-indexed halves. The DFT is expressed as:
+        explanation: `The Cooley-Tukey Radix-2 Decimation-In-Time (DIT) algorithm reduces the computational complexity of the Discrete Fourier Transform (DFT) from $O(N^2)$ to $O(N \log_2 N)$. This is achieved by dividing the sequence $x[n]$ into even and odd-indexed halves. The DFT is expressed as:
 
-\$\$X[k] = \sum_{m=0}^{N/2-1} x[2m] e^{-i \frac{2\pi}{N/2} m k} + e^{-i \frac{2\pi}{N} k} \sum_{m=0}^{N/2-1} x[2m+1] e^{-i \frac{2\pi}{N/2} m k}\$\$
+$$X[k] = \sum_{m=0}^{N/2-1} x[2m] e^{-i \frac{2\pi}{N/2} m k} + e^{-i \frac{2\pi}{N} k} \sum_{m=0}^{N/2-1} x[2m+1] e^{-i \frac{2\pi}{N/2} m k}$$
 
-This yields \$X[k] = E[k] + W_N^k O[k]\$, where \$E[k]\$ and \$O[k]\$ are the DFTs of the even and odd sub-sequences. By exploiting the periodicity of the twiddle factors (\$W_N^k = e^{-i 2\pi k/N}\$), we can efficiently compute the upper half of the frequencies: \$X[k + N/2] = E[k] - W_N^k O[k]\$. This halving procedure is applied recursively, requiring the input size to be a power of two (\$N = 2^p\$).`
+This yields $X[k] = E[k] + W_N^k O[k]$, where $E[k]$ and $O[k]$ are the DFTs of the even and odd sub-sequences. By exploiting the periodicity of the twiddle factors ($W_N^k = e^{-i 2\pi k/N}$), we can efficiently compute the upper half of the frequencies: $X[k + N/2] = E[k] - W_N^k O[k]$. This halving procedure is applied recursively, requiring the input size to be a power of two ($N = 2^p$).`
       },
       {
         name: 'Zero Padding and Spectral Resolution',
-        explanation: `Zero padding involves extending a sequence length to the next higher power of two, e.g., to \$2^{\lceil \log_2 N \rceil}\$, by appending zeros. The zero-padded DFT \$X_M[k]\$ evaluates the Discrete-Time Fourier Transform (DTFT) \$X(e^{j\omega})\$ on a denser frequency grid. 
+        explanation: `Zero padding involves extending a sequence length to the next higher power of two, e.g., to $2^{\lceil \log_2 N \rceil}$, by appending zeros. The zero-padded DFT $X_M[k]$ evaluates the Discrete-Time Fourier Transform (DTFT) $X(e^{j\omega})$ on a denser frequency grid. 
 
 Crucially, zero padding **interpolates** the spectrum without altering its fundamental shape or improving the true spectral resolution (the main-lobe width remains unchanged). The original signal samples are preserved, but more points are generated in the frequency domain, resulting in a smoother spectral appearance.`
       },
       {
         name: 'FFT-Based Convolution',
-        explanation: `Discrete convolution involves \$O(p \cdot q)\$ operations for two sequences of lengths \$p\$ and \$q\$. Using FFT, we can compute linear convolution much faster in \$O(N \log N)\$ operations. By zero-padding the sequences to length \$N = p + q - 1\$ to prevent circular wrap-around, linear convolution is obtained via:
+        explanation: `Discrete convolution involves $O(p \cdot q)$ operations for two sequences of lengths $p$ and $q$. Using FFT, we can compute linear convolution much faster in $O(N \log N)$ operations. By zero-padding the sequences to length $N = p + q - 1$ to prevent circular wrap-around, linear convolution is obtained via:
 
-\$\$z[n] = \text{iFFT} \big( \text{FFT}(x_{\text{padded}}) \cdot \text{FFT}(y_{\text{padded}}) \big)\$\$
+$$z[n] = \text{iFFT} \big( \text{FFT}(x_{\text{padded}}) \cdot \text{FFT}(y_{\text{padded}}) \big)$$
 
-For continuous data streams or sequences that are too long for a single FFT, techniques like the **Overlap-Add method** are employed. The signal is split into blocks of length \$L\$, independently convolved with the impulse response of length \$M\$, and the overlapping sections of the resulting blocks (of length \$L+M-1\$) are summed sequentially.`
+For continuous data streams or sequences that are too long for a single FFT, techniques like the **Overlap-Add method** are employed. The signal is split into blocks of length $L$, independently convolved with the impulse response of length $M$, and the overlapping sections of the resulting blocks (of length $L+M-1$) are summed sequentially.`
       },
       {
         name: 'Deconvolution and Noise Amplification',
-        explanation: `Deconvolution aims to recover an original signal \$x(t)\$ from the system output \$y(t) = [x * h](t) + s(t)\$, where \$h(t)\$ is the impulse response and \$s(t)\$ is additive noise. In the frequency domain, this is expressed as \$Y = X \cdot H + S\$, and inverse filtering yields \$\tilde{X} = X + \frac{S}{H}\$. 
+        explanation: `Deconvolution aims to recover an original signal $x(t)$ from the system output $y(t) = [x * h](t) + s(t)$, where $h(t)$ is the impulse response and $s(t)$ is additive noise. In the frequency domain, this is expressed as $Y = X \cdot H + S$, and inverse filtering yields $\tilde{X} = X + \frac{S}{H}$. 
 
-A fundamental problem arises at frequencies where the magnitude of the system's frequency response \$|H(f)|\$ is close to zero. At these frequencies, the noise component \$\frac{S}{H}\$ is dramatically amplified, destroying the estimate \$\tilde{x}\$.`
+A fundamental problem arises at frequencies where the magnitude of the system's frequency response $|H(f)|$ is close to zero. At these frequencies, the noise component $\frac{S}{H}$ is dramatically amplified, destroying the estimate $\tilde{x}$.`
       },
       {
         name: 'Spectral Estimation: Leakage and Scalloping',
         explanation: `When estimating the spectrum of a finite sampled signal, two main artifacts occur:
 
-- **Spectral Leakage:** Caused by the inherent windowing (finite observation) of the signal. In the frequency domain, the true spectrum is convolved with the Fourier transform of the window \$W(f)\$, causing energy to spread from the main signal frequency into adjacent bins.
-- **Scalloping Loss:** Refers to the amplitude underestimation that happens because the DFT samples the continuous spectrum at discrete frequency bins. If the signal's frequency is not a perfect multiple of the frequency resolution \$\Delta f = f_s/N\$ (non-coherent sampling), the peak falls between bins.
+- **Spectral Leakage:** Caused by the inherent windowing (finite observation) of the signal. In the frequency domain, the true spectrum is convolved with the Fourier transform of the window $W(f)$, causing energy to spread from the main signal frequency into adjacent bins.
+- **Scalloping Loss:** Refers to the amplitude underestimation that happens because the DFT samples the continuous spectrum at discrete frequency bins. If the signal's frequency is not a perfect multiple of the frequency resolution $\Delta f = f_s/N$ (non-coherent sampling), the peak falls between bins.
 
-Coherent sampling (\$f_0 = k \frac{f_s}{N}\$) visually hides these effects because the DFT bins align precisely with the peak and the zero-crossings of the window's spectrum.`
+Coherent sampling ($f_0 = k \frac{f_s}{N}$) visually hides these effects because the DFT bins align precisely with the peak and the zero-crossings of the window's spectrum.`
       },
       {
         name: 'Window Functions',
-        explanation: `To mitigate spectral leakage, sequences are multiplied by tapering window functions \$w[n]\$ that smoothly decay at the edges, replacing the default rectangular (Dirichlet) window. Common windows include:
+        explanation: `To mitigate spectral leakage, sequences are multiplied by tapering window functions $w[n]$ that smoothly decay at the edges, replacing the default rectangular (Dirichlet) window. Common windows include:
 
-- **Triangular (Bartlett):** \$w[n] = 1 - \left| \frac{n - N/2}{N/2} \right|\$
-- **Hann:** \$w[n] = 0.5 \left( 1 - \cos \left( \frac{2\pi n}{N} \right) \right) = \sin^2 \left( \frac{\pi n}{N} \right)\$
-- **Hamming:** \$w[n] = 0.54 - 0.46 \cos \left( \frac{2\pi n}{N} \right)\$
+- **Triangular (Bartlett):** $w[n] = 1 - \left| \frac{n - N/2}{N/2} \right|$
+- **Hann:** $w[n] = 0.5 \left( 1 - \cos \left( \frac{2\pi n}{N} \right) \right) = \sin^2 \left( \frac{\pi n}{N} \right)$
+- **Hamming:** $w[n] = 0.54 - 0.46 \cos \left( \frac{2\pi n}{N} \right)$
 - **Welch:** Parabolic window.
 
-More advanced windows can be expressed as a linear combination of cosines: \$w[n] = a_0 - a_1 \cos \left( \frac{2\pi n}{N-1} \right) + a_2 \cos \left( \frac{4\pi n}{N-1} \right) - \dots\$`
+More advanced windows can be expressed as a linear combination of cosines: $w[n] = a_0 - a_1 \cos \left( \frac{2\pi n}{N-1} \right) + a_2 \cos \left( \frac{4\pi n}{N-1} \right) - \dots$`
       },
     ],
 
@@ -506,15 +506,15 @@ The DFT takes $N$ time samples in, $N$ frequency samples out. It's the foundatio
     concepts: [
       {
         name: 'Periodogram and Spectral Density Estimation',
-        explanation: `The Periodogram provides an estimate of the signal's power distribution over frequencies. For a discrete sequence \$x[n]\$ of length \$N\$, it is defined as \$P_x(f_k) = \frac{1}{N} |X[k]|^2\$, where \$X[k]\$ is the DFT. 
+        explanation: `The Periodogram provides an estimate of the signal's power distribution over frequencies. For a discrete sequence $x[n]$ of length $N$, it is defined as $P_x(f_k) = \frac{1}{N} |X[k]|^2$, where $X[k]$ is the DFT. 
 
 By Parseval's theorem, the power spectral density (PSD) captures the signal power in the frequency domain. However, a raw periodogram computed directly from a noisy sequence suffers from high variance (noisy spectrum) and inconsistency.`
       },
       {
         name: 'Bartlett\'s Method for Spectral Estimation',
-        explanation: `To overcome the high variance of the raw periodogram, the Bartlett method splits the observed data record of length \$N\$ into \$M\$ non-overlapping segments, each of length \$L = N/M\$. 
+        explanation: `To overcome the high variance of the raw periodogram, the Bartlett method splits the observed data record of length $N$ into $M$ non-overlapping segments, each of length $L = N/M$. 
 
-The periodogram is computed for each segment, and the final estimate is the average of these \$M\$ periodograms: \$S_B[k] = \frac{1}{M} \sum_{m=1}^M I_m[k]\$. This reduces variance (smoothing the spectrum) and computational cost to \$O(N \log L)\$, but it decreases the frequency resolution to \$\Delta f = f_s / L\$ and introduces higher bias (leakage) due to shorter segments.`
+The periodogram is computed for each segment, and the final estimate is the average of these $M$ periodograms: $S_B[k] = \frac{1}{M} \sum_{m=1}^M I_m[k]$. This reduces variance (smoothing the spectrum) and computational cost to $O(N \log L)$, but it decreases the frequency resolution to $\Delta f = f_s / L$ and introduces higher bias (leakage) due to shorter segments.`
       },
       {
         name: 'Welch\'s Method',
@@ -523,27 +523,27 @@ The periodogram is computed for each segment, and the final estimate is the aver
 The steps are:
 1. **Segmentation:** Divide the signal into overlapping segments.
 2. **Detrending:** Remove the mean or linear trend to prevent a large DC spike (Dirac delta) from polluting low frequencies.
-3. **Windowing:** Multiply by a normalized window \$w[n]\$.
+3. **Windowing:** Multiply by a normalized window $w[n]$.
 4. **Zero Padding:** Pad segments to refine the DFT frequency grid.
-5. **DFT & PSD Normalization:** Compute the squared magnitude and scale by \$\frac{1}{f_s \sum w^2[n]}\$.
-6. **Averaging:** Average the modified periodograms to yield the Welch PSD estimator \$\hat{S}_{xx}(f_m)\$.`
+5. **DFT & PSD Normalization:** Compute the squared magnitude and scale by $\frac{1}{f_s \sum w^2[n]}$.
+6. **Averaging:** Average the modified periodograms to yield the Welch PSD estimator $\hat{S}_{xx}(f_m)$.`
       },
       {
         name: 'The Laplace Transform',
-        explanation: `The Laplace transform maps a continuous-time signal \$f(t)\$ to the complex frequency domain \$s = \sigma + i\omega\$. It is defined for \$t \ge 0\$ as:
+        explanation: `The Laplace transform maps a continuous-time signal $f(t)$ to the complex frequency domain $s = \sigma + i\omega$. It is defined for $t \ge 0$ as:
 
-\$\$F(s) = \mathcal{L}[f] = \int_0^\infty f(t) e^{-st} dt\$\$
+$$F(s) = \mathcal{L}[f] = \int_0^\infty f(t) e^{-st} dt$$
 
 It is a linear integral transform extensively used to solve linear constant-coefficient differential equations. Important properties include:
-- **Shift in s-domain:** \$\mathcal{L}[e^{ct} f(t)] = F(s-c)\$
-- **Time scaling:** \$\mathcal{L}[f(ct)] = \frac{1}{c} F(\frac{s}{c})\$
-- **Multiplication by \$t\$:** \$\mathcal{L}[(-t)^n f(t)] = \frac{d^n}{ds^n} F(s)\$`
+- **Shift in s-domain:** $\mathcal{L}[e^{ct} f(t)] = F(s-c)$
+- **Time scaling:** $\mathcal{L}[f(ct)] = \frac{1}{c} F(\frac{s}{c})$
+- **Multiplication by $t$:** $\mathcal{L}[(-t)^n f(t)] = \frac{d^n}{ds^n} F(s)$`
       },
       {
         name: 'Convolution in the Laplace Domain',
-        explanation: `The convolution of two causal signals \$f(t)\$ and \$g(t)\$ is \$f * g = \int_0^t f(\tau) g(t-\tau) d\tau\$. The Laplace transform simplifies convolution in the time domain into algebraic multiplication in the complex frequency domain:
+        explanation: `The convolution of two causal signals $f(t)$ and $g(t)$ is $f * g = \int_0^t f(\tau) g(t-\tau) d\tau$. The Laplace transform simplifies convolution in the time domain into algebraic multiplication in the complex frequency domain:
 
-\$\$\mathcal{L}[f * g] = \mathcal{L}[f] \cdot \mathcal{L}[g] = F(s) G(s)\$\$
+$$\mathcal{L}[f * g] = \mathcal{L}[f] \cdot \mathcal{L}[g] = F(s) G(s)$$
 
 This property is the foundation for analyzing Linear Time-Invariant (LTI) systems using transfer functions.`
       },
@@ -1244,12 +1244,12 @@ print(len(s), len(Pxx))
 ## Parseval theorem
 
 
-\$\$
+$$
 \\int_{-\\infty}^{\\infty} |x(t)|^2 \\, dt
 =
 \\int_{-\\infty}^{\\infty} |X(f)|^2 \\, df
-\$\$
-\$\$
+$$
+$$
 \\sum_{n=0}^{N-1} |x[n]|^2
 \`\`\`
 
@@ -1369,39 +1369,39 @@ The FFT isn't a different transform — it's a clever **algorithm** for computin
     concepts: [
       {
         name: 'Inverse Laplace Transform and System Poles',
-        explanation: `The Inverse Laplace Transform, often solved via partial fraction expansion, characterizes the time-domain components of a signal based on the poles (roots of the denominator polynomial) of its transform \$Y(s)\$:
+        explanation: `The Inverse Laplace Transform, often solved via partial fraction expansion, characterizes the time-domain components of a signal based on the poles (roots of the denominator polynomial) of its transform $Y(s)$:
 
-- Real pole at \$s = a\$: Corresponds to an exponential term \$e^{at}\$. If \$a > 0\$, the signal grows (unstable); if \$a < 0\$, it decays (stable).
-- Complex conjugate poles at \$s = \pm i\omega\$: Correspond to constant-amplitude harmonic oscillations (\$\sin \omega t\$, \$\cos \omega t\$).
-- Poles at the origin (\$s=0\$): Correspond to step functions (DC, non-oscillating).
-- Higher-order poles (multiplicity \$k > 1\$): Correspond to the basic term multiplied by \$t^{k-1}\$, e.g., \$\frac{1}{(s-a)^2} \iff t e^{at}\$.`
+- Real pole at $s = a$: Corresponds to an exponential term $e^{at}$. If $a > 0$, the signal grows (unstable); if $a < 0$, it decays (stable).
+- Complex conjugate poles at $s = \pm i\omega$: Correspond to constant-amplitude harmonic oscillations ($\sin \omega t$, $\cos \omega t$).
+- Poles at the origin ($s=0$): Correspond to step functions (DC, non-oscillating).
+- Higher-order poles (multiplicity $k > 1$): Correspond to the basic term multiplied by $t^{k-1}$, e.g., $\frac{1}{(s-a)^2} \iff t e^{at}$.`
       },
       {
         name: 'Solving Differential Equations with Laplace Transform',
-        explanation: `The Laplace transform converts linear differential equations into algebraic equations, automatically incorporating initial conditions. Using the derivative property \$\mathcal{L}[y'] = sY(s) - y(0)\$ and \$\mathcal{L}[y''] = s^2Y(s) - sy(0) - y'(0)\$, the system equation becomes \$Y(s) = \frac{\text{Initial Conditions}}{P(s)} + \frac{G(s)}{P(s)}\$.
+        explanation: `The Laplace transform converts linear differential equations into algebraic equations, automatically incorporating initial conditions. Using the derivative property $\mathcal{L}[y'] = sY(s) - y(0)$ and $\mathcal{L}[y''] = s^2Y(s) - sy(0) - y'(0)$, the system equation becomes $Y(s) = \frac{\text{Initial Conditions}}{P(s)} + \frac{G(s)}{P(s)}$.
 
-The inverse transform of the resulting expression separates naturally into the **transient response** (decaying terms generated by initial conditions and system poles) and the **steady-state response** (driven by the input function \$g(t)\$).`
+The inverse transform of the resulting expression separates naturally into the **transient response** (decaying terms generated by initial conditions and system poles) and the **steady-state response** (driven by the input function $g(t)$).`
       },
       {
         name: 'Frequency Response of Continuous LTI Systems',
-        explanation: `For an LTI system defined by a transfer function \$H(s) = \mathcal{L}[h(t)]\$, the steady-state response to an oscillatory input \$x(t) = e^{i\omega t}\$ is governed by \$H(i\omega)\$, which is \$H(s)\$ evaluated along the imaginary axis (\$s = i\omega\$).
+        explanation: `For an LTI system defined by a transfer function $H(s) = \mathcal{L}[h(t)]$, the steady-state response to an oscillatory input $x(t) = e^{i\omega t}$ is governed by $H(i\omega)$, which is $H(s)$ evaluated along the imaginary axis ($s = i\omega$).
 
-The output is \$y(t) = |H(i\omega)| e^{i(\omega t + \theta(\omega))}\$. This gives rise to the **Bode Plot**, which visualizes:
-- **Gain:** \$|H(i\omega)|\$ plotted in decibels (dB).
-- **Phase:** \$\angle H(i\omega) = \theta(\omega)\$ plotted in degrees.
-All-pole filters \$H(s) = 1/P(s)\$ can only function as low-pass or band-pass filters.`
+The output is $y(t) = |H(i\omega)| e^{i(\omega t + \theta(\omega))}$. This gives rise to the **Bode Plot**, which visualizes:
+- **Gain:** $|H(i\omega)|$ plotted in decibels (dB).
+- **Phase:** $\angle H(i\omega) = \theta(\omega)$ plotted in degrees.
+All-pole filters $H(s) = 1/P(s)$ can only function as low-pass or band-pass filters.`
       },
       {
         name: 'Polynomial Representation and the z-Transform',
-        explanation: `A discrete sequence \$x[n]\$ can be represented as coefficients of a polynomial or a power series. The convolution of two sequences corresponds directly to the algebraic multiplication of their representative polynomials. 
+        explanation: `A discrete sequence $x[n]$ can be represented as coefficients of a polynomial or a power series. The convolution of two sequences corresponds directly to the algebraic multiplication of their representative polynomials. 
 
 The z-transform formalizes this concept for infinite sequences:
-\$\$X(z) = \sum_{n=-\infty}^\infty x[n] z^{-n}, \quad z \in \mathbb{C}\$\$
-\$z^n\$ acts as an eigenvector of the LTI convolution operator, with the eigenvalue being the transfer function evaluated at \$z\$. The z-transform is uniquely defined only when paired with its Region of Convergence (ROC).`
+$$X(z) = \sum_{n=-\infty}^\infty x[n] z^{-n}, \quad z \in \mathbb{C}$$
+$z^n$ acts as an eigenvector of the LTI convolution operator, with the eigenvalue being the transfer function evaluated at $z$. The z-transform is uniquely defined only when paired with its Region of Convergence (ROC).`
       },
       {
         name: 'Relationship between z-Transform and Fourier Transform',
-        explanation: `The z-transform is a generalization of the Discrete-Time Fourier Transform (DTFT). The DTFT is obtained by restricting the z-transform strictly to the unit circle in the complex plane, i.e., \$z = e^{i\omega}\$. Thus, \$X(e^{i\omega})\$ is the DTFT. If the Region of Convergence (ROC) does not include the unit circle, the Fourier transform of the sequence does not converge.`
+        explanation: `The z-transform is a generalization of the Discrete-Time Fourier Transform (DTFT). The DTFT is obtained by restricting the z-transform strictly to the unit circle in the complex plane, i.e., $z = e^{i\omega}$. Thus, $X(e^{i\omega})$ is the DTFT. If the Region of Convergence (ROC) does not include the unit circle, the Fourier transform of the sequence does not converge.`
       },
     ],
 
@@ -1587,7 +1587,7 @@ grid()
 legend()
 \`\`\`
 
-*Explanation*: This code constructs a continuous-time transfer function \$H(s)\$ and utilizes \`scipy.signal.bode\` to compute its frequency response. We overlay the theoretical calculations of magnitude and phase to verify the empirical result.
+*Explanation*: This code constructs a continuous-time transfer function $H(s)$ and utilizes \`scipy.signal.bode\` to compute its frequency response. We overlay the theoretical calculations of magnitude and phase to verify the empirical result.
 `,
 
     keyFormulas: `## Week 8 Key Formulas
@@ -1620,30 +1620,30 @@ The feedback means the impulse response goes on forever (hence "infinite"). IIR 
     concepts: [
       {
         name: 'Mapping from s-Plane to z-Plane',
-        explanation: `Sampling a continuous-time signal with period \$T\$ maps the Laplace transform variable \$s = \sigma + i\omega\$ to the z-transform variable \$z\$ via the exponential mapping:
+        explanation: `Sampling a continuous-time signal with period $T$ maps the Laplace transform variable $s = \sigma + i\omega$ to the z-transform variable $z$ via the exponential mapping:
 
-\$\$z = e^{sT} = e^{\sigma T} e^{i\omega T} = |z| e^{i\omega T}\$\$
+$$z = e^{sT} = e^{\sigma T} e^{i\omega T} = |z| e^{i\omega T}$$
 
-This mapping transforms the left half of the s-plane (\$\sigma < 0\$, continuous stability region) strictly into the interior of the unit circle in the z-plane (\$|z| < 1\$, discrete stability region). The imaginary axis (\$\sigma = 0\$) maps precisely onto the unit circle (\$|z| = 1\$).`
+This mapping transforms the left half of the s-plane ($\sigma < 0$, continuous stability region) strictly into the interior of the unit circle in the z-plane ($|z| < 1$, discrete stability region). The imaginary axis ($\sigma = 0$) maps precisely onto the unit circle ($|z| = 1$).`
       },
       {
         name: 'Transfer Functions of FIR and IIR Filters',
-        explanation: `The transfer function \$H(z) = Y(z)/X(z)\$ describes an LTI system in the z-domain.
+        explanation: `The transfer function $H(z) = Y(z)/X(z)$ describes an LTI system in the z-domain.
 
-- **FIR (Finite Impulse Response) Filters:** Governed by non-recursive difference equations \$y[n] = \sum a_l x[n-l]\$. The transfer function \$H(z) = \sum a_l z^{-l}\$ has only zeros (and poles at the origin). FIR filters are inherently stable and can maintain perfectly linear phase.
-- **IIR (Infinite Impulse Response) Filters:** Characterized by recursive feedback \$\sum b_l y[n-l] = \sum a_l x[n-l]\$. The transfer function is a rational polynomial \$H(z) = A(z)/B(z)\$. The roots of \$B(z)\$ become the poles of the system. IIR filters require fewer coefficients to achieve steep roll-offs but face stability issues and non-linear phase distortion.`
+- **FIR (Finite Impulse Response) Filters:** Governed by non-recursive difference equations $y[n] = \sum a_l x[n-l]$. The transfer function $H(z) = \sum a_l z^{-l}$ has only zeros (and poles at the origin). FIR filters are inherently stable and can maintain perfectly linear phase.
+- **IIR (Infinite Impulse Response) Filters:** Characterized by recursive feedback $\sum b_l y[n-l] = \sum a_l x[n-l]$. The transfer function is a rational polynomial $H(z) = A(z)/B(z)$. The roots of $B(z)$ become the poles of the system. IIR filters require fewer coefficients to achieve steep roll-offs but face stability issues and non-linear phase distortion.`
       },
       {
         name: 'System Stability in the z-Domain',
-        explanation: `For a causal discrete-time LTI system to be bounded-input bounded-output (BIBO) stable, all the poles of its transfer function \$H(z)\$ must reside strictly inside the unit circle on the complex z-plane. If any pole is outside the unit circle (\$|z| > 1\$), the impulse response grows exponentially; if a pole lies exactly on the unit circle (\$|z| = 1\$), the system is marginally stable (oscillates perpetually).`
+        explanation: `For a causal discrete-time LTI system to be bounded-input bounded-output (BIBO) stable, all the poles of its transfer function $H(z)$ must reside strictly inside the unit circle on the complex z-plane. If any pole is outside the unit circle ($|z| > 1$), the impulse response grows exponentially; if a pole lies exactly on the unit circle ($|z| = 1$), the system is marginally stable (oscillates perpetually).`
       },
       {
         name: 'Frequency Response from the z-Plane',
-        explanation: `The frequency response of a digital filter is determined by evaluating \$H(z)\$ along the unit circle (\$z = e^{i\omega T}\$). As frequency increases from \$0\$ to the Nyquist frequency \$f_s/2\$, the evaluation point moves counter-clockwise along the upper half of the unit circle from \$z = 1\$ (DC) to \$z = -1\$.
+        explanation: `The frequency response of a digital filter is determined by evaluating $H(z)$ along the unit circle ($z = e^{i\omega T}$). As frequency increases from $0$ to the Nyquist frequency $f_s/2$, the evaluation point moves counter-clockwise along the upper half of the unit circle from $z = 1$ (DC) to $z = -1$.
 
 Geometrically, the response at any frequency point on the unit circle can be calculated using the distances to the system's poles and zeros:
-- **Gain:** Proportional to \$\frac{\prod \text{zero distances}}{\prod \text{pole distances}}\$
-- **Phase Angle:** \$\sum \text{zero angles} - \sum \text{pole angles}\$`
+- **Gain:** Proportional to $\frac{\prod \text{zero distances}}{\prod \text{pole distances}}$
+- **Phase Angle:** $\sum \text{zero angles} - \sum \text{pole angles}$`
       },
     ],
 

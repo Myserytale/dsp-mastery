@@ -33,9 +33,9 @@ This week we lay the foundation: what signals are, what systems do to them, and 
         name: 'Signals and their Classifications',
         explanation: `A signal is formally defined as any physical quantity that varies with time or position, serving as a flow of information. Mathematically, it is described as a function of one or more independent variables. Signals can be categorized into various types:
 
-*   **Continuous-time signals** (often informally referred to as analog signals) are functions over the real numbers, denoted as \$s(t) : \mathbb{R} \rightarrow \mathbb{R}\$. The independent variable \$t\$ (time) and dependent variable \$s\$ (amplitude) take continuous values.
-*   **Discrete-time signals** (sequences) are functions over integers, denoted as \$s[n] : \mathbb{Z} \rightarrow \mathbb{R}\$. These are often obtained by uniform sampling of continuous signals: \$s[n] = s(nT)\$, where \$T\$ is the sampling period and \$F_s = 1/T\$ is the sampling frequency.
-*   **Digital signals** are defined over a discrete set of amplitudes, \$s_d[n] : \mathbb{Z} \rightarrow \mathbb{X}\$, obtained by quantizing the continuous amplitude range into discrete levels.
+*   **Continuous-time signals** (often informally referred to as analog signals) are functions over the real numbers, denoted as $s(t) : \mathbb{R} \rightarrow \mathbb{R}$. The independent variable $t$ (time) and dependent variable $s$ (amplitude) take continuous values.
+*   **Discrete-time signals** (sequences) are functions over integers, denoted as $s[n] : \mathbb{Z} \rightarrow \mathbb{R}$. These are often obtained by uniform sampling of continuous signals: $s[n] = s(nT)$, where $T$ is the sampling period and $F_s = 1/T$ is the sampling frequency.
+*   **Digital signals** are defined over a discrete set of amplitudes, $s_d[n] : \mathbb{Z} \rightarrow \mathbb{X}$, obtained by quantizing the continuous amplitude range into discrete levels.
 
 Signals can also be classified physically (e.g., voltage levels, magnetic domains) or by their domain (temporal vs. spatial).`
       },
@@ -51,20 +51,20 @@ Signals can also be classified physically (e.g., voltage levels, magnetic domain
         name: 'Properties of Discrete Sequences',
         explanation: `Discrete sequences can be classified by their summation properties over infinite intervals:
 
-*   **Absolutely Summable:** A sequence is absolutely summable if \$\sum_{n=-\infty}^{\infty} |x[n]| < \infty\$.
-*   **Square Summable (Energy Signal):** A sequence is square summable if its total energy is finite: \$\sum_{n=-\infty}^{\infty} |x[n]|^2 < \infty\$.
-*   **Periodic:** A sequence is periodic if there exists an integer \$k > 0\$ such that \$\forall n \in \mathbb{Z} : x[n] = x[n + k]\$.
+*   **Absolutely Summable:** A sequence is absolutely summable if $\sum_{n=-\infty}^{\infty} |x[n]| < \infty$.
+*   **Square Summable (Energy Signal):** A sequence is square summable if its total energy is finite: $\sum_{n=-\infty}^{\infty} |x[n]|^2 < \infty$.
+*   **Periodic:** A sequence is periodic if there exists an integer $k > 0$ such that $\forall n \in \mathbb{Z} : x[n] = x[n + k]$.
 *   **Power Signal:** A non-square-summable sequence is a power signal if its average power exists and is finite:
-    \$\$ \lim_{k\rightarrow\infty} \frac{1}{1 + 2k} \sum_{n=-k}^{k} |x[n]|^2 < \infty \$\$`
+    $$ \lim_{k\rightarrow\infty} \frac{1}{1 + 2k} \sum_{n=-k}^{k} |x[n]|^2 < \infty $$`
       },
       {
         name: 'Characteristics of Discrete-Time Systems',
-        explanation: `Discrete-time systems map an input sequence \$x[n]\$ to an output sequence \$y[n] = \mathcal{H}\{x[n]\}\$. They are characterized by several fundamental properties:
+        explanation: `Discrete-time systems map an input sequence $x[n]$ to an output sequence $y[n] = \mathcal{H}\{x[n]\}$. They are characterized by several fundamental properties:
 
-*   **Causality:** A system is causal if the output depends only on present and past input values: \$y[n] = f(x[n], x[n-1], \dots)\$. It is **memory-less** if it only depends on the current input: \$y[n] = f(x[n])\$.
-*   **Time-Invariance:** A system is time-invariant if a time shift in the input causes an identical time shift in the output: \$\mathcal{H}(x[n-d]) = y[n-d]\$.
-*   **Linearity:** A system satisfies superposition (homogeneity and additivity) if \$\mathcal{H}(a_1 x_1[n] + a_2 x_2[n]) = a_1 \mathcal{H}(x_1[n]) + a_2 \mathcal{H}(x_2[n])\$.
-*   **Stability (BIBO):** A system is bounded-input bounded-output stable if a bounded input (\$|x[n]| < M_x < \infty\$) always produces a bounded output (\$|y[n]| < M_y < \infty\$).`
+*   **Causality:** A system is causal if the output depends only on present and past input values: $y[n] = f(x[n], x[n-1], \dots)$. It is **memory-less** if it only depends on the current input: $y[n] = f(x[n])$.
+*   **Time-Invariance:** A system is time-invariant if a time shift in the input causes an identical time shift in the output: $\mathcal{H}(x[n-d]) = y[n-d]$.
+*   **Linearity:** A system satisfies superposition (homogeneity and additivity) if $\mathcal{H}(a_1 x_1[n] + a_2 x_2[n]) = a_1 \mathcal{H}(x_1[n]) + a_2 \mathcal{H}(x_2[n])$.
+*   **Stability (BIBO):** A system is bounded-input bounded-output stable if a bounded input ($|x[n]| < M_x < \infty$) always produces a bounded output ($|y[n]| < M_y < \infty$).`
       },
     ],
 
@@ -521,36 +521,36 @@ These representations are commonly used to model **Finite Impulse Response (FIR)
       },
       {
         name: 'Linear Time-Invariant (LTI) Systems and Convolution',
-        explanation: `LTI systems are both linear and time-invariant. Due to linearity, any discrete signal can be decomposed into a superposition of scaled and delayed impulses: \$x[n] = \sum_{k=-\infty}^{\infty} x[k]\delta[n-k]\$.
+        explanation: `LTI systems are both linear and time-invariant. Due to linearity, any discrete signal can be decomposed into a superposition of scaled and delayed impulses: $x[n] = \sum_{k=-\infty}^{\infty} x[k]\delta[n-k]$.
 
-The response of an LTI system is uniquely determined by its **impulse response**, \$h[n]\$ (the output when the input is a Dirac delta \$\delta[n]\$). Applying superposition and time-invariance, the output \$y[n]\$ is the **convolution sum** of the input and the impulse response:
-\$\$ y[n] = x[n] * h[n] = \sum_{k=-\infty}^{\infty} x[k]h[n-k] \$\$
-Convolution is commutative, associative, bilinear, and satisfies the identity property with the Dirac delta: \$x[n] * \delta[n] = x[n]\$.`
+The response of an LTI system is uniquely determined by its **impulse response**, $h[n]$ (the output when the input is a Dirac delta $\delta[n]$). Applying superposition and time-invariance, the output $y[n]$ is the **convolution sum** of the input and the impulse response:
+$$ y[n] = x[n] * h[n] = \sum_{k=-\infty}^{\infty} x[k]h[n-k] $$
+Convolution is commutative, associative, bilinear, and satisfies the identity property with the Dirac delta: $x[n] * \delta[n] = x[n]$.`
       },
       {
         name: 'Causality and Stability of LTI Systems',
-        explanation: `The impulse response \$h[n]\$ governs the fundamental properties of an LTI system:
+        explanation: `The impulse response $h[n]$ governs the fundamental properties of an LTI system:
 
-*   **Causality:** An LTI system is causal if and only if its impulse response is zero for negative time: \$h[n] = 0\$ for \$n < 0\$. This ensures the convolution sum only relies on current and past input values (\$k \le n\$).
-*   **Stability:** An LTI system is BIBO stable if and only if its impulse response is absolutely summable: \$\sum_{n=-\infty}^{\infty} |h[n]| < \infty\$. This ensures that bounded inputs produce bounded outputs.`
+*   **Causality:** An LTI system is causal if and only if its impulse response is zero for negative time: $h[n] = 0$ for $n < 0$. This ensures the convolution sum only relies on current and past input values ($k \le n$).
+*   **Stability:** An LTI system is BIBO stable if and only if its impulse response is absolutely summable: $\sum_{n=-\infty}^{\infty} |h[n]| < \infty$. This ensures that bounded inputs produce bounded outputs.`
       },
       {
         name: 'Continuous-Time LTI Systems and Dirac Delta Distribution',
-        explanation: `For continuous-time LTI systems, the output is given by the convolution integral: \$y(t) = \int_{-\infty}^{\infty} x(\tau)h(t-\tau)d\tau\$.
+        explanation: `For continuous-time LTI systems, the output is given by the convolution integral: $y(t) = \int_{-\infty}^{\infty} x(\tau)h(t-\tau)d\tau$.
 
-The **Dirac delta function**, \$\delta(x)\$, is a generalized function (distribution) defined such that \$\delta(x) = 0\$ for \$x \ne 0\$ and \$\int_{-\infty}^{\infty} \delta(x) dx = 1\$. It can be represented as the limit of parameter-dependent families of functions.
+The **Dirac delta function**, $\delta(x)$, is a generalized function (distribution) defined such that $\delta(x) = 0$ for $x \ne 0$ and $\int_{-\infty}^{\infty} \delta(x) dx = 1$. It can be represented as the limit of parameter-dependent families of functions.
 Key properties include:
-*   Sifting property: \$\int_{-\infty}^{\infty} f(x)\delta(x-x_0)dx = f(x_0)\$
-*   Scaling: \$\delta(ax) = \frac{1}{|a|}\delta(x)\$
-*   Composition: \$\delta(\phi(x)) = \sum_i \frac{\delta(x-x_i)}{|\phi'(x_i)|}\$ for roots \$x_i\$ of \$\phi(x)\$
-*   Derivative relation: \$\int_{-\infty}^{\infty} f(x)\delta'(x)dx = -f'(0)\$.
-The **Heaviside step function** \$H(x)\$ is related via its derivative: \$H'(x) = \delta(x)\$.`
+*   Sifting property: $\int_{-\infty}^{\infty} f(x)\delta(x-x_0)dx = f(x_0)$
+*   Scaling: $\delta(ax) = \frac{1}{|a|}\delta(x)$
+*   Composition: $\delta(\phi(x)) = \sum_i \frac{\delta(x-x_i)}{|\phi'(x_i)|}$ for roots $x_i$ of $\phi(x)$
+*   Derivative relation: $\int_{-\infty}^{\infty} f(x)\delta'(x)dx = -f'(0)$.
+The **Heaviside step function** $H(x)$ is related via its derivative: $H'(x) = \delta(x)$.`
       },
       {
         name: 'Introduction to Fourier Series',
-        explanation: `A function \$f(x)\$ is periodic with period \$P\$ if \$f(x) = f(x \pm nP)\$ for integer \$n\$. According to Fourier's theorem, any \$2\pi\$-periodic function can be expanded into a trigonometric series:
-\$\$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} (a_n \cos nx + b_n \sin nx) \$\$
-The terms \$a_n\$ and \$b_n\$ are the Fourier coefficients. This expansion relies on the orthogonality of the trigonometric basis functions (sines and cosines) over the interval \$[0, 2\pi]\$ defined by the scalar product \$({\phi, \psi}) \equiv \int_0^{2\pi} \phi(x)\psi(x)dx\$.`
+        explanation: `A function $f(x)$ is periodic with period $P$ if $f(x) = f(x \pm nP)$ for integer $n$. According to Fourier's theorem, any $2\pi$-periodic function can be expanded into a trigonometric series:
+$$ f(x) = \frac{a_0}{2} + \sum_{n=1}^{\infty} (a_n \cos nx + b_n \sin nx) $$
+The terms $a_n$ and $b_n$ are the Fourier coefficients. This expansion relies on the orthogonality of the trigonometric basis functions (sines and cosines) over the interval $[0, 2\pi]$ defined by the scalar product $({\phi, \psi}) \equiv \int_0^{2\pi} \phi(x)\psi(x)dx$.`
       },
     ],
 
@@ -865,44 +865,44 @@ This is like a prism splitting white light into a rainbow — except instead of 
     concepts: [
       {
         name: 'Fourier Series for Arbitrary Periodic Functions',
-        explanation: `For functions with an arbitrary period \$L = 2\ell\$, the trigonometric basis functions are scaled to \$\cos(\frac{n\pi x}{\ell})\$ and \$\sin(\frac{n\pi x}{\ell})\$. The Fourier coefficients are calculated as:
-\$\$ a_n = \frac{1}{\ell} \int_{-\ell}^{\ell} f(x) \cos\left(\frac{n\pi x}{\ell}\right) dx \$\$
-\$\$ b_n = \frac{1}{\ell} \int_{-\ell}^{\ell} f(x) \sin\left(\frac{n\pi x}{\ell}\right) dx \$\$
-Symmetric functions (\$f(x) = f(-x)\$) have only cosine terms (\$b_n = 0\$), while antisymmetric functions (\$f(x) = -f(-x)\$) have only sine terms (\$a_n = 0\$). The fundamental frequency relates to the pitch, whereas higher harmonics dictate the timbre.`
+        explanation: `For functions with an arbitrary period $L = 2\ell$, the trigonometric basis functions are scaled to $\cos(\frac{n\pi x}{\ell})$ and $\sin(\frac{n\pi x}{\ell})$. The Fourier coefficients are calculated as:
+$$ a_n = \frac{1}{\ell} \int_{-\ell}^{\ell} f(x) \cos\left(\frac{n\pi x}{\ell}\right) dx $$
+$$ b_n = \frac{1}{\ell} \int_{-\ell}^{\ell} f(x) \sin\left(\frac{n\pi x}{\ell}\right) dx $$
+Symmetric functions ($f(x) = f(-x)$) have only cosine terms ($b_n = 0$), while antisymmetric functions ($f(x) = -f(-x)$) have only sine terms ($a_n = 0$). The fundamental frequency relates to the pitch, whereas higher harmonics dictate the timbre.`
       },
       {
         name: 'Complex Fourier Series',
-        explanation: `Using Euler's formula, \$e^{ix} = \cos x + i\sin x\$, the trigonometric Fourier series can be expressed in a compact exponential form:
-\$\$ f(x) = \sum_{n=-\infty}^{\infty} c_n e^{i \frac{n\pi x}{\ell}} \$\$
-The complex coefficients \$c_n\$ encapsulate both amplitude and phase and are given by:
-\$\$ c_n = \frac{1}{2\ell} \int_{-\ell}^{\ell} f(y) e^{-i \frac{n\pi y}{\ell}} dy \$\$
-This exploits the orthogonality of the complex exponentials \$\int_{-\ell}^{\ell} e^{i(n-m)\frac{\pi x}{\ell}} dx = 2\ell\delta_{nm}\$.`
+        explanation: `Using Euler's formula, $e^{ix} = \cos x + i\sin x$, the trigonometric Fourier series can be expressed in a compact exponential form:
+$$ f(x) = \sum_{n=-\infty}^{\infty} c_n e^{i \frac{n\pi x}{\ell}} $$
+The complex coefficients $c_n$ encapsulate both amplitude and phase and are given by:
+$$ c_n = \frac{1}{2\ell} \int_{-\ell}^{\ell} f(y) e^{-i \frac{n\pi y}{\ell}} dy $$
+This exploits the orthogonality of the complex exponentials $\int_{-\ell}^{\ell} e^{i(n-m)\frac{\pi x}{\ell}} dx = 2\ell\delta_{nm}$.`
       },
       {
         name: 'The Dirac Comb Distribution',
-        explanation: `The **Dirac comb**, denoted \$\amalg_T(t)\$, is an infinite sum of Dirac delta functions spaced \$T\$ apart:
-\$\$ \amalg_T(t) \equiv T \sum_{n=-\infty}^{\infty} \delta(t - nT) \$\$
+        explanation: `The **Dirac comb**, denoted $\amalg_T(t)$, is an infinite sum of Dirac delta functions spaced $T$ apart:
+$$ \amalg_T(t) \equiv T \sum_{n=-\infty}^{\infty} \delta(t - nT) $$
 This distribution is itself periodic and its complex Fourier series coefficients evaluate to 1. Thus, its Fourier series expansion is:
-\$\$ \amalg_T(t) = \sum_{n=-\infty}^{\infty} e^{in \frac{2\pi t}{T}} \$\$
+$$ \amalg_T(t) = \sum_{n=-\infty}^{\infty} e^{in \frac{2\pi t}{T}} $$
 The Dirac comb is vital for mathematically modeling the sampling of continuous-time signals.`
       },
       {
         name: 'Continuous-Time Fourier Transform',
-        explanation: `By extending the period \$2\ell \rightarrow \infty\$, a non-periodic function can be analyzed using the continuous-time Fourier transform. Transitioning to frequency variables \$\omega = 2\pi\nu\$, the Fourier transform \$\mathcal{F}\$ and its inverse \$\mathcal{F}^{-1}\$ are defined as:
-\$\$ \hat{f}(\omega) \equiv \mathcal{F}(f)(\omega) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} f(t) e^{i\omega t} dt \$\$
-\$\$ f(t) = \mathcal{F}^{-1}(\hat{f})(t) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} \hat{f}(\omega) e^{-i\omega t} d\omega \$\$
-These forms reveal that \$f(t)\$ and \$\hat{f}(\omega)\$ are dual representations of the same abstract entity in complementary domains (time and frequency). The normalization factors (e.g., \$1/\sqrt{2\pi}\$) can be adjusted as long as their product is \$1/(2\pi)\$.`
+        explanation: `By extending the period $2\ell \rightarrow \infty$, a non-periodic function can be analyzed using the continuous-time Fourier transform. Transitioning to frequency variables $\omega = 2\pi\nu$, the Fourier transform $\mathcal{F}$ and its inverse $\mathcal{F}^{-1}$ are defined as:
+$$ \hat{f}(\omega) \equiv \mathcal{F}(f)(\omega) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} f(t) e^{i\omega t} dt $$
+$$ f(t) = \mathcal{F}^{-1}(\hat{f})(t) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} \hat{f}(\omega) e^{-i\omega t} d\omega $$
+These forms reveal that $f(t)$ and $\hat{f}(\omega)$ are dual representations of the same abstract entity in complementary domains (time and frequency). The normalization factors (e.g., $1/\sqrt{2\pi}$) can be adjusted as long as their product is $1/(2\pi)$.`
       },
       {
         name: 'Properties of the Fourier Transform',
         explanation: `The Fourier transform obeys several powerful properties facilitating signal analysis:
 
-*   **Linearity:** \$\mathcal{F}(c_1f + c_2g) = c_1\hat{f} + c_2\hat{g}\$.
-*   **Time Shift:** A delay in the time domain corresponds to a linear phase shift in the frequency domain: \$\mathcal{F}(f(t+b)) = e^{-i\omega b}\hat{f}(\omega)\$.
-*   **Time/Frequency Scaling:** Compression in time leads to expansion in frequency: \$\mathcal{F}(f(at)) = \frac{1}{|a|}\hat{f}(\frac{\omega}{a})\$.
-*   **Frequency Shift:** \$\mathcal{F}(f(t)e^{iat}) = \hat{f}(\omega+a)\$.
-*   **Parseval's Theorem:** Total energy is conserved between domains: \$\int_{-\infty}^{\infty} |f(t)|^2 dt = \int_{-\infty}^{\infty} |\hat{f}(\omega)|^2 d\omega\$.
-*   **Differentiation:** The transform of the \$n\$-th derivative is \$\mathcal{F}(f^{(n)}(t)) = (-i)^n \omega^n \hat{f}(\omega)\$.`
+*   **Linearity:** $\mathcal{F}(c_1f + c_2g) = c_1\hat{f} + c_2\hat{g}$.
+*   **Time Shift:** A delay in the time domain corresponds to a linear phase shift in the frequency domain: $\mathcal{F}(f(t+b)) = e^{-i\omega b}\hat{f}(\omega)$.
+*   **Time/Frequency Scaling:** Compression in time leads to expansion in frequency: $\mathcal{F}(f(at)) = \frac{1}{|a|}\hat{f}(\frac{\omega}{a})$.
+*   **Frequency Shift:** $\mathcal{F}(f(t)e^{iat}) = \hat{f}(\omega+a)$.
+*   **Parseval's Theorem:** Total energy is conserved between domains: $\int_{-\infty}^{\infty} |f(t)|^2 dt = \int_{-\infty}^{\infty} |\hat{f}(\omega)|^2 d\omega$.
+*   **Differentiation:** The transform of the $n$-th derivative is $\mathcal{F}(f^{(n)}(t)) = (-i)^n \omega^n \hat{f}(\omega)$.`
       },
     ],
 
@@ -1154,42 +1154,42 @@ The DTFT output is a **continuous function of frequency** $\\omega$ (even though
     concepts: [
       {
         name: 'Fourier Transform Symmetries',
-        explanation: `The Fourier transform exhibits specific symmetries depending on the properties of the time-domain signal \$x(t)\$. Letting \$X(f) = \mathcal{F}[x(t)](f)\$:
+        explanation: `The Fourier transform exhibits specific symmetries depending on the properties of the time-domain signal $x(t)$. Letting $X(f) = \mathcal{F}[x(t)](f)$:
 
-*   If \$x(t)\$ is **real**, then \$X(-f) = X^*(f)\$ (Hermitian symmetry).
-*   If \$x(t)\$ is **imaginary**, then \$X(-f) = -X^*(f)\$.
-*   If \$x(t)\$ is **even** (\$x(t) = x(-t)\$), then \$X(f)\$ is even.
-*   If \$x(t)\$ is **odd** (\$x(t) = -x(-t)\$), then \$X(f)\$ is odd.
+*   If $x(t)$ is **real**, then $X(-f) = X^*(f)$ (Hermitian symmetry).
+*   If $x(t)$ is **imaginary**, then $X(-f) = -X^*(f)$.
+*   If $x(t)$ is **even** ($x(t) = x(-t)$), then $X(f)$ is even.
+*   If $x(t)$ is **odd** ($x(t) = -x(-t)$), then $X(f)$ is odd.
 Combining these implies that a real and even signal yields a real and even transform, whereas a real and odd signal yields an imaginary and odd transform.`
       },
       {
         name: 'Cosine and Sine Transforms',
         explanation: `For symmetric functions, the standard Fourier exponential kernel reduces to trigonometric kernels:
 
-*   **Cosine Transform:** For even functions (\$f(t) = f(-t)\$), the Fourier transform simplifies to \$\hat{f}_c(\omega) = \sqrt{\frac{2}{\pi}} \int_0^{\infty} f(t) \cos(\omega t) dt\$.
-*   **Sine Transform:** For odd functions (\$f(t) = -f(-t)\$), it reduces to \$\hat{f}_s(\omega) = \sqrt{\frac{2}{\pi}} \int_0^{\infty} f(t) \sin(\omega t) dt\$.
-These allow calculating half-range integrals over \$[0, \infty)\$ while capturing the entire frequency spectrum.`
+*   **Cosine Transform:** For even functions ($f(t) = f(-t)$), the Fourier transform simplifies to $\hat{f}_c(\omega) = \sqrt{\frac{2}{\pi}} \int_0^{\infty} f(t) \cos(\omega t) dt$.
+*   **Sine Transform:** For odd functions ($f(t) = -f(-t)$), it reduces to $\hat{f}_s(\omega) = \sqrt{\frac{2}{\pi}} \int_0^{\infty} f(t) \sin(\omega t) dt$.
+These allow calculating half-range integrals over $[0, \infty)$ while capturing the entire frequency spectrum.`
       },
       {
         name: 'Continuous Convolution Theorem',
-        explanation: `The continuous convolution of two functions is defined as \$[f * g](t) = \int_{-\infty}^{\infty} f(t')g(t - t') dt'\$. Convolution is commutative.
+        explanation: `The continuous convolution of two functions is defined as $[f * g](t) = \int_{-\infty}^{\infty} f(t')g(t - t') dt'$. Convolution is commutative.
 Crucially, convolution in the time domain is equivalent to multiplication in the frequency domain:
-\$\$ \mathcal{F}[f * g](\omega) = \hat{f}(\omega) \cdot \hat{g}(\omega) \$\$
-Conversely, multiplication in the time domain equates to convolution in the frequency domain: \$f \cdot g = \mathcal{F}^{-1}[\hat{f} * \hat{g}]\$. This principle is foundational for modulation and filtering operations.`
+$$ \mathcal{F}[f * g](\omega) = \hat{f}(\omega) \cdot \hat{g}(\omega) $$
+Conversely, multiplication in the time domain equates to convolution in the frequency domain: $f \cdot g = \mathcal{F}^{-1}[\hat{f} * \hat{g}]$. This principle is foundational for modulation and filtering operations.`
       },
       {
         name: 'Sampling and the Dirac Comb',
-        explanation: `Sampling a continuous signal \$x(t)\$ with a rate \$f_s = 1/T\$ produces a discrete sequence \$x[n] = x(nT)\$. This can be modeled continuously as multiplication with a Dirac comb:
-\$\$ \hat{x}(t) = x(t) \cdot \amalg_T(t) = x(t) \cdot T \sum_{n=-\infty}^{\infty} \delta(t - nT) \$\$
-In the frequency domain, this multiplication translates to convolution with the Fourier transform of the Dirac comb (which is another Dirac comb in the frequency domain). Consequently, the spectrum of the sampled signal, \$\hat{X}(f)\$, consists of infinite, periodically shifted copies (images) of the original baseband spectrum \$X(f)\$ spaced by intervals of \$f_s\$:
-\$\$ \hat{X}(f) = \sum_{n=-\infty}^{\infty} X(f - nf_s) \$\$`
+        explanation: `Sampling a continuous signal $x(t)$ with a rate $f_s = 1/T$ produces a discrete sequence $x[n] = x(nT)$. This can be modeled continuously as multiplication with a Dirac comb:
+$$ \hat{x}(t) = x(t) \cdot \amalg_T(t) = x(t) \cdot T \sum_{n=-\infty}^{\infty} \delta(t - nT) $$
+In the frequency domain, this multiplication translates to convolution with the Fourier transform of the Dirac comb (which is another Dirac comb in the frequency domain). Consequently, the spectrum of the sampled signal, $\hat{X}(f)$, consists of infinite, periodically shifted copies (images) of the original baseband spectrum $X(f)$ spaced by intervals of $f_s$:
+$$ \hat{X}(f) = \sum_{n=-\infty}^{\infty} X(f - nf_s) $$`
       },
       {
         name: 'Aliasing and the Nyquist-Shannon Sampling Theorem',
-        explanation: `A signal is **bandwidth limited** if its Fourier spectrum is strictly zero outside a finite frequency band \$[-f_{max}, f_{max}]\$.
+        explanation: `A signal is **bandwidth limited** if its Fourier spectrum is strictly zero outside a finite frequency band $[-f_{max}, f_{max}]$.
 
-*   **Aliasing** occurs when a continuous signal is under-sampled, causing high-frequency components to disguise themselves as low frequencies. This manifests mathematically as overlapping images in the sampled spectrum \$\hat{X}(f)\$, permanently distorting the signal.
-*   **The Nyquist-Shannon Sampling Theorem** states that a bandwidth-limited signal can be perfectly reconstructed from its discrete samples if and only if the sampling rate \$f_s\$ strictly exceeds twice the highest frequency component: \$f_s > 2f_{max}\$. The threshold rate \$2f_{max}\$ is known as the **Nyquist rate**.`
+*   **Aliasing** occurs when a continuous signal is under-sampled, causing high-frequency components to disguise themselves as low frequencies. This manifests mathematically as overlapping images in the sampled spectrum $\hat{X}(f)$, permanently distorting the signal.
+*   **The Nyquist-Shannon Sampling Theorem** states that a bandwidth-limited signal can be perfectly reconstructed from its discrete samples if and only if the sampling rate $f_s$ strictly exceeds twice the highest frequency component: $f_s > 2f_{max}$. The threshold rate $2f_{max}$ is known as the **Nyquist rate**.`
       },
     ],
 
@@ -1488,30 +1488,30 @@ When you set $z = e^{j\\omega}$, you get back the DTFT. But the Z-transform is m
     concepts: [
       {
         name: 'Signal Reconstruction Strategy',
-        explanation: `To reconstruct the original continuous signal \$x(t)\$ from its samples \$x[n]\$, the base image of the periodic sampled spectrum \$\hat{X}(f)\$ must be isolated.
+        explanation: `To reconstruct the original continuous signal $x(t)$ from its samples $x[n]$, the base image of the periodic sampled spectrum $\hat{X}(f)$ must be isolated.
 
-This is achieved by applying a **reconstruction filter**, an ideal low-pass filter in the frequency domain represented by a rectangular window \$\text{rect}(f / f_s)\$. The isolated spectrum is:
-\$\$ X(f) = \hat{X}(f) \cdot \text{rect}(f / f_s) \$\$
+This is achieved by applying a **reconstruction filter**, an ideal low-pass filter in the frequency domain represented by a rectangular window $\text{rect}(f / f_s)$. The isolated spectrum is:
+$$ X(f) = \hat{X}(f) \cdot \text{rect}(f / f_s) $$
 By taking the inverse Fourier transform, multiplication in frequency becomes convolution with a sinc function in time. The exact interpolation formula yields:
-\$\$ x(t) = \sum_{n=-\infty}^{\infty} x[n] \frac{\sin(\pi(t - nT)/T)}{\pi(t - nT)/T} = \sum_{n=-\infty}^{\infty} x[n] \text{sinc}_\pi((t - nT)/T) \$\$
-This means the continuous waveform is formed by a linear combination of shifted \$\text{sinc}\$ functions weighted by the sample values.`
+$$ x(t) = \sum_{n=-\infty}^{\infty} x[n] \frac{\sin(\pi(t - nT)/T)}{\pi(t - nT)/T} = \sum_{n=-\infty}^{\infty} x[n] \text{sinc}_\pi((t - nT)/T) $$
+This means the continuous waveform is formed by a linear combination of shifted $\text{sinc}$ functions weighted by the sample values.`
       },
       {
         name: 'Anti-Aliasing Filters',
-        explanation: `If a signal contains frequencies above the Nyquist limit (\$f_{max} > f_s/2\$), perfect reconstruction fails due to overlapping spectral images. To prevent this, an **anti-aliasing filter** is applied *before* sampling.
+        explanation: `If a signal contains frequencies above the Nyquist limit ($f_{max} > f_s/2$), perfect reconstruction fails due to overlapping spectral images. To prevent this, an **anti-aliasing filter** is applied *before* sampling.
 
-This analog low-pass filter mathematically cuts off the continuous signal's spectrum at \$f_s/2\$:
-\$\$ \tilde{X}(f) = X(f) \cdot \text{rect}(f / f_s) \$\$
-Although some high-frequency information is irretrievably lost, the filtered signal \$\tilde{x}(t)\$ becomes strictly bandwidth-limited. Sampling and subsequently reconstructing this filtered signal yields a clean waveform without the spurious, unpredictable low-frequency artifacts caused by aliasing.`
+This analog low-pass filter mathematically cuts off the continuous signal's spectrum at $f_s/2$:
+$$ \tilde{X}(f) = X(f) \cdot \text{rect}(f / f_s) $$
+Although some high-frequency information is irretrievably lost, the filtered signal $\tilde{x}(t)$ becomes strictly bandwidth-limited. Sampling and subsequently reconstructing this filtered signal yields a clean waveform without the spurious, unpredictable low-frequency artifacts caused by aliasing.`
       },
       {
         name: 'Derivation of the Discrete Fourier Transform (DFT)',
-        explanation: `The DFT bridges the gap between discrete time and discrete frequency. A continuous aperiodic signal sampled yields a periodic spectrum. If the continuous signal is inherently periodic (period \$NT\$), its spectrum becomes discrete (sampled) while remaining periodic due to time sampling.
+        explanation: `The DFT bridges the gap between discrete time and discrete frequency. A continuous aperiodic signal sampled yields a periodic spectrum. If the continuous signal is inherently periodic (period $NT$), its spectrum becomes discrete (sampled) while remaining periodic due to time sampling.
 
-Letting \$f_s = N/T\$ and considering \$N\$ discrete frequency bins, the **Discrete Fourier Transform (DFT)** and its inverse are defined for a sequence of length \$N\$:
-\$\$ X[k] = \sum_{n=0}^{N-1} x[n] e^{-2\pi i \frac{nk}{N}} \$\$
-\$\$ x[n] = \frac{1}{N} \sum_{k=0}^{N-1} X[k] e^{2\pi i \frac{nk}{N}} \$\$
-The reciprocal factor \$1/N\$ ensures the transformation is exactly invertible, utilizing the fundamental orthogonality property of discrete complex exponentials: \$\frac{1}{N} \sum_{k=0}^{N-1} e^{\frac{2\pi i}{N} (m-n)k} = \delta_{mn}\$.`
+Letting $f_s = N/T$ and considering $N$ discrete frequency bins, the **Discrete Fourier Transform (DFT)** and its inverse are defined for a sequence of length $N$:
+$$ X[k] = \sum_{n=0}^{N-1} x[n] e^{-2\pi i \frac{nk}{N}} $$
+$$ x[n] = \frac{1}{N} \sum_{k=0}^{N-1} X[k] e^{2\pi i \frac{nk}{N}} $$
+The reciprocal factor $1/N$ ensures the transformation is exactly invertible, utilizing the fundamental orthogonality property of discrete complex exponentials: $\frac{1}{N} \sum_{k=0}^{N-1} e^{\frac{2\pi i}{N} (m-n)k} = \delta_{mn}$.`
       },
     ],
 

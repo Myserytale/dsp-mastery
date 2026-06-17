@@ -21,12 +21,12 @@ No feedback means **always stable** and can have **linear phase** (all frequenci
       {
         name: 'Filter Specifications and Terminology',
         explanation: `Fundamental terminology is required to describe the frequency response of a filter:
-* **Passband**: The frequency range where the filter gain is approximately \$1\$.
-* **Stopband**: The frequency range where the filter gain is approximately \$0\$.
-* **Cutoff Frequency (\$f_C\$)**: The frequency at which the output signal has one-half the power of the input signal (also called the \$-3\$ dB frequency, corresponding to an amplitude multiplier of \$1/\sqrt{2}\$).
-* **Bandwidth**: The range between the higher (\$f_H\$) and lower (\$f_L\$) cutoff frequencies for band-pass or band-reject filters.
+* **Passband**: The frequency range where the filter gain is approximately $1$.
+* **Stopband**: The frequency range where the filter gain is approximately $0$.
+* **Cutoff Frequency ($f_C$)**: The frequency at which the output signal has one-half the power of the input signal (also called the $-3$ dB frequency, corresponding to an amplitude multiplier of $1/\sqrt{2}$).
+* **Bandwidth**: The range between the higher ($f_H$) and lower ($f_L$) cutoff frequencies for band-pass or band-reject filters.
 * **Transition Band**: The finite-width frequency range between the passband and stopband.
-* **Order of a Filter**: Denotes the number of poles used in the \$z\$-domain, which directly corresponds to the number of delay elements required in its implementation.
+* **Order of a Filter**: Denotes the number of poles used in the $z$-domain, which directly corresponds to the number of delay elements required in its implementation.
 * **Ripple**: Variation in attenuation (in dB) within the pass-band or stop-band.
 * **Rolloff**: The slope of the filter's magnitude response in the transition region, specified in dB/octave or dB/decade.
 * **Insertion Loss (IL)**: The minimum attenuation in the pass-band.
@@ -46,9 +46,9 @@ No feedback means **always stable** and can have **linear phase** (all frequenci
       },
       {
         name: 'Direct Design of Infinite Impulse Response (IIR) Filters',
-        explanation: `The direct design method for IIR filters involves manually placing poles and zeros on the complex \$z\$-plane to explicitly shape the frequency response. This approach is highly suitable for simple digital filters.
-* **Transfer Function Realization**: A digital filter transfer function takes the form \$H(z)\$. For example, a simple first-order lowpass filter can be formulated as \$H(z) = k \frac{z+a}{z+b}\$. By evaluating design constraints—such as demanding a unity DC gain (\$H(1) = 1\$) and a predefined cutoff frequency where the gain drops appropriately—the coefficients \$a\$, \$b\$, and the scaling factor \$k\$ can be analytically solved.
-* **Notch Filter Design Example**: To completely reject a specific notch frequency \$f_N\$, zeros are placed precisely on the unit circle at complex conjugate angles corresponding to \$f_N\$. To ensure the notch bandwidth is exceedingly narrow without affecting the rest of the passband, poles are placed closely behind the zeros on the exact same radial lines (e.g., at a radius of \$r = 0.92\$). The resulting transfer function will incorporate conjugate pairs to maintain strictly real-valued coefficients.`
+        explanation: `The direct design method for IIR filters involves manually placing poles and zeros on the complex $z$-plane to explicitly shape the frequency response. This approach is highly suitable for simple digital filters.
+* **Transfer Function Realization**: A digital filter transfer function takes the form $H(z)$. For example, a simple first-order lowpass filter can be formulated as $H(z) = k \frac{z+a}{z+b}$. By evaluating design constraints—such as demanding a unity DC gain ($H(1) = 1$) and a predefined cutoff frequency where the gain drops appropriately—the coefficients $a$, $b$, and the scaling factor $k$ can be analytically solved.
+* **Notch Filter Design Example**: To completely reject a specific notch frequency $f_N$, zeros are placed precisely on the unit circle at complex conjugate angles corresponding to $f_N$. To ensure the notch bandwidth is exceedingly narrow without affecting the rest of the passband, poles are placed closely behind the zeros on the exact same radial lines (e.g., at a radius of $r = 0.92$). The resulting transfer function will incorporate conjugate pairs to maintain strictly real-valued coefficients.`
       },
     ],
 
@@ -307,7 +307,7 @@ This week also covers **notch filters** — a practical design technique for rem
     concepts: [
       {
         name: 'IIR Filter Design via Analogue Prototypes',
-        explanation: `For sophisticated digital IIR filters, direct \$z\$-plane design is too complex. Instead, established continuous-time analogue filter prototypes \$H_a(s)\$ are designed first, and then transformed into discrete-time digital filters \$H_d(z)\$ via \$s\$-to-\$z\$ mapping techniques. The main analogue prototype families are:
+        explanation: `For sophisticated digital IIR filters, direct $z$-plane design is too complex. Instead, established continuous-time analogue filter prototypes $H_a(s)$ are designed first, and then transformed into discrete-time digital filters $H_d(z)$ via $s$-to-$z$ mapping techniques. The main analogue prototype families are:
 * **Butterworth Filters**: Deliver a monotonically decreasing gain with absolutely no ripples in either the passband or stopband. However, they suffer from a relatively slow rolloff.
 * **Chebyshev Type I**: Distribute the gain error uniformly as equiripples in the passband while remaining monotonic in the stopband.
 * **Chebyshev Type II**: Distribute the gain error uniformly as equiripples in the stopband while remaining monotonic in the passband.
@@ -315,15 +315,15 @@ This week also covers **notch filters** — a practical design technique for rem
       },
       {
         name: 'Bilinear Transform and Frequency Pre-warping',
-        explanation: `The Bilinear Transform is a standard \$s\$-to-\$z\$ domain mapping that converts the entire infinite continuous \$s\$-plane into the discrete \$z\$-plane by using the substitution \$s = \frac{2}{T}\frac{z-1}{z+1}\$. 
-* **Derivation**: It originates from the first-order Maclaurin series approximation of the exact logarithmic mapping \$s = \frac{1}{T}\ln(z)\$. It structurally preserves system stability because the left-half \$s\$-plane maps strictly to the inside of the unit circle in the \$z\$-plane.
-* **Frequency Warping**: Because the infinite frequency range \$(0, \infty)\$ of the analogue filter is non-linearly compressed into the finite Nyquist interval \$[0, f_s/2]\$, a severe frequency distortion occurs near the Nyquist limit.
-* **Pre-warping**: To ensure that a critical digital cutoff frequency \$\omega_c\$ perfectly matches the design target, the analogue prototype must be intentionally designed using an artificially pre-warped frequency: \$\omega_c' = \frac{2}{T}\tan\left(\frac{\omega_c T}{2}\right)\$.`
+        explanation: `The Bilinear Transform is a standard $s$-to-$z$ domain mapping that converts the entire infinite continuous $s$-plane into the discrete $z$-plane by using the substitution $s = \frac{2}{T}\frac{z-1}{z+1}$. 
+* **Derivation**: It originates from the first-order Maclaurin series approximation of the exact logarithmic mapping $s = \frac{1}{T}\ln(z)$. It structurally preserves system stability because the left-half $s$-plane maps strictly to the inside of the unit circle in the $z$-plane.
+* **Frequency Warping**: Because the infinite frequency range $(0, \infty)$ of the analogue filter is non-linearly compressed into the finite Nyquist interval $[0, f_s/2]$, a severe frequency distortion occurs near the Nyquist limit.
+* **Pre-warping**: To ensure that a critical digital cutoff frequency $\omega_c$ perfectly matches the design target, the analogue prototype must be intentionally designed using an artificially pre-warped frequency: $\omega_c' = \frac{2}{T}\tan\left(\frac{\omega_c T}{2}\right)$.`
       },
       {
         name: 'Impulse-Invariant and Pole-Zero Matching Methods',
-        explanation: `* **Impulse-Invariant Method**: This mapping guarantees that the discrete impulse response perfectly matches the sampled continuous impulse response: \$h[n] = h(nT)\$. For a first-order pole \$H_a(s) = \frac{\omega_c}{s+\omega_c}\$, the continuous time-domain response \$h(t) = \omega_c e^{-\omega_c t}\$ translates in the \$z\$-domain to \$H_d(z) = \frac{\omega_c T}{1 - e^{-\omega_c T}z^{-1}}\$. While it preserves time-domain shape, it heavily suffers from spectral aliasing and requires normalization to maintain unity DC gain.
-* **Pole-Zero Matching Technique**: The analogue poles and zeros \$s_k\$ are directly mapped to digital poles and zeros using the exact exponential relation \$z_k = e^{s_k T}\$. Because this naive mapping does not natively place zeros at the Nyquist frequency (\$z = -1\$), artificial zeros are often manually appended to the transfer function, followed by the derivation of a gain scaling factor \$k\$ to perfectly match the filter gain at a chosen reference frequency (like \$\omega=0\$ or \$\omega_N\$).`
+        explanation: `* **Impulse-Invariant Method**: This mapping guarantees that the discrete impulse response perfectly matches the sampled continuous impulse response: $h[n] = h(nT)$. For a first-order pole $H_a(s) = \frac{\omega_c}{s+\omega_c}$, the continuous time-domain response $h(t) = \omega_c e^{-\omega_c t}$ translates in the $z$-domain to $H_d(z) = \frac{\omega_c T}{1 - e^{-\omega_c T}z^{-1}}$. While it preserves time-domain shape, it heavily suffers from spectral aliasing and requires normalization to maintain unity DC gain.
+* **Pole-Zero Matching Technique**: The analogue poles and zeros $s_k$ are directly mapped to digital poles and zeros using the exact exponential relation $z_k = e^{s_k T}$. Because this naive mapping does not natively place zeros at the Nyquist frequency ($z = -1$), artificial zeros are often manually appended to the transfer function, followed by the derivation of a gain scaling factor $k$ to perfectly match the filter gain at a chosen reference frequency (like $\omega=0$ or $\omega_N$).`
       },
     ],
 
@@ -424,11 +424,11 @@ grid()
 --- Markdown Cell 3 ---
 ## Normalizing the DC gain
 
-However, at 0 Hz the gain is not exactly unity. We can fix it by reintroducing \$k\$ such that \$|H(e^{j0})| = 1\$: 
+However, at 0 Hz the gain is not exactly unity. We can fix it by reintroducing $k$ such that $|H(e^{j0})| = 1$: 
 
-\$\$
+$$
 k = \\left|\\frac{1 - 0.92\\sqrt{2}+0.92^2}{2 - \\sqrt{2}}\\right|\\approx 0.965
-\$\$
+$$
 
 Thus the filter coefficients are
 \`\`\`
@@ -625,30 +625,30 @@ Everything we've learned comes together when we process **real signals** — aud
     concepts: [
       {
         name: 'Finite Impulse Response (FIR) Filters Overview',
-        explanation: `FIR filters are non-recursive systems fully characterized by a difference equation evaluated over a finite history of inputs: \$y[n] = \sum_{k=0}^{M} b_k x[n-k]\$.
+        explanation: `FIR filters are non-recursive systems fully characterized by a difference equation evaluated over a finite history of inputs: $y[n] = \sum_{k=0}^{M} b_k x[n-k]$.
 * **Advantages**: They are unconditionally stable (as they entirely lack feedback poles), can be designed to possess exact linear phase (preventing phase distortion and providing a constant group delay across all frequencies), and are highly insensitive to numerical coefficient quantization.
-* **Disadvantages**: To achieve steep transition bands equivalent to IIR filters, FIR filters demand a drastically higher order. This leads to intensive computational overhead, elevated memory usage for delay lines, and a substantial group delay of exactly \$M/2\$ samples.
-* **Linear Phase Theorem**: A filter is mathematically guaranteed to exhibit a strictly linear phase response if its impulse response coefficients exhibit perfect symmetry (or perfect antisymmetry): \$h[n] = h[N-1-n]\$.`
+* **Disadvantages**: To achieve steep transition bands equivalent to IIR filters, FIR filters demand a drastically higher order. This leads to intensive computational overhead, elevated memory usage for delay lines, and a substantial group delay of exactly $M/2$ samples.
+* **Linear Phase Theorem**: A filter is mathematically guaranteed to exhibit a strictly linear phase response if its impulse response coefficients exhibit perfect symmetry (or perfect antisymmetry): $h[n] = h[N-1-n]$.`
       },
       {
         name: 'Fourier and Windowing Method for FIR Filter Design',
         explanation: `FIR filters are systematically designed by taking the continuous infinite impulse response of an ideal filter and adapting it for discrete, causal implementation.
-* **Continuous Ideal Filter**: An ideal continuous low-pass filter with cutoff \$f_c\$ exhibits a perfectly rectangular frequency response \$H(f) = \text{rect}(f/2f_c)\$. The inverse Fourier transform yields an infinite \$sinc\$ impulse response: \$h(t) = 2f_c \text{sinc}(\pi(2tf_c))\$.
-* **Truncation and Shifting**: The continuous function is sampled at interval \$T\$. Because calculating an infinite series is impossible, it is symmetrically truncated to a finite range \$-N/2 \le n \le N/2\$. The sequence is then temporally shifted by \$N/2\$ samples to enforce causality: \$b_n = h[n-N/2]\$.
-* **Windowing Optimization**: Abrupt boxcar truncation introduces severe spectral leakage and rippling (Gibbs phenomenon). To vastly improve the frequency response—widening the main lobe slightly while aggressively suppressing side lobes—the truncated coefficients are multiplicatively smoothed by a taper window \$w[n]\$: \$b_{new}[n] = b[n] \cdot w[n]\$.
-* Through algebraic combination of rectangular frequency blocks, High-pass, Band-pass, and Band-stop filters are easily formulated using superposition of corresponding \$sinc\$ impulse responses.`
+* **Continuous Ideal Filter**: An ideal continuous low-pass filter with cutoff $f_c$ exhibits a perfectly rectangular frequency response $H(f) = \text{rect}(f/2f_c)$. The inverse Fourier transform yields an infinite $sinc$ impulse response: $h(t) = 2f_c \text{sinc}(\pi(2tf_c))$.
+* **Truncation and Shifting**: The continuous function is sampled at interval $T$. Because calculating an infinite series is impossible, it is symmetrically truncated to a finite range $-N/2 \le n \le N/2$. The sequence is then temporally shifted by $N/2$ samples to enforce causality: $b_n = h[n-N/2]$.
+* **Windowing Optimization**: Abrupt boxcar truncation introduces severe spectral leakage and rippling (Gibbs phenomenon). To vastly improve the frequency response—widening the main lobe slightly while aggressively suppressing side lobes—the truncated coefficients are multiplicatively smoothed by a taper window $w[n]$: $b_{new}[n] = b[n] \cdot w[n]$.
+* Through algebraic combination of rectangular frequency blocks, High-pass, Band-pass, and Band-stop filters are easily formulated using superposition of corresponding $sinc$ impulse responses.`
       },
       {
         name: 'Short Time Fourier Transform (STFT) and Heisenberg Uncertainty',
         explanation: `The standard Fourier Transform completely integrates over time, losing all temporal localization of transient spectral phenomena. 
-* **STFT Framework**: To counter this, STFT utilizes a sliding temporal window \$w(t-\tau)\$ to analyze localized frequency content: \$X(\nu, \tau) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} x(t) e^{-2\pi i \nu t} w(t-\tau) dt\$. The magnitude square of STFT yields the spectrogram.
-* **Heisenberg Uncertainty Principle**: This principle dictates an immovable fundamental limit on time-frequency resolution: \$\sigma_t \sigma_\nu \ge \frac{1}{4\pi}\$. Consequently, a narrow window provides excellent time resolution but terrible frequency resolution, whereas a wide window isolates frequencies perfectly but obscures the precise timing of events.`
+* **STFT Framework**: To counter this, STFT utilizes a sliding temporal window $w(t-\tau)$ to analyze localized frequency content: $X(\nu, \tau) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^{\infty} x(t) e^{-2\pi i \nu t} w(t-\tau) dt$. The magnitude square of STFT yields the spectrogram.
+* **Heisenberg Uncertainty Principle**: This principle dictates an immovable fundamental limit on time-frequency resolution: $\sigma_t \sigma_\nu \ge \frac{1}{4\pi}$. Consequently, a narrow window provides excellent time resolution but terrible frequency resolution, whereas a wide window isolates frequencies perfectly but obscures the precise timing of events.`
       },
       {
         name: 'Wavelet Transforms (CWT and DWT)',
         explanation: `Wavelet transforms resolve the fixed-window limitation of STFT by employing dynamic, scalable time-frequency atoms.
-* **Continuous Wavelet Transform (CWT)**: Utilizes a localized 'mother wavelet' \$\psi(t)\$ that is both translated by \$\tau\$ and scaled by \$s\$: \$\psi_{\tau, s}(t) = \frac{1}{\sqrt{s}} \psi\left(\frac{t-\tau}{s}\right)\$. This yields the projection: \$W_\psi[f](s, \tau) = \int_{-\infty}^{\infty} f(t) \psi_{\tau, s}^*(t) dt\$. The wavelet must satisfy the exact admissibility criterion \$\int \frac{|\hat{\psi}(\omega)|^2}{|\omega|} d\omega < \infty\$ (which forces zero mean: \$\int \psi(t) dt = 0\$). Increasing the number of vanishing moments (\$t^k \psi(t) dt = 0\$) improves noise suppression and polynomial trend elimination. CWT is a highly redundant, continuous representation equivalent to applying a bank of bandpass filters.
-* **Discrete Wavelet Transform (DWT)**: Formulates an orthonormal computational basis using strict dyadic scales (\$s = 2^m\$) and translations (\$\tau = n 2^m\$). Signal decomposition is efficiently performed using a dual-filter framework: a lowpass 'father wavelet' (scaling function \$\phi\$) that extracts smooth approximations, and a bandpass 'mother wavelet' (wavelet function \$\psi\$) that captures high-frequency details. Examples include the Haar and Daubechies families.`
+* **Continuous Wavelet Transform (CWT)**: Utilizes a localized 'mother wavelet' $\psi(t)$ that is both translated by $\tau$ and scaled by $s$: $\psi_{\tau, s}(t) = \frac{1}{\sqrt{s}} \psi\left(\frac{t-\tau}{s}\right)$. This yields the projection: $W_\psi[f](s, \tau) = \int_{-\infty}^{\infty} f(t) \psi_{\tau, s}^*(t) dt$. The wavelet must satisfy the exact admissibility criterion $\int \frac{|\hat{\psi}(\omega)|^2}{|\omega|} d\omega < \infty$ (which forces zero mean: $\int \psi(t) dt = 0$). Increasing the number of vanishing moments ($t^k \psi(t) dt = 0$) improves noise suppression and polynomial trend elimination. CWT is a highly redundant, continuous representation equivalent to applying a bank of bandpass filters.
+* **Discrete Wavelet Transform (DWT)**: Formulates an orthonormal computational basis using strict dyadic scales ($s = 2^m$) and translations ($\tau = n 2^m$). Signal decomposition is efficiently performed using a dual-filter framework: a lowpass 'father wavelet' (scaling function $\phi$) that extracts smooth approximations, and a bandpass 'mother wavelet' (wavelet function $\psi$) that captures high-frequency details. Examples include the Haar and Daubechies families.`
       },
     ],
 
@@ -1001,26 +1001,26 @@ Every week taught one piece of this pipeline. Now you can go from a real signal 
     concepts: [
       {
         name: 'Taxonomy of Colored Noises',
-        explanation: `Random stochastic signals are rigorously classified by the shape of their Power Spectral Density (PSD), \$S(f)\$:
-* **White Noise**: Exhibits perfectly flat, equal power across all frequencies (\$S(f) \propto f^0\$). The signal is completely uncorrelated in time (impulsive autocorrelation).
-* **Pink Noise (1/f Noise)**: Distributes equal power across every octave (\$S(f) \propto 1/f\$). It is ubiquitous in biological systems, fractal mathematics, and music production.
-* **Brown / Red Noise**: Exhibits a steep spectral drop-off (\$S(f) \propto 1/f^2\$). Mathematically generated by taking the cumulative integral sum of white noise (Brownian motion), producing a deep, rumbling auditory character.
-* **Blue Noise**: Displays power proportional to frequency (\$S(f) \propto f\$), resulting in a harsh, high-pitched hiss.
-* **Violet / Purple Noise**: Exhibits power scaling with the square of frequency (\$S(f) \propto f^2\$), creating an extremely sharp and intense high-pitched sound.
+        explanation: `Random stochastic signals are rigorously classified by the shape of their Power Spectral Density (PSD), $S(f)$:
+* **White Noise**: Exhibits perfectly flat, equal power across all frequencies ($S(f) \propto f^0$). The signal is completely uncorrelated in time (impulsive autocorrelation).
+* **Pink Noise (1/f Noise)**: Distributes equal power across every octave ($S(f) \propto 1/f$). It is ubiquitous in biological systems, fractal mathematics, and music production.
+* **Brown / Red Noise**: Exhibits a steep spectral drop-off ($S(f) \propto 1/f^2$). Mathematically generated by taking the cumulative integral sum of white noise (Brownian motion), producing a deep, rumbling auditory character.
+* **Blue Noise**: Displays power proportional to frequency ($S(f) \propto f$), resulting in a harsh, high-pitched hiss.
+* **Violet / Purple Noise**: Exhibits power scaling with the square of frequency ($S(f) \propto f^2$), creating an extremely sharp and intense high-pitched sound.
 * **Gray Noise**: Sourced from white noise but heavily filtered via psychoacoustic curves to sound perceptually equally loud across all frequencies to the human ear.
-* **Green Noise**: A specialized band-limited variant of pink noise with a pronounced PSD peak concentrated in the mid-frequencies (\$500\$ Hz to \$2000\$ Hz), corresponding to the peak sensitivity of human hearing.`
+* **Green Noise**: A specialized band-limited variant of pink noise with a pronounced PSD peak concentrated in the mid-frequencies ($500$ Hz to $2000$ Hz), corresponding to the peak sensitivity of human hearing.`
       },
       {
         name: 'Nonlinear Dynamical Systems and Attractors',
-        explanation: `Complex signals are often generated by deterministic nonlinear dynamical systems, modeled continuously via differential equations \$\dot{X} = \Phi(X, t)\$ or discretely via iterative maps \$X_{n+1} = \Phi(X_n, n)\$.
+        explanation: `Complex signals are often generated by deterministic nonlinear dynamical systems, modeled continuously via differential equations $\dot{X} = \Phi(X, t)$ or discretely via iterative maps $X_{n+1} = \Phi(X_n, n)$.
 * **Attractor Topology**: When a system dissipates energy, its long-term trajectories settle onto specific geometrical manifolds called attractors. These are classified into four distinct types: Fixed point attractors, periodic limit cycles, quasi-periodic tori, and chaotic (strange) attractors.
-* **Paradigmatic Examples**: The **Lorenz system** is a classic continuous 3D chaotic system initially developed for atmospheric convection modeling, defined by \$\dot{x} = \sigma(y-x)\$, \$\dot{y} = x(\rho-z)-y\$, \$\dot{z} = xy-\beta z\$. The **Henon map** serves as a fundamental 2D discrete chaotic attractor model defined by \$x_{n+1} = 1 - a x_n^2 + y_n\$.`
+* **Paradigmatic Examples**: The **Lorenz system** is a classic continuous 3D chaotic system initially developed for atmospheric convection modeling, defined by $\dot{x} = \sigma(y-x)$, $\dot{y} = x(\rho-z)-y$, $\dot{z} = xy-\beta z$. The **Henon map** serves as a fundamental 2D discrete chaotic attractor model defined by $x_{n+1} = 1 - a x_n^2 + y_n$.`
       },
       {
         name: 'Time Delay Embedding and Takens\' Theorem',
-        explanation: `Often, only a single 1D scalar observation time series \$x(t)\$ is measurable from a highly complex, multidimensional system. **Takens' Embedding Theorem** provides a rigorous mathematical framework to perfectly reconstruct the hidden phase space topology of the original multidimensional dynamics.
-* **Reconstruction**: The multi-dimensional state vector is built using delayed copies of the scalar signal: \$X(t) = [x(t), x(t+\tau), \dots, x(t+(m-1)\tau)]\$.
-* **Parameter Selection**: The time delay lag \$\tau\$ is optimally chosen where the signal's autocorrelation function hits its first null point (ensuring linear independence of coordinates). The embedding dimension \$m\$ must satisfy \$m > 2d_A\$ (where \$d_A\$ is the true attractor dimension), effectively estimated using algorithmic approaches like the False Nearest Neighbors method.`
+        explanation: `Often, only a single 1D scalar observation time series $x(t)$ is measurable from a highly complex, multidimensional system. **Takens' Embedding Theorem** provides a rigorous mathematical framework to perfectly reconstruct the hidden phase space topology of the original multidimensional dynamics.
+* **Reconstruction**: The multi-dimensional state vector is built using delayed copies of the scalar signal: $X(t) = [x(t), x(t+\tau), \dots, x(t+(m-1)\tau)]$.
+* **Parameter Selection**: The time delay lag $\tau$ is optimally chosen where the signal's autocorrelation function hits its first null point (ensuring linear independence of coordinates). The embedding dimension $m$ must satisfy $m > 2d_A$ (where $d_A$ is the true attractor dimension), effectively estimated using algorithmic approaches like the False Nearest Neighbors method.`
       },
       {
         name: 'Surrogate Data Testing for Nonlinearity',
@@ -1031,10 +1031,10 @@ Every week taught one piece of this pipeline. Now you can go from a real signal 
       {
         name: 'Functional Connectivity and Statistical Dependence Measures',
         explanation: `To ascertain how multiple time series (like multi-channel EEG signals) interact, several mathematical connectivity measures are calculated:
-* **Covariance and Correlation**: Measures linear synchronization. Covariance is defined as \$c_{xy} = \langle (x-\langle x \rangle)(y-\langle y \rangle) \rangle\$. Pearson's correlation coefficient normalizes this to be scale-invariant: \$r_{xy} = \frac{c_{xy}}{\sigma_x \sigma_y} \in [-1, 1]\$.
-* **Cross-Correlation**: Evaluates signal similarity as a function of temporal lag \$\tau\$, defined strictly as \$c_{xy}(\tau) = \int_{-\infty}^{\infty} x^*(t)y(t+\tau) dt\$.
-* **Wiener-Khinchin Theorem**: A foundational proof establishing that the Power Spectral Density \$P_x(\nu)\$ is exactly equal to the Fourier transform of the signal's Autocorrelation function \$c_{xx}(\tau)\$.
-* **Phase Coherence**: Evaluates the stability of phase differences across independent frequency bands between two signals. It is defined in the frequency domain as \$\text{Coh}_{xy}(\nu) = \frac{|C_{xy}(\nu)|}{\sqrt{P_x(\nu) P_y(\nu)}} \in [0, 1]\$, where \$C_{xy}(\nu)\$ is the complex cross-spectral density.`
+* **Covariance and Correlation**: Measures linear synchronization. Covariance is defined as $c_{xy} = \langle (x-\langle x \rangle)(y-\langle y \rangle) \rangle$. Pearson's correlation coefficient normalizes this to be scale-invariant: $r_{xy} = \frac{c_{xy}}{\sigma_x \sigma_y} \in [-1, 1]$.
+* **Cross-Correlation**: Evaluates signal similarity as a function of temporal lag $\tau$, defined strictly as $c_{xy}(\tau) = \int_{-\infty}^{\infty} x^*(t)y(t+\tau) dt$.
+* **Wiener-Khinchin Theorem**: A foundational proof establishing that the Power Spectral Density $P_x(\nu)$ is exactly equal to the Fourier transform of the signal's Autocorrelation function $c_{xx}(\tau)$.
+* **Phase Coherence**: Evaluates the stability of phase differences across independent frequency bands between two signals. It is defined in the frequency domain as $\text{Coh}_{xy}(\nu) = \frac{|C_{xy}(\nu)|}{\sqrt{P_x(\nu) P_y(\nu)}} \in [0, 1]$, where $C_{xy}(\nu)$ is the complex cross-spectral density.`
       },
     ],
 
