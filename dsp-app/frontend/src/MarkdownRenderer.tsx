@@ -7,6 +7,8 @@ import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex';
 import rehypeHighlight from 'rehype-highlight';
 import 'katex/dist/katex.min.css';
+import glossaryData from './glossary.json';
+import { rehypeGlossary } from './rehypeGlossary';
 
 function extractText(node: any): string {
   if (typeof node === 'string' || typeof node === 'number') {
@@ -26,21 +28,8 @@ interface MarkdownRendererProps {
   onCopyToIDE?: (code: string) => void;
 }
 
-const MATH_GLOSSARY: Record<string, string> = {
-  'H(z)': 'Transfer Function: Defines the system response in the Z-domain. Roots of its numerator are zeros, roots of its denominator are poles.',
-  'H(s)': 'Continuous Transfer Function: Defines the system response in the Laplace S-domain.',
-  'f_s': 'Sampling Frequency: The rate at which a continuous signal is sampled, measured in Hertz (samples per second).',
-  'f_c': 'Cutoff Frequency: The boundary in a filter\'s frequency response where energy begins to be significantly attenuated (usually at -3 dB).',
-  'T_s': 'Sampling Period: The time duration between consecutive samples ($T_s = 1 / f_s$).',
-  '\\omega': 'Angular Frequency: Radian frequency of a continuous signal ($\\omega = 2\\pi f$).',
-  '\\omega_c': 'Angular Cutoff Frequency: Cutoff frequency expressed in radians per second.',
-  'X(f)': 'Frequency Spectrum: The continuous Fourier transform of a signal $x(t)$.',
-  'x[n]': 'Discrete Signal: A sequence of values indexed by integer $n$, usually obtained by sampling a continuous signal.',
-  'y[n]': 'Output Signal: The discrete-time output sequence produced by a digital system or filter.',
-  'h[n]': 'Impulse Response: The output of a digital filter when the input is a single unit impulse (Kronecker delta).',
-  '\\delta(t)': 'Dirac Delta Function: A continuous mathematical impulse with infinite height, zero width, and an area of exactly 1.',
-  '\\delta[n]': 'Kronecker Delta: A discrete impulse that is 1 exactly at $n=0$ and 0 everywhere else.',
-};
+const MATH_GLOSSARY: Record<string, string> = glossaryData.math || {};
+const TEXT_GLOSSARY: Record<string, string> = glossaryData.text || {};
 
 function CodeBlock({ children, rawCode, className, onCopyToIDE }: {
   children: ReactNode;
@@ -262,6 +251,18 @@ export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRende
       }
     });
 
+    const glossaryEls = containerRef.current.querySelectorAll('.glossary-term');
+    glossaryEls.forEach(el => {
+      const termKey = el.getAttribute('data-glossary-term');
+      if (termKey && TEXT_GLOSSARY[termKey]) {
+        const enter = (e: Event) => handleEnter(e, TEXT_GLOSSARY[termKey]);
+        const leave = () => handleLeave();
+        el.addEventListener('mouseenter', enter);
+        el.addEventListener('mouseleave', leave);
+        listeners.push({ el, enter, leave });
+      }
+    });
+
     return () => {
       listeners.forEach(({ el, enter, leave }) => {
         el.removeEventListener('mouseenter', enter);
@@ -286,6 +287,7 @@ export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRende
         rehypePlugins={[
           rehypeKatex,
           [rehypeHighlight, { detect: true, ignoreMissing: true }],
+          [rehypeGlossary, { glossary: TEXT_GLOSSARY }],
         ]}
         components={{
           // Custom code block rendering with copy buttons
