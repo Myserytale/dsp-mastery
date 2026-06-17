@@ -1,0 +1,126 @@
+=== HOMEWORK 9 QUESTIONS ===
+Homework 09 - Transfer functions
+Deadline: 3rd test date (21th of May)
+The mandatory questions account for 100 points, while the optional questions together contribute up to an additional
+20 points.
+0.4
+9. A processor has a transfer function z−0.5
+. Find the
+response to a discrete unit step (first four terms
+only).
+
+1. Explain the relationship between filters and linear
+time invariant systems.
+2. Explain the stability criterion for digital filters in the
+z-plane. What is the significance of the unit circle
+in this context?
+
+10. Write a Python script to plot the pole-zero diagram
+2
++0.5z+1
+. Anafor the transfer function H(z) = zz2 −1.5z+0.7
+lyze the stability based on the pole locations.
+
+3. What is the relationship between the s-plane and
+the z-plane when analyzing digital filters? Explain
+the mapping from continuous to discrete systems.
+4. Explain the significance of poles and zeros in the
+context of the z-transform. How do they influence
+the behavior of digital filters? How can it be used
+to analyze the stability and frequency response of
+digital filters?
+5. Describe the frequency response of a digital filter.
+How is it typically represented, and what information does it provide?
+
+11.
+
+Using the numpy.roots function write a script
+to plot the pole-zero diagram for a given transfer
+2
++0.5z+1
+. Analyze the stability
+function H(z) = zz2 −1.5z+0.7
+based on the pole locations.
+
+12.
+
+z+0.5
+Given the transfer function H(z) = z2 −0.7z+0.1
+,
+compute the first five terms of the impulse response
+using the inverse z-transform.
+
+13. Define FIR and IIR filters. Explain the main differences between them in terms of complexity, efficiency, stability and phase response.
+
+6. How does the Bode plot for discrete-time systems
+differ from that for continuous-time systems?
+
+z+1
+14. Given the transfer function H(z) = z−0.5
+, calculate
+the frequency response at 0 Hz, 1 Hz, and 2 Hz if
+the sampling frequency fs = 8 Hz. Provide both
+gain and phase angle for each frequency.
+
+1
+, determine
+7. For the transfer function H(z) = z−0.5
+whether the system is stable and find the corresponding impulse response sequence.
+
+8. Study the stability of the system with transfer function
+1
+H(z) = 2
+z − z + 0.5
+and determine its impulse response.
+
+15.
+
+1
+
+−1
+
+1−0.8z
+For the transfer function H(z) = 1−0.5z
+−1 , determine the frequency response at 0 Hz, 1 Hz, and
+2 Hz if the sampling frequency fs = 10 Hz. Provide
+both gain and phase angle for each frequency.
+
+
+
+=== LAB 09 CODE ===
+########## LAB 09 ##########
+--- Markdown Cell 0 ---
+## Exercise
+For the transfer function $H(z) = \frac{1}{z-0.5}$, determine whether the system is stable. Justify your answer.
+
+### Solution 1
+
+
+$$
+H(z)=\frac{z^{-1}}{1-0.5z^{-1}}.
+$$
+
+
+
+--- Markdown Cell 1 ---
+<hr style="height:5px;background-color:black">
+
+--- Markdown Cell 2 ---
+## Exercise
+Study the stability of the system with transfer function
+
+$H(z) = \dfrac{1}{z^2 - z + 0.5}$		
+
+and determine its impulse response.
+
+### Solution
+The two poles are $p_{1,2} = \frac{1\pm i}{2}$ $|p_{1,2}| < 1$ $\rightarrow$ stable causal system (the unit circle is within the ROC which is $|z| > \text{max}(|p_1|, |p_2|)$)<img src="Meddins_zplane_4.png" width=500>
+
+
+
+--- Code Cell 3 ---
+
+
+--- Code Cell 4 ---
+
+

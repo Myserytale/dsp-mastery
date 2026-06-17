@@ -1,0 +1,484 @@
+=== HOMEWORK 7 QUESTIONS ===
+Homework 07 - Spectral density estimation & the Laplace transform
+Deadline: 3rd test date (14th of May)
+The mandatory questions account for 100 points, while the optional questions together contribute up to an additional
+50 points.
+1. Demonstrate the validity of the Parseval theorem
+using FFT.
+
+(for the same signal apply different parameters and
+briefly discuss the observed differences in the obtained PSD)
+
+2. Define the periodogram. Why is it a poor estimator?
+22.
+
+3. What are the benefits and side effects of slicing the
+signal when calculating the periodogram?
+4. Explain the bias–variance trade-off in spectral estimation.
+
+Read in and plot the EEG signal from the
+eeg.bin file (it is in a contiguously laid out binary
+format).
+Hint:
+amplitude is typically within 100 µV .
+numpy.fromfile
+
+5. Describe the Welch method.
+
+23.
+
+For the above signal calculate and plot the signal’s power spectral density using 4 seconds long,
+50% overlapping Hamming windows, with detrending.
+
+24.
+
+Determine the above signal’s sampling frequency.
+
+6. Why does Welch assume stationarity?
+7. Why does Welch reduce variance?
+8. What is lost when using Welch instead of a single
+FFT?
+
+Use
+
+Hint: A 50 Hz notch filter removed the pollution from the
+power line.
+
+9. What is the effect of segment length?
+10. Why does averaging reduce variance but not bias?
+
+25. Explain the Laplace transform and its kernel. Why
+is it widely used in mathematics, physics, and engineering?
+
+11. Why is overlap used in Welch?
+12. Why are windows applied before the FFT?
+
+14. What is zero padding? What does it change?
+
+26. Describe the linearity property of the Laplace transform. Provide an example demonstrating this property.
+
+15. If segments have 300 samples, what FFT length is
+typically used and why?
+
+27. Prove the following properties of the Laplace transform:
+
+13. What is detrending and why is it used?
+
+16.
+
+(a) L[1] = 1s , s > 0
+
+In spectral estimation (e.g., periodogram/Welch),
+detrending, windowing, and zero-padding are commonly applied before the FFT. To what extent can
+the order of these operations be interchanged without affecting the result? Provide explanation, identifying which operations commute, which do not,
+and why.
+
+1
+(b) L[eat ] = s−a
+,s>0
+s
+(c) L[cos(at)] = s2 +a
+2
+a
+(d) L[sin(at)] = s2 +a
+2
+
+(e) L[tp ] = Γ(p+1)
+sp+1 , s > 0
+(f) L[ect f (t)] = F (s − c)
+
+(g) L[f (ct)] = 1c F sc
+
+17. Why must sampling frequency appear in PSD scaling?
+
+(h) L[δ(t − t0 )] = 1, t0 > 0,
+
+18. What is meant by a one-sided spectrum? When is
+it a valid measure of the energy content of a signal?
+
+−st0
+
+(i) L[H(t − t0 )] = e s , t0 > 0
+28.
+
+19. Explain the line below when normalizing a one-sided
+spectrum:
+FFTSlices[:, 1:-1] *= np.sqrt(2)
+20.
+
+21.
+
+Prove the convolution theorem in the context of
+the Laplace transform.
+
+29. Determine the inverse Laplace transform of the functions below:
+
+Implement your own Welch method and compare
+it to scipy.signal.welch using a generated harmonic signal with added noise.
+
+3
+s2 + 4
+3s
+(b) 2
+s −s−6
+5s + 2
+(c) 2
+s + 2s + 5
+2s − 3
+(d) 2
+s −4
+8s2 − 4s + 12
+(e)
+s(s2 + 4)
+(a)
+
+In the context of the Welch method demonstrate
+numerically the effect of
+(a) segment size
+(b) overlap
+(c) detrending
+(d) window type
+(e) padding
+1
+
+1 − 2s
+s2 + 4s + 5
+2s − 3
+(g) 2
+s + 2s + 10
+s
+(h)
+(s + 1)(s2 + 4)
+1
+(i)
+(s + 1)2 (s2 + 4)
+(f)
+
+(j)
+
+G(s)
+s2 + 1
+
+
+
+=== LAB 07 CODE ===
+########## LAB 07 ##########
+--- Markdown Cell 0 ---
+## Power spectral density using Welch's method for one-sided spectrum
+
+1. Split signal into overlapping segments of length NFFT
+2. Detrend each segment
+3. Apply window (length NFFT!)
+4. Zero-pad (>= NFFT, power of 2)
+5. Compute FFT
+6. Keep only positive frequencies (one-sided spectrum)
+7. Apply proper normalization (window + Fs + one-sided scaling)
+
+--- Code Cell 1 ---
+#--------------------------------------------------------------------------------------------
+from pylab import *
+import numpy as np
+import types
+
+#----------------------------------------------------------------    
+def apply_window(x, window):
+    """
+    Apply a window to signal x.
+
+    'window' can be:
+    1. A function: window(x) returns a windowed version of x
+    2. An array: same shape as x, applied multiplicatively
+
+    In DSP terms:
+    x_w[n] = x[n] * w[n]
+    """
+    if type(window) == types.FunctionType:
+        # Window is a function that internally applies the weighting
+        return window(x)
+    else:
+        # Window is an array → pointwise multiplication
+        return window * x
+
+
+#----------------------------------------------------------------    
+def _spectral_helper(x, NFFT=256, Fs=2, detrend=detrend_none,
+                 window=window_hanning, noverlap=0, pad_to=None):
+
+    """
+    Compute windowed, segmented FFT slices of a signal.
+
+    This is a low-level routine used in spectral estimation (e.g. Welch PSD).
+
+    Pipeline:
+    1. Split signal into overlapping segments of length NFFT
+    2. Detrend each segment
+    3. Apply window (length NFFT!)
+    4. Zero-pad to length pad_to (>= NFFT, power of 2)
+    5. Compute FFT
+    6. Keep only positive frequencies (one-sided spectrum)
+    7. Apply proper normalization (window + Fs + one-sided scaling)
+
+    Returns:
+    - FFTSlices: normalized complex spectra (per segment)
+    - freqs: frequency axis (0 → Fs/2)
+    """
+
+    # Original signal length
+    n = len(x)
+
+    #------------------------------------------------------------
+    # Ensure we have at least one full segment
+    #------------------------------------------------------------
+    if len(x) < NFFT:
+        # Resize to NFFT and zero-pad the rest
+        x = np.resize(x, (NFFT,))
+        x[n:] = 0
+        # NOTE: np.resize may repeat data, but we overwrite with zeros
+
+    #------------------------------------------------------------
+    # FFT length selection
+    #------------------------------------------------------------
+    if pad_to is None:
+        pad_to = NFFT
+
+    # Force FFT length to next power of 2 (computational efficiency)
+    pad_to = 2**int(np.ceil(np.log2(pad_to)))
+
+    # Number of frequencies in one-sided spectrum
+    # (DC → Nyquist)
+    numFreqs = pad_to // 2 + 1
+
+    #------------------------------------------------------------
+    # Segment indexing (overlapping windows)
+    #------------------------------------------------------------
+    # Step size = hop = NFFT - noverlap
+    ind = list(range(0, n - NFFT + 1, NFFT - noverlap))
+
+    # Number of segments
+    numSlices = len(ind)
+
+    # Allocate array:
+    # rows → time segments
+    # cols → frequency bins
+    FFTSlices = np.zeros((numSlices, numFreqs), dtype=np.complex_)
+
+    # Simple list of indices for looping
+    slices = list(range(numSlices))
+
+    #------------------------------------------------------------
+    # Window normalization (VERY IMPORTANT)
+    #------------------------------------------------------------
+    # Apply window to a constant signal of ones → yields window itself
+    # Then compute L2 norm:
+    # normVal = sqrt(sum w[n]^2)
+    #
+    # This ensures energy normalization:
+    # compensates for attenuation introduced by the window
+    normVal = np.linalg.norm(apply_window(np.ones(NFFT), window))
+
+    #------------------------------------------------------------
+    # Main loop: process each segment
+    #------------------------------------------------------------
+    for iSlice in slices:
+
+        # Extract segment of length NFFT
+        segment = x[ind[iSlice]:ind[iSlice] + NFFT]
+
+        # Remove mean / trend if needed
+        segment = detrend(segment)
+
+        # Apply window (length NFFT!)
+        segment = apply_window(segment, window)
+
+        # Compute FFT:
+        # - zero-padded to length pad_to
+        # - gives finer frequency grid (interpolation), not higher resolution
+        spectrum = np.fft.fft(segment, n=pad_to)
+
+        # Keep only positive frequencies (one-sided spectrum)
+        FFTSlices[iSlice, :] = spectrum[:numFreqs]
+
+    #------------------------------------------------------------
+    # Frequency axis
+    #------------------------------------------------------------
+    # f_k = k * Fs / pad_to
+    freqs = float(Fs) / pad_to * np.arange(numFreqs)
+
+    #------------------------------------------------------------
+    # One-sided spectrum correction
+    #------------------------------------------------------------
+    # We removed negative frequencies.
+    # For real signals:
+    # |X(-f)|^2 = |X(f)|^2
+    #
+    # To preserve total energy:
+    # double the power of interior bins
+    # → multiply amplitudes by sqrt(2)
+    #
+    # DO NOT scale:
+    # - DC (index 0)
+    # - Nyquist (last index)
+    FFTSlices[:, 1:-1] *= np.sqrt(2)
+
+    #------------------------------------------------------------
+    # Final normalization
+    #------------------------------------------------------------
+    # Divide by:
+    # 1. normVal → window energy normalization
+    # 2. sqrt(Fs) → ensures PSD units (V^2 / Hz after squaring)
+    #
+    # After this:
+    # |FFTSlices|^2 behaves like a properly scaled PSD contribution
+    return FFTSlices / normVal / np.sqrt(Fs), freqs
+
+    #------------------------------------------------------------
+    # NOTE (commented original line):
+    # Pxx = mean(|Slices|^2)
+    #
+    # This function returns the building blocks for PSD:
+    # averaging over slices is done outside
+    #------------------------------------------------------------
+
+#--------------------------------------------------------------------------------------------
+def psd(x, NFFT=256, Fs=2, detrend=detrend_none, window=window_hanning, noverlap=0, pad_to=None):
+    X, f =     _spectral_helper(x, NFFT, Fs, detrend, window, noverlap, pad_to)
+    Pxx = np.abs(X)**2
+    return Pxx.mean(axis=0), f
+
+--- Code Cell 2 ---
+from scipy.io import wavfile
+import scipy.io
+samplerate, data = wavfile.read("02. School Boy-9.wav")
+print(samplerate, data.shape)
+
+--- Code Cell 3 ---
+plot(data[10000:50000, 0])
+
+--- Code Cell 4 ---
+s, f = psd(data[:, 0], Fs=samplerate, NFFT=2**15, noverlap=2**14, detrend=detrend_none)
+figure(1)
+semilogy(f, s)
+#xlim([0, 10])
+#ylim([0,100])
+grid()
+s
+
+--- Code Cell 5 ---
+len(f) # NFFT//2 + 1
+
+--- Code Cell 6 ---
+from scipy.signal import welch
+
+f, s = welch(
+    data[:, 0],
+    fs=samplerate,
+    window='hann',
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend=False,
+    nfft=2**15,          # matches pad_to = NFFT
+    return_onesided=True,
+    scaling='density'    # ensures V^2/Hz
+)
+s
+
+--- Code Cell 7 ---
+semilogy(f, s)
+
+--- Code Cell 8 ---
+
+
+--- Code Cell 9 ---
+freq, Pxx = signal.welch(data[:, 0], fs=samplerate, nperseg=2**10, noverlap=2**9, window='box', detrend='constant')
+semilogy(freq, Pxx)
+#semilogy(f, s)
+xlim([0, 5000])
+print(s, Pxx)
+print(len(s), len(Pxx))
+
+--- Markdown Cell 10 ---
+## Parseval theorem
+
+
+$$
+\int_{-\infty}^{\infty} |x(t)|^2 \, dt
+=
+\int_{-\infty}^{\infty} |X(f)|^2 \, df
+$$
+$$
+\sum_{n=0}^{N-1} |x[n]|^2
+
+
+--- Code Cell 11 ---
+### Using FFT
+import numpy as np
+
+x = data[:, 0].astype(float)
+N = len(x)
+
+#------------------------------------------------------------
+# Time-domain energy
+#------------------------------------------------------------
+E_time = np.sum(np.abs(x)**2)
+
+#------------------------------------------------------------
+# Frequency-domain energy
+#------------------------------------------------------------
+X = np.fft.fft(x)
+
+E_freq = (1.0 / N) * np.sum(np.abs(X)**2)
+
+E_time,  E_freq
+
+--- Code Cell 12 ---
+### Using power spectral density
+
+import numpy as np
+
+x = data[:, 0].astype(float)
+N = len(x)
+
+# ------------------------------------------------------------
+# Time-domain average power
+# ------------------------------------------------------------
+P_time = np.mean(np.abs(x)**2)
+
+# ------------------------------------------------------------
+# PSD from your routine
+# no detrend, no window, no padding, no overlap
+# ------------------------------------------------------------
+s, f = psd(
+    x,
+    Fs=samplerate,
+    NFFT=N,
+    noverlap=0,
+    detrend=detrend_none,
+    window=ones(N),
+    pad_to=N
+)
+
+# ------------------------------------------------------------
+# Frequency-domain power from PSD
+# ------------------------------------------------------------
+P_freq_sum = np.sum(s) * (f[1] - f[0])
+
+P_time, P_freq_sum
+
+--- Code Cell 13 ---
+f, s = welch(
+    x,
+    fs=samplerate,
+    window='boxcar',
+    nperseg=N,
+    noverlap=0,
+    detrend=False,
+    nfft=N,          # matches pad_to = NFFT
+    return_onesided=True,
+    scaling='density'    # ensures V^2/Hz
+)
+P_freq_sum = np.sum(s) * (f[1] - f[0])
+P_time, P_freq_sum
+
+--- Code Cell 14 ---
+
+

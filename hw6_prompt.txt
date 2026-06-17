@@ -1,0 +1,491 @@
+=== HOMEWORK 6 QUESTIONS ===
+Homework 06 - The fast Fourier transform
+Deadline: 2nd test date (23rd of April)
+The mandatory questions account for 100 points, while the optional questions together contribute up to an additional
+50 points.
+1. Describe the purpose of zero padding in FFT and
+how it affects frequency resolution.
+2. Explain the changes observed in the FFT output
+when zero padding is applied to a signal.
+3. Demonstrate the effect of zero padding.
+4. The definition of discrete convolution is
+z[n] ≡ (x ∗ y)[n] ≡
+
+∞
+X
+
+x[k]y[n − k] ,
+
+n∈Z.
+
+k=−∞
+
+Prove that for the practical case, x[0], x[1], . . . , x[p −
+1] and y[0], y[1], . . . , y[q − 1], this can be rewritten as
+min{p−1,n}
+
+z[n] =
+
+X
+
+x[k]y[n−k] ,
+
+n = 0, 1, . . . , p+q−16.
+
+Demonstrate the effect of leakage and scalloping.
+
+7.
+
+Confirm numerically the following properties of
+the different windows:
+
+k=max{0,n−(q−1)}
+
+(a) Show that the number of multiplications for
+calculating the discrete convolution between
+two sequences of p respectively q elements is
+p · q.
+(b) Determine the number of additions.
+5. Calculate the Fourier transforms of the different
+windows and reproduce the images below:
+
+1
+
+
+
+=== LAB 06 CODE ===
+########## LAB 06 ##########
+--- Markdown Cell 0 ---
+## Fast Fourier Transform
+
+--- Code Cell 1 ---
+from numpy import *
+from numpy.fft import fft, ifft, fftfreq, fftshift
+from matplotlib.pyplot import *
+
+def ditfft2(x):
+    N = len(x)
+    if N == 1:
+        return x
+    else:
+        even = ditfft2(x[::2])
+        odd = exp(-2*pi*1j/N*arange(N/2))*ditfft2(x[1::2])
+        return hstack([even+odd, even - odd])
+
+--- Code Cell 2 ---
+x = arange(16)
+fft(x)
+
+--- Code Cell 3 ---
+ditfft2(x)
+
+--- Code Cell 4 ---
+plot(fftshift(fftfreq(len(x))), fftshift(abs(    fft(x))), '.-') 
+plot(fftshift(fftfreq(len(x))), fftshift(abs(ditfft2(x))), 'o' ) 
+
+--- Code Cell 5 ---
+# complex constants
+2+0.5j
+
+--- Markdown Cell 6 ---
+## Zero-padding
+
+Zero-padding does **not** improve the true resolution
+
+$$
+\Delta f = \frac{f_s}{N},
+$$
+
+but it gives a denser plotted spectrum, so peaks are easier to read.
+
+--- Code Cell 7 ---
+N = 128
+tmax = 2
+T = 2*tmax/N
+tm = 0.5
+
+--- Code Cell 8 ---
+t = arange(-tmax, tmax, T)
+x = zeros(N)
+#x[abs(t) <= tm] = (1 - abs(t)/tm)[abs(t) <= tm]
+x[abs(t) <= tm] = 1
+
+--- Code Cell 9 ---
+plot(t, x, '.-')
+
+--- Code Cell 10 ---
+X = T*fft(fftshift(x))
+
+--- Code Cell 11 ---
+f = fftfreq(N, T)
+
+
+--- Code Cell 12 ---
+plot(fftshift(f), fftshift(real(X)), 'o-')
+#xlim([-16, 16])
+
+--- Code Cell 13 ---
+Npad = 512
+xp = pad(x,((Npad - N)//2, (Npad - N)//2))
+tpmax = tmax*Npad//N
+tp = arange(-tpmax, tpmax, T)
+
+--- Code Cell 14 ---
+plot(tp, xp, '.-')
+
+--- Code Cell 15 ---
+__version__
+
+--- Code Cell 16 ---
+fp = fftfreq(Npad, T)
+Xp = T*fft(roll(fftshift(xp), 0))
+plot(fftshift(fp), (fftshift((real(Xp)))), '.-', label='real')
+plot(fftshift(fp), (fftshift((imag(Xp)))), '.-', label='imag')
+plot(fftshift(fp), (fftshift((abs(Xp)))), '.-', label='magnitude')
+#xlim([-3.5, 3.5])
+legend()
+
+--- Code Cell 17 ---
+# again: shifting introduces extra phase factor (oscillations)
+# but the magnitude is not affected
+Xp = T*fft(roll(fftshift(xp), 10)) # shifting
+plot(fftshift(fp), (fftshift((real(Xp)))), '.-', label='real')
+plot(fftshift(fp), (fftshift((imag(Xp)))), '.-', label='imag')
+plot(fftshift(fp), (fftshift((abs(Xp)))), '.-', label='magnitude')
+#xlim([-3.5, 3.5])
+legend()
+
+
+--- Code Cell 18 ---
+# different (simpler) padding if you don't care about oscillations due to phase shifts (look at the magnitude)
+xp = pad(x, ( Npad -N, 0))
+Xp = T*fft(xp)
+plot(fftshift(fp), abs(fftshift((Xp))), '.-')
+#xlim([-1.5, 1.5])
+
+--- Code Cell 19 ---
+fs = 1000.0
+T = 1 / fs
+N = 256
+t = np.arange(N) / fs
+x = np.cos(2 * np.pi * 50.5 * t)
+
+# Original FFT
+X1 = T * np.fft.fft(x)
+f1 = np.fft.fftfreq(N, T)
+
+# Zero-padded FFT
+Npad = 4096
+xpad = np.pad(x, (0, Npad - N))
+X2 = T * np.fft.fft(xpad)
+f2 = np.fft.fftfreq(Npad, T)
+
+plt.figure(figsize=(8, 3.2))
+plt.plot(np.fft.fftshift(f1), np.abs(np.fft.fftshift(X1)), '.-', label="original", markersize=10)
+plt.plot(np.fft.fftshift(f2), np.abs(np.fft.fftshift(X2)), label="zero-padded")
+plt.xlim(-80, 80)
+plt.xlabel("f [Hz]")
+plt.ylabel(r"$|X(f)|$")
+plt.title("Zero-padding: smoother display only")
+plt.grid(True)
+plt.legend()
+plt.show()
+
+--- Markdown Cell 20 ---
+ ## Leakage
+
+--- Code Cell 21 ---
+T = 0.1
+tau = 10*T
+tmax = 20*tau
+t = arange(-tmax, tmax, T)
+x = cos(2*pi*t/tau)
+plot(t, x, '.-')
+#xlim([-5, 5])
+
+--- Code Cell 22 ---
+X = T*fft(fftshift(x))  # should be a Dirac delta
+
+--- Code Cell 23 ---
+f = fftfreq(len(X), T)
+
+--- Code Cell 24 ---
+plot(fftshift(f), fftshift(real(X)), '.-')
+xlim([-2, 0])
+
+--- Code Cell 25 ---
+X = T*fft(fftshift(x))
+f = fftfreq(len(X), T)
+plot(fftshift(f), fftshift(abs(X)), '.-')
+xlim([-2, -0.5])
+
+--- Code Cell 26 ---
+window = 2.5
+x[abs(t) > window] = 0
+plot(t, x)
+
+--- Code Cell 27 ---
+X = T*fft(fftshift(x))
+plot(fftshift(f), fftshift(abs(X)), '.-')
+#xlim([-2, -0.5])
+
+--- Code Cell 28 ---
+def rect(t):
+    return (abs(t) <= 1/2).astype(float)
+
+--- Code Cell 29 ---
+plot(t, rect(t), '.-')
+
+--- Code Cell 30 ---
+def triangle(t):
+    res = zeros(len(t))
+    res[abs(t) < 0.5] = (1 - 2*abs(t))[abs(t) < 0.5]
+    return res
+def Hann(t):
+    res = zeros(len(t))
+    res[abs(t) < 0.5] = (cos(pi*abs(t))**2)[abs(t) < 0.5]
+    return res
+
+--- Code Cell 31 ---
+plot(t, triangle(t), '.-')
+plot(t, Hann(t), '.-')
+xlim([-1, 1])
+
+--- Code Cell 32 ---
+Xrect = T*fft((rect    (t)))
+Xtri  = T*fft((triangle(t)))
+XHann = T*fft((Hann(t)))
+plot(fftshift(f), fftshift(abs(Xrect)), '.-', label='rect')
+plot(fftshift(f), fftshift(abs(Xtri )), '.-', label='triangle')
+plot(fftshift(f), fftshift(abs(XHann)), '.-', label='Hann')
+legend()
+
+--- Code Cell 33 ---
+plot(fftshift(f), 20*log10(fftshift(abs(Xrect)+1e-20)/abs(Xrect).max()), '.-', label='rect')
+plot(fftshift(f), 20*log10(fftshift(abs(Xtri )+1e-20)/abs(Xtri ).max()), '.-', label='triangle')
+plot(fftshift(f), 20*log10(fftshift(abs(XHann)+1e-20)/abs(XHann).max()), '.-', label='triangle')
+xlim([0, f.max()])
+ylim([-100, 0.5])
+legend()
+
+--- Code Cell 34 ---
+plot(t, Hann(t), '.-')
+xlim([-2, 2])
+
+--- Markdown Cell 35 ---
+## Scalloping
+
+--- Code Cell 36 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+fs = 1000
+N = 1000
+n = np.arange(N)
+
+def show_fft(f0):
+    x = np.cos(2*np.pi*f0*n/fs)
+    X = np.fft.fft(x)
+    f = np.fft.fftfreq(N, 1/fs)
+
+    plt.figure(figsize=(12,4))
+    plt.plot(f[:N//2], np.abs(X[:N//2]))
+    plt.title(f"f0 = {f0} Hz")
+    plt.xlabel("Frequency (Hz)")
+    plt.ylabel("Magnitude")
+    plt.xlim([f0 -10, f0+10])
+    plt.grid()
+    plt.show()
+
+# Perfect alignment
+show_fft(10)
+
+# Off-bin → scalloping loss
+show_fft(10.76)
+
+--- Code Cell 37 ---
+T = 0.15
+f0 = 1
+period = 1/f0#10*T
+#tmax = 5*period
+t = arange(-tmax, tmax, T)
+x = cos(2*pi*t/period)
+plot(t, x, '.-')
+
+--- Code Cell 38 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+fs = 256          # Hz
+N = 256           # original record length
+Npad = 2048       # zero-padded FFT length
+f0 = 9.5          # Hz, exactly halfway between 9 and 10 Hz bins for 256-point FFT
+
+# Time-domain signal
+n = np.arange(N)
+x = np.sin(2 * np.pi * f0 * n / fs)
+
+# FFTs
+X_256 = np.fft.rfft(x, n=N)
+X_2048 = np.fft.rfft(x, n=Npad)
+
+# Frequency axes
+f_256 = np.fft.rfftfreq(N, d=1/fs)
+f_2048 = np.fft.rfftfreq(Npad, d=1/fs)
+
+# Normalize both to the peak of the zero-padded spectrum
+ref = np.max(np.abs(X_2048))
+mag_256_db = 20 * np.log10(np.abs(X_256) / ref)
+mag_2048_db = 20 * np.log10(np.abs(X_2048) / ref)
+
+# Avoid -inf in plotting
+floor_db = -40
+mag_256_db = np.maximum(mag_256_db, floor_db)
+mag_2048_db = np.maximum(mag_2048_db, floor_db)
+
+# Scalloping loss of the 256-point FFT
+idx_9 = np.argmin(np.abs(f_256 - 9))
+idx_10 = np.argmin(np.abs(f_256 - 10))
+scallop_db = mag_256_db[idx_9]   # same as idx_10 here, by symmetry
+
+# Plot
+plt.figure(figsize=(8.8, 5.2))
+
+plt.plot(f_2048, mag_2048_db, color='blue', lw=1.5, label='2048 point FFT')
+plt.plot(f_256, mag_256_db, 'o-', color='red', ms=5, lw=1.5, label='256 point FFT')
+
+plt.xlim(5, 15)
+plt.ylim(-40, 1)
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Magnitude (dB)')
+plt.title('FFT of 9.5 Hz sine wave through Boxcar window')
+plt.grid(True, alpha=0.35)
+plt.legend(loc='upper right')
+
+# Annotation
+plt.annotate(
+    f'Scalloping loss\n{scallop_db:.2f} dB',
+    xy=(9, scallop_db),
+    xytext=(5.6, -3.5),
+    arrowprops=dict(arrowstyle='->', lw=1),
+    fontsize=9,
+    ha='left',
+    va='top'
+)
+
+plt.tight_layout()
+plt.show()
+
+--- Code Cell 39 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+fs = 256          # Hz
+N = 256           # original record length
+Npad = 2048       # zero-padded FFT length
+f0 = 9.5          # Hz, exactly halfway between 9 and 10 Hz bins for 256-point FFT
+
+# Time-domain signal
+n = np.arange(N)
+x = np.sin(2 * np.pi * f0 * n / fs)
+
+# FFTs
+X_256 = np.fft.fft(x, n=N)
+X_2048 = np.fft.fft(x, n=Npad)
+
+# Frequency axes
+f_256 = np.fft.fftfreq(N, d=1/fs)
+f_2048 = np.fft.fftfreq(Npad, d=1/fs)
+
+
+# Plot
+
+plt.plot(f_2048, abs(X_2048), color='blue', lw=1.5, label='2048 point FFT')
+plt.plot(f_256, abs(X_256), 'o-', color='red', ms=5, lw=1.5, label='256 point FFT')
+
+plt.xlim(0, 20)
+# plt.ylim(-40, 1)
+plt.xlabel('Frequency (Hz)')
+plt.title('FFT of 9.5 Hz sine wave through Boxcar window')
+plt.grid(True, alpha=0.35)
+plt.legend(loc='upper right')
+
+
+plt.show()
+
+--- Code Cell 40 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+# =========================
+# PARAMETERS
+# =========================
+N = 64                     # window length
+pad = 16                   # zero-padding factor (for smooth DTFT view)
+Nfft = N * pad             # FFT size
+
+# =========================
+# WINDOW (change here)
+# =========================
+n = np.arange(N)
+
+# Examples (uncomment one)
+w = np.ones(N)                              # Rectangular
+# w = np.hanning(N)                         # Hann
+# w = np.hamming(N)                         # Hamming
+# w = np.blackman(N)                        # Blackman
+
+# =========================
+# ZERO-PAD (DTFT sampling)
+# =========================
+w_pad = np.zeros(Nfft)
+w_pad[:N] = w
+
+# =========================
+# FFT → DTFT samples
+# =========================
+W = np.fft.fft(w_pad)
+W = np.fft.fftshift(W)                      # center at 0 frequency
+
+# =========================
+# NORMALIZED FREQUENCY AXIS
+# =========================
+f = np.fft.fftshift(np.fft.fftfreq(Nfft, d=1))  # cycles/sample
+
+# =========================
+# MAGNITUDE (dB)
+# =========================
+W_mag = np.abs(W)
+W_dB = 20 * np.log10(W_mag / np.max(W_mag) + 1e-12)
+
+# =========================
+# PLOTTING
+# =========================
+plt.figure(figsize=(12, 4))
+
+plt.plot(f, W_dB)
+plt.xlabel('Normalized frequency $\hat{f}$ (cycles/sample)')
+plt.ylabel('Magnitude (dB)')
+plt.title('Window DTFT (normalized frequency)')
+plt.grid()
+
+plt.ylim([-120, 5])
+plt.xlim([-0.5, 0.5])
+
+plt.show()
+
+--- Code Cell 41 ---
+x = arange(20).reshape((4, 5))
+x
+
+--- Code Cell 42 ---
+x.sum(axis=0)
+
+--- Code Cell 43 ---
+x.sum(axis=1)
+
+--- Code Cell 44 ---
+
+

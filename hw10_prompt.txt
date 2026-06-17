@@ -1,0 +1,183 @@
+=== HOMEWORK 10 QUESTIONS ===
+Homework 10 - IIR filters
+Deadline: 4th test date (4th of June)
+The mandatory questions account for 100 points, while the optional questions together contribute up to an additional
+50 points.
+1. Outline the different classes of filters in terms of the
+frequency regions where they attenuate the amplitude of the oscillations. Draw the corresponding frequency response curves.
+
+15.
+
+Explain the concept of notch depth in the context of notch filters. How is it related to stop-band
+attenuation?
+
+16.
+
+Design a notch filter with notch frequency of
+20 Hz for signals sampled at 160 Hz. Attenuation
+should be of at least 40 dB and the bandwidth of 4
+Hz. The gain in the passband should be unity.
+
+2. What is the passband of a filter? How is it different
+from the stopband?
+3. What do we mean by the cut-off frequency of a filter?
+
+Hint: Use the direct design method with two poles and two
+zeros. Check the course material.
+
+4. Explain the concept of rolloff in filter design. How
+is it measured, and what does it indicate about a
+filter’s performance?
+
+17.
+
+5. Define the following terms in the context of filter
+design: passband, stopband, cutoff frequency, bandwidth, ripple, rolloff, insertion loss, and stop-band
+attenuation.
+
+18. Explain the bilinear transform method for designing
+digital filters from analog prototypes. Provide an
+example.
+
+6. Explain the significance of the order of a filter. How
+does it relate to the number of poles in the zdomain?
+
+19.
+
+7. What is ripple in the context of filter design? How
+does it affect the filter’s performance in the passband
+and stopband?
+8.
+
+Implement a Python script to compute and plot
+the frequency response of the IIR filter designed in
+the previous question.
+
+Derive the bilinear transformation formula.
+
+20. Design a low-pass IIR filter with a cutoff frequency
+of 5 Hz and a sampling frequency of 20 Hz using the
+bilinear transform method. Provide the filter coefficients.
+
+Describe the trade-offs involved in filter design
+between the transition band, filter order, and ripple
+amplitude.
+
+Hint: Use the direct design method with a single zero and
+pole. Check the course material.
+
+9. Explain the concept of a chirp signal. Sketch its
+waveform and also the effect of different types of filters on it (low-, high-, bandpass).
+
+21. Describe the concept of pre-warping in the bilinear
+transform method. Why is it necessary and how is
+it applied?
+
+10. What are the different approaches to designing an
+IIR filter?
+
+22.
+
+Estimate the correction in the cutoff frequency
+ωc for a sampling rate of 100 Hz using the prewarping method.
+
+23.
+
+Derive up to second order the pre-warp correction using the MacLaurin series.
+
+11. Describe the process of digitizing an analog filter.
+What are the common methods used for this purpose?
+12. What is the significance of the Nyquist frequency
+in digital filter design? How does it relate to the
+sampling rate? How is it represented in the z-plane?
+
+24. Explain the impulse-invariant method for designing
+IIR filters. How does it work and what are its main
+advantages and disadvantages?
+
+13. Design a lowpass filter for signals sampled at 16 Hz
+such that the direct current gain is unity and the
+cutoff frequency is at 4Hz.
+
+0.465z
+25. Given the transfer function H(z) = z−0.535
+, verify
+the correctness of this representation for a low-pass
+filter designed using the impulse-invariant method.
+
+Hint: Use the direct design method with a single zero and
+pole. Check the course material.
+
+26. Describe the process of mapping poles and zeros
+from the s-plane to the z-plane. Why is this important in digital filter design?
+
+14. What is a notch filter? What parameters are critical
+in defining the filter’s characteristics?
+
+1
+
+
+
+=== LAB 10 CODE ===
+########## LAB 10 ##########
+--- Code Cell 0 ---
+# impulse response of a simple cont. LTI
+cs = signal.lti([10], [1, 10])
+t, sig = cs.impulse(T = arange(0, 10, 0.01))    
+plot(t, sig, '.')
+yscale('log')
+plot(t, 10*exp(-10*t))
+
+--- Code Cell 1 ---
+ds = signal.dlti([1], [1, -0.5])
+n, h = ds.impulse()
+stem(n, h[0], 'o')
+show()
+
+--- Code Cell 2 ---
+plot(n, h[0], 'o')
+ht = zeros(len(h[0]))
+ht[1:] = 0.5**arange(len(h[0]) - 1)
+plot(n, ht,'.-')
+plot(n, h[0], 'o')
+yscale('log')
+plot(n, h[0], 'o')
+show()
+
+--- Code Cell 3 ---
+w, h = signal.freqz([1], [1, -1, 0.5])
+ds = signal.dlti([1], [1, -1, 0.5])
+n, hn = ds.impulse()
+stem(n, hn[0])
+show()
+
+--- Code Cell 4 ---
+ds = signal.dlti([1], [1, -1, 0.5])
+n, h = ds.impulse()
+stem(n, h[0], 'o')
+ht = zeros(len(h[0]))
+# see from last week analytical approach
+ht[1:] = (lambda n: 2*sin((n-1)*pi/4)/sqrt(2)**(n-1))(arange(1, len(h[0])))
+stem(n, h[0])
+plot(n, ht, 'r-')
+
+--- Code Cell 5 ---
+# to illustrate that it is an exponentially decaying oscillation
+semilogy(n, abs(ht))
+grid()
+
+--- Code Cell 6 ---
+# to_zpk() method of an LTI system returns the zeros and poles
+print(ds.to_zpk())
+
+--- Code Cell 7 ---
+# to verify the frequency response (magnitude and phase)
+w, H = ds.freqresp() # complex freq. response including both
+# compare freq. response and the output of the bode() method
+w, gain, phase = ds.bode(w = w)
+semilogy(w, 20*log10(abs(H)), 'r-', linewidth=15, alpha=0.3)
+semilogy(w, gain, 'k-', linewidth=2, alpha=1)
+
+--- Code Cell 8 ---
+
+

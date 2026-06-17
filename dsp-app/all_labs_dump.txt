@@ -1,0 +1,2566 @@
+########## LAB 01 ##########
+--- Markdown Cell 0 ---
+# Introduction to Python
+
+## Interactive mode, lists, functions
+
+--- Code Cell 1 ---
+2+3
+print(2+3)
+a=2
+b=3
+a+b
+
+--- Code Cell 2 ---
+2+3
+print(2+3)
+
+--- Code Cell 3 ---
+a, b = 2, 3
+print(a+b)
+
+--- Code Cell 4 ---
+l = [1, 3, [0, 1], 'c', lambda x: x*x]
+l
+
+--- Code Cell 5 ---
+l[0]
+len(l), l[4], l[len(l) -1], 3*[0,1,2]
+#l[len(l)] # IndexError: list index out of range
+
+--- Code Cell 6 ---
+l[-1], l[-2], l[-3], l[-4], l[-5]
+#l[-6] #IndexError: list index out of range
+
+--- Code Cell 7 ---
+l[2:4], l[2:], l[:3], l[:]
+
+--- Code Cell 8 ---
+m = list(range(10))
+m, m[::2], m[1:8:2], m[::-1]
+
+--- Code Cell 9 ---
+def f(x):
+    return 2*x
+f, f(m[3]), f(m) # integer multiple of a list = tiling
+
+--- Code Cell 10 ---
+import numpy as np
+f(np.array(m))  # multiplication of a numeric array = elementwise operations
+
+--- Code Cell 11 ---
+import matplotlib.pyplot as plt
+x = [0, 1]
+y = [1, 2]
+x, y = [0, 1], [1, 2]
+plt.plot(x, y)
+plt.show() # to be used in scripts (not in Jupyterlab)
+plt.ion() # to be used in terminal for interactive mode (not in Jupyterlab)
+
+--- Code Cell 12 ---
+plt.plot(x, y, '.')
+
+--- Code Cell 13 ---
+plt.plot(x, y, '.-')
+
+--- Code Cell 14 ---
+plt.plot(x, y, 'o-')
+
+--- Code Cell 15 ---
+plt.plot(x, y, 'o-', linewidth=13)
+
+--- Code Cell 16 ---
+plt.plot(x, y, 'o-', linewidth=13, markersize=20)
+
+--- Code Cell 17 ---
+plt.plot(x, y, 'bo-', linewidth=13, markersize=20, label='myline')
+plt.legend()
+plt.grid() # or plt.grid(True)
+
+--- Code Cell 18 ---
+plt.plot(x, y, 'o-', linewidth=13, markersize=20)
+plt.grid()
+plt.grid(False)
+
+--- Code Cell 19 ---
+help(plt.plot)
+
+--- Code Cell 20 ---
+N = 10
+impulse = [0]*N
+impulse[0] = 1
+impulse
+
+--- Code Cell 21 ---
+np.roll(impulse, N//2)
+
+--- Code Cell 22 ---
+plt.stem(impulse)
+
+--- Code Cell 23 ---
+n = np.arange(N) - N//2
+n
+
+--- Code Cell 24 ---
+impulse = np.zeros(N)
+impulse[0] = 1
+impulse
+
+--- Code Cell 25 ---
+plt.stem(n,impulse[n])
+
+--- Code Cell 26 ---
+step = np.zeros(N)
+step[:N//2] = 1
+step
+plt.stem(n, step[n])
+
+--- Markdown Cell 27 ---
+## Intro to plotting
+
+########## LAB 02 ##########
+--- Markdown Cell 0 ---
+# Discrete convolution
+
+$$
+z[n] = (x * y)[n] = \sum_{k=-\infty}^{\infty} x[k]\,y[n-k]
+$$
+
+
+
+--- Markdown Cell 1 ---
+### Example
+$$
+x[n] = \{\textbf{1}, 2, 3, 4, 5\}\ ,\quad y[n] = \{-1, \textbf{2}, 1\}\qquad(\text{bold} \rightarrow n=0)
+$$
+
+$$
+\renewcommand{\arraystretch}{1.3}
+\begin{array}{cc|ccccc|cc|c}
+0 & 0 & \mathbf{1} & 2 & 3 & 4 & 5 & 0 & 0 & z[n] \\ \hline
+1 & 2 & -1 & 0 & 0 & 0 & 0 & 0 & 0 & -1 \\
+
+
+--- Code Cell 2 ---
+x = [1, 2, 3, 4, 5]
+y = [-1, 2, 1]
+
+# version 1: let's not worry about limits too early
+for n in range(-10, 10): # explicit Python loop
+    s = 0
+    for k in range(-10, 10):# explicit Python loop
+        if k >= len(x) or n - k >= len(y) or k < 0 or n-k < 0:   # according to conditions in (*)
+            continue
+        else:
+            s += x[k]*y[n-k]
+    print(s, end=",")
+
+
+--- Code Cell 3 ---
+x = [1, 2, 3, 4, 5]
+y = [-1, 2, 1]
+    
+# version 2: implementing (**) and (***)
+for n in range(len(x) + len(y) - 1):# explicit Python loop
+    s = 0
+    for k in range(max(n - len(y)+1, 0), min(n+1, len(x))):# explicit Python loop
+            s += x[k]*y[n-k]
+    print(s, end=",")
+
+--- Code Cell 4 ---
+# Using numeric Python
+import numpy as np
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([-1, 2, 1])
+    
+
+
+# version 3: one explicit loop + vectorized operation
+for n in range(len(x) + len(y) - 1):# explicit Python loop
+    k = np.arange(max(n - len(y)+1, 0), min(n+1, len(x))) # vectorized op.
+    print((x[k]*y[n-k]).sum(), end=",") # vectorized op.
+
+--- Code Cell 5 ---
+# Using numeric Python
+import numpy as np
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([-1, 2, 1])
+ 
+# one liners with one explicit loop + vectorized op.
+
+# version 4    
+print([(x[np.arange(max(n - len(y)+1, 0), min(n+1, len(x)))]*y[n-np.arange(max(n - len(y)+1, 0), min(n+1, len(x)))]).sum() for n in range(len(x) + len(y) - 1)])
+
+# version 5
+print([(lambda k: x[k]*y[n-k])(np.arange(max(n - len(y)+1, 0), min(n+1, len(x)))).sum() for n in range(len(x) + len(y) - 1)])
+
+--- Code Cell 6 ---
+# convolution using the matrix multiplication approach
+# applying only vectorized operations
+n, m = len(x), len(y)
+i, j =np.arange(n+m-1), np.arange(n)
+i,j
+
+--- Code Cell 7 ---
+I, J = np.meshgrid(j, i)
+I, J
+
+--- Code Cell 8 ---
+tmp = J-I
+tmp
+
+--- Code Cell 9 ---
+tmp[tmp >= m] = -1
+tmp
+
+--- Code Cell 10 ---
+ind = np.where(tmp >= 0)
+ind
+
+--- Code Cell 11 ---
+H = np.zeros([n + m -1, n], dtype=int) # without 'dtype' it will use float
+H[ind]=y[tmp[ind]]
+H
+
+--- Code Cell 12 ---
+np.mat(H)*np.mat(x).T  # multiplying as matrices
+
+--- Code Cell 13 ---
+np.array(np.mat(H)*np.mat(x).T).flatten() 
+
+--- Code Cell 14 ---
+def convolve(x, y):
+    """
+    using version 3 : one explicit loop + vectorized operation
+    """
+    z = np.zeros(len(x) + len(y) - 1)
+    for n in range(len(z)):# explicit Python loop
+        k = np.arange(max(n - len(y)+1, 0), min(n+1, len(x))) # vectorized op.
+        z[n] = (x[k]*y[n-k]).sum() # vectorized op.
+    return z
+
+--- Code Cell 15 ---
+convolve(x, y)
+
+--- Code Cell 16 ---
+N = 10
+impulse = np.zeros(N)
+impulse[0] = 1
+impulse
+
+--- Code Cell 17 ---
+convolve(x, impulse)
+
+--- Code Cell 18 ---
+convolve(impulse, x)
+
+--- Code Cell 19 ---
+step = np.zeros(N)
+step[:N//2] = 1
+step
+
+--- Code Cell 20 ---
+convolve(step, step)
+
+--- Code Cell 21 ---
+import matplotlib.pyplot as plt
+n = np.arange(N) - N//2
+nc = np.arange(2*N -1)-N
+plt.stem(nc, convolve(step[n], step[n]), linefmt='b-', markerfmt='ro', basefmt='k-')
+
+########## LAB 03 ##########
+--- Markdown Cell 0 ---
+# FFT lab: reproducing analytical FT with Python
+
+Use the FFT as a **numerical approximation** of the continuous FT.
+$$
+X(f) = \int_{-\infty}^{\infty} x(t)\, e^{-i2\pi f t}\, dt
+$$
+and its inverse
+$$
+x(t) = \int_{-\infty}^{\infty} X(f)\, e^{i2\pi f t}\, df
+$$
+
+
+--- Code Cell 1 ---
+import numpy as np
+import matplotlib.pyplot as plt
+print(np.fft.fftfreq(2))
+print(np.fft.fftfreq(4))
+print(np.fft.fftfreq(8))
+print(np.fft.fftfreq(8, 0.1))
+
+--- Markdown Cell 2 ---
+
+**BEWARE!** The requency axis is not centered, i.e.,
+
+instead of the structure: negative frequencies, 0, positive frequencies 
+
+we have the structure: 0, positive frequencies, negative frequencies
+
+More precisely, the first N/2 elements ([:N//2]) of the FT correspond to amplitudes at zero and positive frequencies while the rest ([N//2:]) to negative frequencies.
+
+--- Code Cell 3 ---
+np.fft.fftshift(np.fft.fftfreq(8, 0.1))  # center the frequencies
+
+--- Markdown Cell 4 ---
+**Practical rules:**
+
+1. choose $f_s$ high enough,
+2. choose $N$ (window size) large enough,
+3. choose $N$ to be integer power of two, e.g., $2^8$
+4. build the frequency axis explicitly,
+5. scale by $T$,
+6. use `fftshift` when comparing with centered theoretical plots,
+7. use long windows or edge decay for non-periodic signals,
+8. zero-pad only for smoother display.
+
+--- Markdown Cell 5 ---
+## 1. Minimal template
+
+Use this every time:
+
+$$
+X(f_k)\approx T_s\sum_{n=0}^{N-1} x(t_n)e^{-i2\pi f_k t_n}.
+$$
+
+So in code we use `Ts*np.fft.fft(x)`.
+
+--- Code Cell 6 ---
+# Sampling grid
+fs = 1000.0
+T = 1 / fs
+N = 1024
+t = np.arange(N) * T
+
+# Example signal
+f0 = 50.0
+x = np.cos(2 * np.pi * f0 * t)
+plt.figure(figsize=(24, 2))  # wide and short
+plt.plot(t, x, '.-')
+
+
+--- Code Cell 7 ---
+# FFT scaled to approximate the continuous FT
+X = T * np.fft.fft(x)
+f = np.fft.fftfreq(N, T)
+
+# Centered version for comparison with theoretical plots
+Xc = np.fft.fftshift(X)
+fc = np.fft.fftshift(f)
+
+plt.figure(figsize=(8, 3.8))
+plt.plot(fc, np.abs(Xc))
+plt.xlabel("f [Hz]")
+plt.ylabel(r"$|X(f)|$")
+plt.title("Cosine: two peaks at ±f0")
+plt.grid(True)
+plt.show()
+
+--- Markdown Cell 8 ---
+## 2. Frequency grid and resolution
+
+The FFT returns values only on discrete frequencies:
+
+$$
+\Delta f = \frac{f_s}{N}.
+$$
+
+Larger \(N\) means denser frequency samples.
+
+--- Code Cell 9 ---
+for N in [256, 1024, 4096]:
+    t = np.arange(N) / fs
+    x = np.cos(2 * np.pi * f0 * t)
+    X = T * np.fft.fft(x)
+    f = np.fft.fftfreq(N, T)
+    Xc = np.fft.fftshift(X)
+    fc = np.fft.fftshift(f)
+
+    plt.figure(figsize=(8, 3.2))
+    plt.plot(fc, np.abs(Xc))
+    plt.xlim(-100, 100)
+    plt.xlabel("f [Hz]")
+    plt.ylabel(r"$|X(f)|$")
+    plt.title(fr"$N={N}$, $\Delta f = {fs/N:.3f}\,\mathrm{{Hz}}$")
+    plt.grid(True)
+    plt.show()
+
+--- Markdown Cell 10 ---
+## 3. Window fit: good vs bad case
+
+To make the FFT resemble the expected transform cleanly, it helps if the sampled signal fits the window well.
+
+Example:
+
+- good fit: integer number of periods in the window,
+- bad fit: non-integer number of periods.
+
+This is not a theory point; it is a **finite-window implementation issue**.
+
+--- Code Cell 11 ---
+T = 1.0
+N = int(fs * T)
+t = np.arange(N) / fs
+
+signals = [
+    (50.0, "good fit: 50 Hz in 1 s"),
+    (50.5, "bad fit: 50.5 Hz in 1 s"),
+]
+
+for f0, title in signals:
+    x = np.cos(2 * np.pi * f0 * t)
+    X = T * np.fft.fft(x)
+    f = np.fft.fftfreq(N, T)
+    Xc = np.fft.fftshift(X)
+    fc = np.fft.fftshift(f)
+
+    plt.figure(figsize=(8, 3.2))
+    plt.plot(fc, np.abs(Xc))
+    plt.xlim(-80, 80)
+    plt.xlabel("f [Hz]")
+    plt.ylabel(r"$|X(f)|$")
+    plt.title(title)
+    plt.grid(True)
+    plt.show()
+
+--- Markdown Cell 12 ---
+## 4. Non-periodic functions: use a long enough window
+
+Analytical transforms often assume infinite support, but the FFT only sees a finite interval.
+
+Recipe: choose the window so that the function is already small near both ends.
+
+Example:
+
+$$
+x(t)=e^{-a t^2}.
+
+
+--- Code Cell 13 ---
+fs = 2000.0
+T = 1 / fs
+N = 4096
+t = (np.arange(N) - N//2) * T   # centered time grid
+
+a = 50.0
+x = np.exp(-a * t**2)
+
+X = T * np.fft.fft(x)
+f = np.fft.fftfreq(N, T)
+Xc = np.fft.fftshift(X)
+fc = np.fft.fftshift(f)
+
+plt.figure(figsize=(8, 3.2))
+plt.plot(t, x)
+plt.xlabel("t [s]")
+plt.ylabel("x(t)")
+plt.title("Gaussian in time")
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(8, 3.2))
+plt.plot(fc, np.abs(Xc))
+plt.xlim(-100, 100)
+plt.xlabel("f [Hz]")
+plt.ylabel(r"$|X(f)|$")
+plt.title("Gaussian-like spectrum")
+plt.grid(True)
+plt.show()
+
+--- Markdown Cell 14 ---
+## Example:Rectangular pulse $\to$ sinc-shaped spectrum
+
+A compact numerical demonstration of a standard transform pair.
+
+$$
+x(t)=\mathrm{rect}\!\left(\frac{t}{T_0}\right).
+$$
+
+Again: use a centered grid and scale by $T$.
+
+--- Code Cell 15 ---
+fs = 4000.0
+T = 1 / fs
+N = 4096
+t = (np.arange(N) - N//2) * T
+
+T0 = 0.04
+x = (np.abs(t) <= T0/2).astype(float)
+
+X = Ts * np.fft.fft(x)
+f = np.fft.fftfreq(N, Ts)
+Xc = np.fft.fftshift(X)
+fc = np.fft.fftshift(f)
+
+plt.figure(figsize=(8, 3.2))
+plt.plot(t, x)
+plt.xlim(-0.08, 0.08)
+plt.xlabel("t [s]")
+plt.ylabel("x(t)")
+plt.title("Rectangular pulse")
+plt.grid(True)
+plt.show()
+
+plt.figure(figsize=(8, 3.2))
+plt.plot(fc, np.abs(Xc))
+plt.xlim(-200, 200)
+plt.xlabel("f [Hz]")
+plt.ylabel(r"$|X(f)|$")
+plt.title("Sinc-shaped magnitude")
+plt.grid(True)
+plt.show()
+
+--- Code Cell 16 ---
+
+
+########## LAB 04 ##########
+--- Code Cell 0 ---
+from numpy import *
+from numpy.fft import fft, ifft, fftfreq, fftshift
+from matplotlib.pyplot import *
+
+--- Code Cell 1 ---
+T = 0.15
+t = arange(-10, 10, T)
+rect = (abs(t) <= 0.5).astype(int)
+rect
+
+--- Code Cell 2 ---
+rect.sum()  # even number of ones
+
+--- Code Cell 3 ---
+Frect = T*fft(rect)
+max(abs(imag(Frect))) # not real, even though rect is real and even (symmetric). Why?
+# Because there are an even number of ones (see above)
+
+--- Code Cell 4 ---
+# How to fix it. 
+T = 0.13
+t = arange(-10, 10, T)
+rect = (abs(t) <= 0.5).astype(int)
+rect.sum()  # odd number. Yeee!!
+
+--- Code Cell 5 ---
+Frect = T*fft(rect)
+max(abs(imag(Frect))) # all real. Yeeee!
+
+--- Code Cell 6 ---
+f = fftfreq(len(Frect), T)
+f
+
+--- Code Cell 7 ---
+plot(fftshift(f), fftshift(real(Frect)), '.-')
+
+--- Code Cell 8 ---
+# Question: why do we have that high 'frequency' oscillation?
+# Answer: because the rectangle should be centered around the 0 index of the array not in the middle
+# Example:
+# I want to calculate the Fourier transform of the peaked signal
+# x = array([0, 0.1, 0.3, 0.6, 1.0, 0.6, 0.3, 0.1]
+x = array([1, 0.6, 0.3, 0.1, 0, 0.1, 0.3, 0.6]) # the right way of representing a symmetric peak to be used in FFT
+plot(x, '.-') # this is how it is stored -> not symmetric
+plot(fftshift(x), '.-') # this is how it is interpreted by FFT  -> symmetric
+grid()
+
+--- Markdown Cell 9 ---
+**Time-shift property of the Fourier transform**
+$$
+\mathcal{F}\{x(t - t_0)\}(f) = X(f)\, e^{-2\pi i f t_0}
+$$
+
+--- Code Cell 10 ---
+plot(fftshift(real(fft(x)))) # the correct way of representing the Fourier transform of the peaked function
+
+--- Code Cell 11 ---
+plot(fftshift(real(fft(fftshift(x))))) # we have an extra oscillation because of the fftshift(x). The outer fftshift is just for the better visualization of the FFT result.
+
+--- Code Cell 12 ---
+#getting back to the 'rect'-s FFT
+#let's shift the function so that it is centered on the 0 index
+Frect = T*fft(fftshift(rect))
+plot(fftshift(f), fftshift(Frect),'.-') # Yeeee!
+
+--- Code Cell 13 ---
+# Question: Why just three maxima?
+# Answer: because of the 'thin' rectangle. Rule: small temporal scale -> large frequency scale
+# Question: How to make it have more waves.
+# Answer: increase temporal scale (without changing the size of the array)
+T = 0.013 # higher resolution
+t = arange(-1, 1, T) # smaller interval (with respect to the rectangle's width)
+rect = (abs(t) <= 0.5).astype(int)
+rect.sum()  # odd number. Yeee!!
+
+--- Code Cell 14 ---
+plot(t, rect, '.-')
+
+--- Code Cell 15 ---
+Frect = T*fft(fftshift(rect))
+plot(fftshift(f), fftshift(Frect),'.-') # Yeee! large temporal scale -> small frequency scale
+
+--- Markdown Cell 16 ---
+Let's check this:
+$$
+\mathcal{F}\left[e^{-t^2}\right]=\sqrt{\pi}e^{-\pi^2 f^2}
+$$
+
+--- Code Cell 17 ---
+T = 0.1
+t = arange(-10, 10, T)
+x = exp(-t**2)
+plot(t, x, '.-')
+
+--- Code Cell 18 ---
+fftshift(x) # check whether the peak is indeed at index 0. Yeee!
+
+--- Code Cell 19 ---
+X = T*fft(fftshift(x))
+f = fftfreq(len(x), T)
+# check if its real
+max(abs(imag(X))) # Yeee!
+
+--- Code Cell 20 ---
+plot(fftshift(f), fftshift(X), '.-', label='FFT')
+# compare with theory
+ff = linspace(f.min(), f.max(), 10000)
+plot(ff, sqrt(pi)*exp(-pi*pi*ff**2), label='theory')
+legend() # Yeeee!
+
+--- Code Cell 21 ---
+
+
+--- Code Cell 22 ---
+
+
+########## LAB 05 ##########
+--- Markdown Cell 0 ---
+## Sampling and reconstruction
+
+--- Code Cell 1 ---
+from numpy import *
+from numpy.fft import ifft, fftfreq, fftshift
+from matplotlib.pyplot import *
+
+--- Markdown Cell 2 ---
+### Create the 'continuous' signal starting from a finite support Fourier transform
+
+$$
+\text{triangle spectrum}\qquad X(f) = 
+\begin{cases}
+1 - \frac{|f|}{f_\text{max}}\ ,& |f| \leq f_\text{max} \\
+0 & |f| > f_\text{max}
+\end{cases}
+$$
+
+
+
+--- Code Cell 3 ---
+# We shall create a 'continuous' signal with a triangle shaped Fourier transform
+dt = 0.001 
+fs = 1/dt # resolution of the 'continuous' signal
+
+fmax = 4.0 # maximum frequency (half width of the triangle)
+N = 4096 # the size of our 'continuous' signal: N points, i.e. N*T long
+f = fftfreq(N, dt) # the 'continous' Fourier transform will have the same number of points at the same number of frequencies
+X = zeros(N)
+X[abs(f) <= fmax] = (1 - abs(f)/fmax)[abs(f) <= fmax] # triangle shape
+X  # the peak is at index 0. Good!
+
+--- Code Cell 4 ---
+plot(fftshift(f), fftshift(X), '.-')
+
+--- Code Cell 5 ---
+plot(fftshift(f), fftshift(X), '.-')
+xlim([-10,10]) # zoom in to see better (non-interactive)
+
+--- Code Cell 6 ---
+# get the signal as inverse Fourier transform
+x = fs*real(ifft(X)) # N*(fs/N)*ifft(X)
+x
+
+--- Code Cell 7 ---
+t = fftfreq(N, fs/N)
+plot(fftshift(t), fftshift(x), '.-')
+# Now we have our 'continuous' signal in x.
+
+--- Markdown Cell 8 ---
+### Sampling
+
+--- Code Cell 9 ---
+# Let's sample it by keeping only every 16th points
+m = 16
+T = dt*m # this is the sampling period
+xhat  = x[::m] # sampled (discrete time) signal
+tsamp = t[::m] # sampled time
+plot(fftshift(t), fftshift(x), '.-', label='original continuous')
+plot(fftshift(tsamp), fftshift(xhat), 'o', label='sampled')
+legend()
+
+--- Markdown Cell 10 ---
+### Reconstruction
+
+$$
+			\!\!\begin{aligned}
+					{x}(t) &= 	\mathcal{F}^{-1}[{X}](t)=
+					\hat{x}\ast \frac{1}{T}\operatorname{sinc}_\pi(t/T)=\\
+					&=\sum_{n=-\infty}^\infty\!\!\!\! x[n]\dfrac{\sin\pi(t-nT)/T}{\pi(t-nT)/T}\ .
+			\end{aligned}
+$$
+
+--- Code Cell 11 ---
+def sincpi(x):
+    x[x == 0] = 1e-13 # to avoid problems when dividint with it
+    return sin(pi*x)/(pi*x)
+# these are the different shifted 'sinc' functions the linear combination of which reconstructs the original 'continuous' signal
+plot(fftshift(t), fftshift(sincpi(t/T)))
+plot(fftshift(t), fftshift(sincpi(t/T - 1)))
+plot(fftshift(t), fftshift(sincpi(t/T - 2)))
+plot(fftshift(t), fftshift(sincpi(t/T - 3)))
+xlim([-0.2, 0.2])
+
+--- Code Cell 12 ---
+Nsamp = N//m # size of the sampled signal (the same as len(xhat))
+xrec = zeros(len(t)) # the reconstructed signal ('continuous')
+for n in arange(-Nsamp//2, Nsamp//2):
+    xrec += xhat[n]*sincpi(t/T - n)
+plot(fftshift(t), fftshift(x), '.-', label='original continuous')
+plot(fftshift(t), fftshift(xrec), '-', label='reconstructed')
+legend()
+
+--- Code Cell 13 ---
+
+
+########## LAB 06 ##########
+--- Markdown Cell 0 ---
+## Fast Fourier Transform
+
+--- Code Cell 1 ---
+from numpy import *
+from numpy.fft import fft, ifft, fftfreq, fftshift
+from matplotlib.pyplot import *
+
+def ditfft2(x):
+    N = len(x)
+    if N == 1:
+        return x
+    else:
+        even = ditfft2(x[::2])
+        odd = exp(-2*pi*1j/N*arange(N/2))*ditfft2(x[1::2])
+        return hstack([even+odd, even - odd])
+
+--- Code Cell 2 ---
+x = arange(16)
+fft(x)
+
+--- Code Cell 3 ---
+ditfft2(x)
+
+--- Code Cell 4 ---
+plot(fftshift(fftfreq(len(x))), fftshift(abs(    fft(x))), '.-') 
+plot(fftshift(fftfreq(len(x))), fftshift(abs(ditfft2(x))), 'o' ) 
+
+--- Code Cell 5 ---
+# complex constants
+2+0.5j
+
+--- Markdown Cell 6 ---
+## Zero-padding
+
+Zero-padding does **not** improve the true resolution
+
+$$
+\Delta f = \frac{f_s}{N},
+$$
+
+but it gives a denser plotted spectrum, so peaks are easier to read.
+
+--- Code Cell 7 ---
+N = 128
+tmax = 2
+T = 2*tmax/N
+tm = 0.5
+
+--- Code Cell 8 ---
+t = arange(-tmax, tmax, T)
+x = zeros(N)
+#x[abs(t) <= tm] = (1 - abs(t)/tm)[abs(t) <= tm]
+x[abs(t) <= tm] = 1
+
+--- Code Cell 9 ---
+plot(t, x, '.-')
+
+--- Code Cell 10 ---
+X = T*fft(fftshift(x))
+
+--- Code Cell 11 ---
+f = fftfreq(N, T)
+
+
+--- Code Cell 12 ---
+plot(fftshift(f), fftshift(real(X)), 'o-')
+#xlim([-16, 16])
+
+--- Code Cell 13 ---
+Npad = 512
+xp = pad(x,((Npad - N)//2, (Npad - N)//2))
+tpmax = tmax*Npad//N
+tp = arange(-tpmax, tpmax, T)
+
+--- Code Cell 14 ---
+plot(tp, xp, '.-')
+
+--- Code Cell 15 ---
+__version__
+
+--- Code Cell 16 ---
+fp = fftfreq(Npad, T)
+Xp = T*fft(roll(fftshift(xp), 0))
+plot(fftshift(fp), (fftshift((real(Xp)))), '.-', label='real')
+plot(fftshift(fp), (fftshift((imag(Xp)))), '.-', label='imag')
+plot(fftshift(fp), (fftshift((abs(Xp)))), '.-', label='magnitude')
+#xlim([-3.5, 3.5])
+legend()
+
+--- Code Cell 17 ---
+# again: shifting introduces extra phase factor (oscillations)
+# but the magnitude is not affected
+Xp = T*fft(roll(fftshift(xp), 10)) # shifting
+plot(fftshift(fp), (fftshift((real(Xp)))), '.-', label='real')
+plot(fftshift(fp), (fftshift((imag(Xp)))), '.-', label='imag')
+plot(fftshift(fp), (fftshift((abs(Xp)))), '.-', label='magnitude')
+#xlim([-3.5, 3.5])
+legend()
+
+
+--- Code Cell 18 ---
+# different (simpler) padding if you don't care about oscillations due to phase shifts (look at the magnitude)
+xp = pad(x, ( Npad -N, 0))
+Xp = T*fft(xp)
+plot(fftshift(fp), abs(fftshift((Xp))), '.-')
+#xlim([-1.5, 1.5])
+
+--- Code Cell 19 ---
+fs = 1000.0
+T = 1 / fs
+N = 256
+t = np.arange(N) / fs
+x = np.cos(2 * np.pi * 50.5 * t)
+
+# Original FFT
+X1 = T * np.fft.fft(x)
+f1 = np.fft.fftfreq(N, T)
+
+# Zero-padded FFT
+Npad = 4096
+xpad = np.pad(x, (0, Npad - N))
+X2 = T * np.fft.fft(xpad)
+f2 = np.fft.fftfreq(Npad, T)
+
+plt.figure(figsize=(8, 3.2))
+plt.plot(np.fft.fftshift(f1), np.abs(np.fft.fftshift(X1)), '.-', label="original", markersize=10)
+plt.plot(np.fft.fftshift(f2), np.abs(np.fft.fftshift(X2)), label="zero-padded")
+plt.xlim(-80, 80)
+plt.xlabel("f [Hz]")
+plt.ylabel(r"$|X(f)|$")
+plt.title("Zero-padding: smoother display only")
+plt.grid(True)
+plt.legend()
+plt.show()
+
+--- Markdown Cell 20 ---
+ ## Leakage
+
+--- Code Cell 21 ---
+T = 0.1
+tau = 10*T
+tmax = 20*tau
+t = arange(-tmax, tmax, T)
+x = cos(2*pi*t/tau)
+plot(t, x, '.-')
+#xlim([-5, 5])
+
+--- Code Cell 22 ---
+X = T*fft(fftshift(x))  # should be a Dirac delta
+
+--- Code Cell 23 ---
+f = fftfreq(len(X), T)
+
+--- Code Cell 24 ---
+plot(fftshift(f), fftshift(real(X)), '.-')
+xlim([-2, 0])
+
+--- Code Cell 25 ---
+X = T*fft(fftshift(x))
+f = fftfreq(len(X), T)
+plot(fftshift(f), fftshift(abs(X)), '.-')
+xlim([-2, -0.5])
+
+--- Code Cell 26 ---
+window = 2.5
+x[abs(t) > window] = 0
+plot(t, x)
+
+--- Code Cell 27 ---
+X = T*fft(fftshift(x))
+plot(fftshift(f), fftshift(abs(X)), '.-')
+#xlim([-2, -0.5])
+
+--- Code Cell 28 ---
+def rect(t):
+    return (abs(t) <= 1/2).astype(float)
+
+--- Code Cell 29 ---
+plot(t, rect(t), '.-')
+
+--- Code Cell 30 ---
+def triangle(t):
+    res = zeros(len(t))
+    res[abs(t) < 0.5] = (1 - 2*abs(t))[abs(t) < 0.5]
+    return res
+def Hann(t):
+    res = zeros(len(t))
+    res[abs(t) < 0.5] = (cos(pi*abs(t))**2)[abs(t) < 0.5]
+    return res
+
+--- Code Cell 31 ---
+plot(t, triangle(t), '.-')
+plot(t, Hann(t), '.-')
+xlim([-1, 1])
+
+--- Code Cell 32 ---
+Xrect = T*fft((rect    (t)))
+Xtri  = T*fft((triangle(t)))
+XHann = T*fft((Hann(t)))
+plot(fftshift(f), fftshift(abs(Xrect)), '.-', label='rect')
+plot(fftshift(f), fftshift(abs(Xtri )), '.-', label='triangle')
+plot(fftshift(f), fftshift(abs(XHann)), '.-', label='Hann')
+legend()
+
+--- Code Cell 33 ---
+plot(fftshift(f), 20*log10(fftshift(abs(Xrect)+1e-20)/abs(Xrect).max()), '.-', label='rect')
+plot(fftshift(f), 20*log10(fftshift(abs(Xtri )+1e-20)/abs(Xtri ).max()), '.-', label='triangle')
+plot(fftshift(f), 20*log10(fftshift(abs(XHann)+1e-20)/abs(XHann).max()), '.-', label='triangle')
+xlim([0, f.max()])
+ylim([-100, 0.5])
+legend()
+
+--- Code Cell 34 ---
+plot(t, Hann(t), '.-')
+xlim([-2, 2])
+
+--- Markdown Cell 35 ---
+## Scalloping
+
+--- Code Cell 36 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+fs = 1000
+N = 1000
+n = np.arange(N)
+
+def show_fft(f0):
+    x = np.cos(2*np.pi*f0*n/fs)
+    X = np.fft.fft(x)
+    f = np.fft.fftfreq(N, 1/fs)
+
+    plt.figure(figsize=(12,4))
+    plt.plot(f[:N//2], np.abs(X[:N//2]))
+    plt.title(f"f0 = {f0} Hz")
+    plt.xlabel("Frequency (Hz)")
+    plt.ylabel("Magnitude")
+    plt.xlim([f0 -10, f0+10])
+    plt.grid()
+    plt.show()
+
+# Perfect alignment
+show_fft(10)
+
+# Off-bin → scalloping loss
+show_fft(10.76)
+
+--- Code Cell 37 ---
+T = 0.15
+f0 = 1
+period = 1/f0#10*T
+#tmax = 5*period
+t = arange(-tmax, tmax, T)
+x = cos(2*pi*t/period)
+plot(t, x, '.-')
+
+--- Code Cell 38 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+fs = 256          # Hz
+N = 256           # original record length
+Npad = 2048       # zero-padded FFT length
+f0 = 9.5          # Hz, exactly halfway between 9 and 10 Hz bins for 256-point FFT
+
+# Time-domain signal
+n = np.arange(N)
+x = np.sin(2 * np.pi * f0 * n / fs)
+
+# FFTs
+X_256 = np.fft.rfft(x, n=N)
+X_2048 = np.fft.rfft(x, n=Npad)
+
+# Frequency axes
+f_256 = np.fft.rfftfreq(N, d=1/fs)
+f_2048 = np.fft.rfftfreq(Npad, d=1/fs)
+
+# Normalize both to the peak of the zero-padded spectrum
+ref = np.max(np.abs(X_2048))
+mag_256_db = 20 * np.log10(np.abs(X_256) / ref)
+mag_2048_db = 20 * np.log10(np.abs(X_2048) / ref)
+
+# Avoid -inf in plotting
+floor_db = -40
+mag_256_db = np.maximum(mag_256_db, floor_db)
+mag_2048_db = np.maximum(mag_2048_db, floor_db)
+
+# Scalloping loss of the 256-point FFT
+idx_9 = np.argmin(np.abs(f_256 - 9))
+idx_10 = np.argmin(np.abs(f_256 - 10))
+scallop_db = mag_256_db[idx_9]   # same as idx_10 here, by symmetry
+
+# Plot
+plt.figure(figsize=(8.8, 5.2))
+
+plt.plot(f_2048, mag_2048_db, color='blue', lw=1.5, label='2048 point FFT')
+plt.plot(f_256, mag_256_db, 'o-', color='red', ms=5, lw=1.5, label='256 point FFT')
+
+plt.xlim(5, 15)
+plt.ylim(-40, 1)
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Magnitude (dB)')
+plt.title('FFT of 9.5 Hz sine wave through Boxcar window')
+plt.grid(True, alpha=0.35)
+plt.legend(loc='upper right')
+
+# Annotation
+plt.annotate(
+    f'Scalloping loss\n{scallop_db:.2f} dB',
+    xy=(9, scallop_db),
+    xytext=(5.6, -3.5),
+    arrowprops=dict(arrowstyle='->', lw=1),
+    fontsize=9,
+    ha='left',
+    va='top'
+)
+
+plt.tight_layout()
+plt.show()
+
+--- Code Cell 39 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Parameters
+fs = 256          # Hz
+N = 256           # original record length
+Npad = 2048       # zero-padded FFT length
+f0 = 9.5          # Hz, exactly halfway between 9 and 10 Hz bins for 256-point FFT
+
+# Time-domain signal
+n = np.arange(N)
+x = np.sin(2 * np.pi * f0 * n / fs)
+
+# FFTs
+X_256 = np.fft.fft(x, n=N)
+X_2048 = np.fft.fft(x, n=Npad)
+
+# Frequency axes
+f_256 = np.fft.fftfreq(N, d=1/fs)
+f_2048 = np.fft.fftfreq(Npad, d=1/fs)
+
+
+# Plot
+
+plt.plot(f_2048, abs(X_2048), color='blue', lw=1.5, label='2048 point FFT')
+plt.plot(f_256, abs(X_256), 'o-', color='red', ms=5, lw=1.5, label='256 point FFT')
+
+plt.xlim(0, 20)
+# plt.ylim(-40, 1)
+plt.xlabel('Frequency (Hz)')
+plt.title('FFT of 9.5 Hz sine wave through Boxcar window')
+plt.grid(True, alpha=0.35)
+plt.legend(loc='upper right')
+
+
+plt.show()
+
+--- Code Cell 40 ---
+import numpy as np
+import matplotlib.pyplot as plt
+
+# =========================
+# PARAMETERS
+# =========================
+N = 64                     # window length
+pad = 16                   # zero-padding factor (for smooth DTFT view)
+Nfft = N * pad             # FFT size
+
+# =========================
+# WINDOW (change here)
+# =========================
+n = np.arange(N)
+
+# Examples (uncomment one)
+w = np.ones(N)                              # Rectangular
+# w = np.hanning(N)                         # Hann
+# w = np.hamming(N)                         # Hamming
+# w = np.blackman(N)                        # Blackman
+
+# =========================
+# ZERO-PAD (DTFT sampling)
+# =========================
+w_pad = np.zeros(Nfft)
+w_pad[:N] = w
+
+# =========================
+# FFT → DTFT samples
+# =========================
+W = np.fft.fft(w_pad)
+W = np.fft.fftshift(W)                      # center at 0 frequency
+
+# =========================
+# NORMALIZED FREQUENCY AXIS
+# =========================
+f = np.fft.fftshift(np.fft.fftfreq(Nfft, d=1))  # cycles/sample
+
+# =========================
+# MAGNITUDE (dB)
+# =========================
+W_mag = np.abs(W)
+W_dB = 20 * np.log10(W_mag / np.max(W_mag) + 1e-12)
+
+# =========================
+# PLOTTING
+# =========================
+plt.figure(figsize=(12, 4))
+
+plt.plot(f, W_dB)
+plt.xlabel('Normalized frequency $\hat{f}$ (cycles/sample)')
+plt.ylabel('Magnitude (dB)')
+plt.title('Window DTFT (normalized frequency)')
+plt.grid()
+
+plt.ylim([-120, 5])
+plt.xlim([-0.5, 0.5])
+
+plt.show()
+
+--- Code Cell 41 ---
+x = arange(20).reshape((4, 5))
+x
+
+--- Code Cell 42 ---
+x.sum(axis=0)
+
+--- Code Cell 43 ---
+x.sum(axis=1)
+
+--- Code Cell 44 ---
+
+
+########## LAB 07 ##########
+--- Markdown Cell 0 ---
+## Power spectral density using Welch's method for one-sided spectrum
+
+1. Split signal into overlapping segments of length NFFT
+2. Detrend each segment
+3. Apply window (length NFFT!)
+4. Zero-pad (>= NFFT, power of 2)
+5. Compute FFT
+6. Keep only positive frequencies (one-sided spectrum)
+7. Apply proper normalization (window + Fs + one-sided scaling)
+
+--- Code Cell 1 ---
+#--------------------------------------------------------------------------------------------
+from pylab import *
+import numpy as np
+import types
+
+#----------------------------------------------------------------    
+def apply_window(x, window):
+    """
+    Apply a window to signal x.
+
+    'window' can be:
+    1. A function: window(x) returns a windowed version of x
+    2. An array: same shape as x, applied multiplicatively
+
+    In DSP terms:
+    x_w[n] = x[n] * w[n]
+    """
+    if type(window) == types.FunctionType:
+        # Window is a function that internally applies the weighting
+        return window(x)
+    else:
+        # Window is an array → pointwise multiplication
+        return window * x
+
+
+#----------------------------------------------------------------    
+def _spectral_helper(x, NFFT=256, Fs=2, detrend=detrend_none,
+                 window=window_hanning, noverlap=0, pad_to=None):
+
+    """
+    Compute windowed, segmented FFT slices of a signal.
+
+    This is a low-level routine used in spectral estimation (e.g. Welch PSD).
+
+    Pipeline:
+    1. Split signal into overlapping segments of length NFFT
+    2. Detrend each segment
+    3. Apply window (length NFFT!)
+    4. Zero-pad to length pad_to (>= NFFT, power of 2)
+    5. Compute FFT
+    6. Keep only positive frequencies (one-sided spectrum)
+    7. Apply proper normalization (window + Fs + one-sided scaling)
+
+    Returns:
+    - FFTSlices: normalized complex spectra (per segment)
+    - freqs: frequency axis (0 → Fs/2)
+    """
+
+    # Original signal length
+    n = len(x)
+
+    #------------------------------------------------------------
+    # Ensure we have at least one full segment
+    #------------------------------------------------------------
+    if len(x) < NFFT:
+        # Resize to NFFT and zero-pad the rest
+        x = np.resize(x, (NFFT,))
+        x[n:] = 0
+        # NOTE: np.resize may repeat data, but we overwrite with zeros
+
+    #------------------------------------------------------------
+    # FFT length selection
+    #------------------------------------------------------------
+    if pad_to is None:
+        pad_to = NFFT
+
+    # Force FFT length to next power of 2 (computational efficiency)
+    pad_to = 2**int(np.ceil(np.log2(pad_to)))
+
+    # Number of frequencies in one-sided spectrum
+    # (DC → Nyquist)
+    numFreqs = pad_to // 2 + 1
+
+    #------------------------------------------------------------
+    # Segment indexing (overlapping windows)
+    #------------------------------------------------------------
+    # Step size = hop = NFFT - noverlap
+    ind = list(range(0, n - NFFT + 1, NFFT - noverlap))
+
+    # Number of segments
+    numSlices = len(ind)
+
+    # Allocate array:
+    # rows → time segments
+    # cols → frequency bins
+    FFTSlices = np.zeros((numSlices, numFreqs), dtype=np.complex_)
+
+    # Simple list of indices for looping
+    slices = list(range(numSlices))
+
+    #------------------------------------------------------------
+    # Window normalization (VERY IMPORTANT)
+    #------------------------------------------------------------
+    # Apply window to a constant signal of ones → yields window itself
+    # Then compute L2 norm:
+    # normVal = sqrt(sum w[n]^2)
+    #
+    # This ensures energy normalization:
+    # compensates for attenuation introduced by the window
+    normVal = np.linalg.norm(apply_window(np.ones(NFFT), window))
+
+    #------------------------------------------------------------
+    # Main loop: process each segment
+    #------------------------------------------------------------
+    for iSlice in slices:
+
+        # Extract segment of length NFFT
+        segment = x[ind[iSlice]:ind[iSlice] + NFFT]
+
+        # Remove mean / trend if needed
+        segment = detrend(segment)
+
+        # Apply window (length NFFT!)
+        segment = apply_window(segment, window)
+
+        # Compute FFT:
+        # - zero-padded to length pad_to
+        # - gives finer frequency grid (interpolation), not higher resolution
+        spectrum = np.fft.fft(segment, n=pad_to)
+
+        # Keep only positive frequencies (one-sided spectrum)
+        FFTSlices[iSlice, :] = spectrum[:numFreqs]
+
+    #------------------------------------------------------------
+    # Frequency axis
+    #------------------------------------------------------------
+    # f_k = k * Fs / pad_to
+    freqs = float(Fs) / pad_to * np.arange(numFreqs)
+
+    #------------------------------------------------------------
+    # One-sided spectrum correction
+    #------------------------------------------------------------
+    # We removed negative frequencies.
+    # For real signals:
+    # |X(-f)|^2 = |X(f)|^2
+    #
+    # To preserve total energy:
+    # double the power of interior bins
+    # → multiply amplitudes by sqrt(2)
+    #
+    # DO NOT scale:
+    # - DC (index 0)
+    # - Nyquist (last index)
+    FFTSlices[:, 1:-1] *= np.sqrt(2)
+
+    #------------------------------------------------------------
+    # Final normalization
+    #------------------------------------------------------------
+    # Divide by:
+    # 1. normVal → window energy normalization
+    # 2. sqrt(Fs) → ensures PSD units (V^2 / Hz after squaring)
+    #
+    # After this:
+    # |FFTSlices|^2 behaves like a properly scaled PSD contribution
+    return FFTSlices / normVal / np.sqrt(Fs), freqs
+
+    #------------------------------------------------------------
+    # NOTE (commented original line):
+    # Pxx = mean(|Slices|^2)
+    #
+    # This function returns the building blocks for PSD:
+    # averaging over slices is done outside
+    #------------------------------------------------------------
+
+#--------------------------------------------------------------------------------------------
+def psd(x, NFFT=256, Fs=2, detrend=detrend_none, window=window_hanning, noverlap=0, pad_to=None):
+    X, f =     _spectral_helper(x, NFFT, Fs, detrend, window, noverlap, pad_to)
+    Pxx = np.abs(X)**2
+    return Pxx.mean(axis=0), f
+
+--- Code Cell 2 ---
+from scipy.io import wavfile
+import scipy.io
+samplerate, data = wavfile.read("02. School Boy-9.wav")
+print(samplerate, data.shape)
+
+--- Code Cell 3 ---
+plot(data[10000:50000, 0])
+
+--- Code Cell 4 ---
+s, f = psd(data[:, 0], Fs=samplerate, NFFT=2**15, noverlap=2**14, detrend=detrend_none)
+figure(1)
+semilogy(f, s)
+#xlim([0, 10])
+#ylim([0,100])
+grid()
+s
+
+--- Code Cell 5 ---
+len(f) # NFFT//2 + 1
+
+--- Code Cell 6 ---
+from scipy.signal import welch
+
+f, s = welch(
+    data[:, 0],
+    fs=samplerate,
+    window='hann',
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend=False,
+    nfft=2**15,          # matches pad_to = NFFT
+    return_onesided=True,
+    scaling='density'    # ensures V^2/Hz
+)
+s
+
+--- Code Cell 7 ---
+semilogy(f, s)
+
+--- Code Cell 8 ---
+
+
+--- Code Cell 9 ---
+freq, Pxx = signal.welch(data[:, 0], fs=samplerate, nperseg=2**10, noverlap=2**9, window='box', detrend='constant')
+semilogy(freq, Pxx)
+#semilogy(f, s)
+xlim([0, 5000])
+print(s, Pxx)
+print(len(s), len(Pxx))
+
+--- Markdown Cell 10 ---
+## Parseval theorem
+
+
+$$
+\int_{-\infty}^{\infty} |x(t)|^2 \, dt
+=
+\int_{-\infty}^{\infty} |X(f)|^2 \, df
+$$
+$$
+\sum_{n=0}^{N-1} |x[n]|^2
+
+
+--- Code Cell 11 ---
+### Using FFT
+import numpy as np
+
+x = data[:, 0].astype(float)
+N = len(x)
+
+#------------------------------------------------------------
+# Time-domain energy
+#------------------------------------------------------------
+E_time = np.sum(np.abs(x)**2)
+
+#------------------------------------------------------------
+# Frequency-domain energy
+#------------------------------------------------------------
+X = np.fft.fft(x)
+
+E_freq = (1.0 / N) * np.sum(np.abs(X)**2)
+
+E_time,  E_freq
+
+--- Code Cell 12 ---
+### Using power spectral density
+
+import numpy as np
+
+x = data[:, 0].astype(float)
+N = len(x)
+
+# ------------------------------------------------------------
+# Time-domain average power
+# ------------------------------------------------------------
+P_time = np.mean(np.abs(x)**2)
+
+# ------------------------------------------------------------
+# PSD from your routine
+# no detrend, no window, no padding, no overlap
+# ------------------------------------------------------------
+s, f = psd(
+    x,
+    Fs=samplerate,
+    NFFT=N,
+    noverlap=0,
+    detrend=detrend_none,
+    window=ones(N),
+    pad_to=N
+)
+
+# ------------------------------------------------------------
+# Frequency-domain power from PSD
+# ------------------------------------------------------------
+P_freq_sum = np.sum(s) * (f[1] - f[0])
+
+P_time, P_freq_sum
+
+--- Code Cell 13 ---
+f, s = welch(
+    x,
+    fs=samplerate,
+    window='boxcar',
+    nperseg=N,
+    noverlap=0,
+    detrend=False,
+    nfft=N,          # matches pad_to = NFFT
+    return_onesided=True,
+    scaling='density'    # ensures V^2/Hz
+)
+P_freq_sum = np.sum(s) * (f[1] - f[0])
+P_time, P_freq_sum
+
+--- Code Cell 14 ---
+
+
+########## LAB 08 ##########
+--- Markdown Cell 0 ---
+## Gain and phase of continuous time system's transfer function: the Bode plot
+
+--- Markdown Cell 1 ---
+Find the gain and phase angle for angular frequencies 0 rad/s (d.c.), 2 rad/s and for very large frequencies if the system is characterised by the transfer function
+$$
+				H(s) = \dfrac{s+1}{s+2}\rightarrow |H(j\omega)|=\sqrt{\dfrac{\omega^2 + 1}{\omega^2 + 4}}\ ,\quad \angle H(j\omega)=\arctan\frac{\omega}{1} - \arctan\frac{\omega}{2}
+			$$
+<img src="Meddins_splane_freqresponse_2.png" width="400">				
+				
+$\omega = 0$ rad/s $\rightarrow$ {Gain} = 0.5, phase angle = 0$^\circ$
+				
+$\omega = 2$ rad/s $\rightarrow$ {Gain} =$\sqrt{\frac{5}{8}}\approx 0,79$, phase angle = $\arctan 2 - \arctan 1 = 18.4^\circ$
+				
+
+
+--- Code Cell 2 ---
+from pylab import *
+from scipy import signal
+num, den = [1, 1], [1, 2]
+o, gain, phase = signal.bode((num, den))
+def gain_theory(o):
+    return 20*log10(sqrt(o**2 + 1)/sqrt(o**2+4))
+def phase_theory(o):
+    return (arctan(o) - arctan(o/2))*180/pi
+plot(o, gain           , linewidth=7, alpha=0.5, label='gain numeric') # o is omega in rad/s, gain in decibels
+plot(o, phase          , linewidth=7, alpha=0.5, label='phase numeric') # phase in degrees
+plot(o, gain_theory (o), 'k-'                  , label='gain theory'  )
+plot(o, phase_theory(o), 'b-'                  , label='phase theory' )
+plot([0], [gain_theory (0)], 'ro', [2], [gain_theory (2)], 'go')
+plot([0], [phase_theory(0)], 'ro', [2], [phase_theory(2)], 'go')
+grid()
+legend()
+print(10**(gain_theory(0)/20) , phase_theory (0),'deg', 10**(gain_theory(2)/20), phase_theory(2),'deg')
+
+--- Code Cell 3 ---
+o
+
+--- Code Cell 4 ---
+gain
+
+--- Code Cell 5 ---
+phase
+
+--- Code Cell 6 ---
+signal.bode?
+
+--- Code Cell 7 ---
+
+
+--- Code Cell 8 ---
+# Let's create our own general Bode plot calculator
+# and compare it to the one in the 'signal' package
+def my_bode(transfer_function, omega = linspace(0.01, 10,100)):
+    return omega,\
+           20*log10(abs(transfer_function(1j*omega))),\
+           180/pi*angle(transfer_function(1j*omega))
+
+--- Code Cell 9 ---
+H = lambda s: (s+1)/(s+2)
+o1, gain1, phase1 = my_bode(H)
+print(o1, gain1, phase1)
+
+--- Code Cell 10 ---
+plot(o, gain           , linewidth=7, alpha=0.5, label='gain (signal.bode)') # o is omega in rad/s, gain in decibels
+plot(o, phase          , linewidth=7, alpha=0.5, label='phase (signal.bode)') # phase in degrees
+plot(o1, gain1, 'k-'                  , label='gain (my_bode)'  )
+plot(o1, phase1, 'b-'                  , label='phase (my_bode)' )
+legend()
+
+--- Markdown Cell 11 ---
+<hr style="border:2px solid black;">
+
+--- Markdown Cell 12 ---
+## The $z$ transform
+
+--- Markdown Cell 13 ---
+## Power series recap:
+$$
+S_N = \sum_{n=0}^{N} r^n
+$$
+
+Multiply by $r$:
+$$
+rS_N = \sum_{n=0}^{N} r^{n+1}
+= \sum_{n=1}^{N+1} r^n=S_{N} + r^{N+1} - 1
+$$
+
+
+--- Markdown Cell 14 ---
+---
+## Exercise
+Calculate the  $z$-transform of 
+$$		
+					u[n] = \begin{cases}
+						0\ , & n < 0\\
+						1\ , & n\geqslant 0	
+					\end{cases}
+$$
+### Solution:
+
+
+--- Markdown Cell 15 ---
+---
+## Exercise
+Show that if sampled at intervals $T$ the $z$-transform of $x(t) = t$ is
+$\frac{Tz}{(z-1)^2}$; 
+
+### Solution
+
+
+Sampling $x(t)=t$ at intervals $T$ gives
+$$
+
+
+--- Markdown Cell 16 ---
+---
+## Exercise
+Show that if sampled at intervals $T$ the $z$-transform of $x(t) =e^{-at}$ is $\frac{z}{z-e^{-aT}}$
+
+### Solution
+
+Sampling $x(t)=e^{-at}$ at intervals $T$ gives
+$$
+x[n]=x(nT)=e^{-anT}=\left(e^{-aT}\right)^n,\qquad n\ge 0.
+$$
+
+
+--- Markdown Cell 17 ---
+---
+## Exercise
+Show that if sampled at intervals $T$, the $z$-transform of
+$x(t)=\sin \omega t$ is
+$$
+X_{\sin}(z)=\frac{z\sin\omega T}{z^2-2z\cos\omega T+1},
+$$
+and the $z$-transform of $x(t)=\cos \omega t$ is
+$$
+X_{\cos}(z)=\frac{z(z-\cos\omega T)}{z^2-2z\cos\omega T+1}.
+
+
+--- Markdown Cell 18 ---
+## Exercise
+If the input to a system, having a transfer function of $ 1 + 2z^{-1} - z^{-2} $, is a discrete unit step, show that the first four terms of the output sequence are 1, 3, 2, 2.
+
+### Solution 1
+$$
+H(z)=1+2z^{-1}-z^{-2}
+$$
+
+
+$
+
+
+--- Markdown Cell 19 ---
+## Exercise
+When a discrete signal \( 1, -2 \) is inputted to a processing system, the output sequence is \( 1, -5, 8, -4 \).
+
+a. Derive the transfer function for the system.
+
+b. Find the first three terms of the output sequence in response to the finite input sequence of \( 2, 2, 1 \).
+
+### Solution 1
+
+
+
+
+--- Code Cell 20 ---
+
+
+########## LAB 09 ##########
+--- Markdown Cell 0 ---
+## Exercise
+For the transfer function $H(z) = \frac{1}{z-0.5}$, determine whether the system is stable. Justify your answer.
+
+### Solution 1
+
+
+$$
+H(z)=\frac{z^{-1}}{1-0.5z^{-1}}.
+$$
+
+
+
+--- Markdown Cell 1 ---
+<hr style="height:5px;background-color:black">
+
+--- Markdown Cell 2 ---
+## Exercise
+Study the stability of the system with transfer function
+
+$H(z) = \dfrac{1}{z^2 - z + 0.5}$		
+
+and determine its impulse response.
+
+### Solution
+The two poles are $p_{1,2} = \frac{1\pm i}{2}$ $|p_{1,2}| < 1$ $\rightarrow$ stable causal system (the unit circle is within the ROC which is $|z| > \text{max}(|p_1|, |p_2|)$)<img src="Meddins_zplane_4.png" width=500>
+
+
+
+--- Code Cell 3 ---
+
+
+--- Code Cell 4 ---
+
+
+########## LAB 10 ##########
+--- Code Cell 0 ---
+# impulse response of a simple cont. LTI
+cs = signal.lti([10], [1, 10])
+t, sig = cs.impulse(T = arange(0, 10, 0.01))    
+plot(t, sig, '.')
+yscale('log')
+plot(t, 10*exp(-10*t))
+
+--- Code Cell 1 ---
+ds = signal.dlti([1], [1, -0.5])
+n, h = ds.impulse()
+stem(n, h[0], 'o')
+show()
+
+--- Code Cell 2 ---
+plot(n, h[0], 'o')
+ht = zeros(len(h[0]))
+ht[1:] = 0.5**arange(len(h[0]) - 1)
+plot(n, ht,'.-')
+plot(n, h[0], 'o')
+yscale('log')
+plot(n, h[0], 'o')
+show()
+
+--- Code Cell 3 ---
+w, h = signal.freqz([1], [1, -1, 0.5])
+ds = signal.dlti([1], [1, -1, 0.5])
+n, hn = ds.impulse()
+stem(n, hn[0])
+show()
+
+--- Code Cell 4 ---
+ds = signal.dlti([1], [1, -1, 0.5])
+n, h = ds.impulse()
+stem(n, h[0], 'o')
+ht = zeros(len(h[0]))
+# see from last week analytical approach
+ht[1:] = (lambda n: 2*sin((n-1)*pi/4)/sqrt(2)**(n-1))(arange(1, len(h[0])))
+stem(n, h[0])
+plot(n, ht, 'r-')
+
+--- Code Cell 5 ---
+# to illustrate that it is an exponentially decaying oscillation
+semilogy(n, abs(ht))
+grid()
+
+--- Code Cell 6 ---
+# to_zpk() method of an LTI system returns the zeros and poles
+print(ds.to_zpk())
+
+--- Code Cell 7 ---
+# to verify the frequency response (magnitude and phase)
+w, H = ds.freqresp() # complex freq. response including both
+# compare freq. response and the output of the bode() method
+w, gain, phase = ds.bode(w = w)
+semilogy(w, 20*log10(abs(H)), 'r-', linewidth=15, alpha=0.3)
+semilogy(w, gain, 'k-', linewidth=2, alpha=1)
+
+--- Code Cell 8 ---
+
+
+########## LAB 11 ##########
+--- Markdown Cell 0 ---
+## Manually designed second-order notch filter
+
+We want a digital notch filter with the following properties:
+
+- attenuation of at least 40 dB at $f_0=20 $ Hz
+- bandwidth of $\Delta f = 4 $ Hz
+- the gain at 0 Hz should be 0 dB. 
+- sampling frequency is $f_s=160 $ Hz
+
+Let's find out the form of the transfer function $H(z)$.
+
+
+--- Code Cell 1 ---
+fs = 160
+fn = fs/2
+d = 1 - pi/40
+ds = signal.dlti([1, -sqrt(2), 1], [1, -sqrt(2)*d, d**2])
+w, gain, phase = ds.bode()
+f = w/(2*pi)*fs
+plot(f, gain, '.-', label='bode')
+hlines([-3], [0], [80], color='red')
+vlines([18, 22], [0, 0], [-200, -200],color='red')
+grid()
+
+--- Code Cell 2 ---
+# Let's see the in detail how well we satisfied the requirements (DC gain + cut off freq. gain)
+plot(f, gain, '.-', label='bode')
+hlines([-3], [0], [80], color='red')
+vlines([18, 22], [0, 0], [-200, -200],color='red')
+xlim([0.0, 25])
+ylim([-10, 1])
+grid()
+
+--- Markdown Cell 3 ---
+## Normalizing the DC gain
+
+However, at 0 Hz the gain is not exactly unity. We can fix it by reintroducing $k$ such that $|H(e^{j0})| = 1$: 
+
+$$
+k = \left|\frac{1 - 0.92\sqrt{2}+0.92^2}{2 - \sqrt{2}}\right|\approx 0.965
+$$
+
+Thus the filter coefficients are
+
+
+
+--- Code Cell 4 ---
+k = (1+d**2 - 2*d/sqrt(2))/(2 - sqrt(2))
+print(k)
+ds = signal.dlti(k*array([1, -sqrt(2), 1]), [1, -sqrt(2)*d, d**2])
+w, gain, phase = ds.bode()
+f = w/(2*pi)*fs
+plot(f, gain, '.-', label='bode')
+axvline(18, linestyle=':', color='red')
+axvline(22, linestyle=':', color='red')
+axhline(-3, linestyle=':', color='red')
+xlim([0, 25])
+ylim([-10, 1])
+grid()
+
+--- Markdown Cell 5 ---
+Observe that by normalizing the DC gain we (negligibly) distorted the the gain at the cutoff frequency.
+
+--- Markdown Cell 6 ---
+---
+## Designing a lowpass FIR filter using the Fourier (window) method
+
+--- Code Cell 7 ---
+from pylab import *
+from scipy import signal
+fs, fl, N = 100, 20, 51
+n = arange(N) - N//2 + 1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n/pi)
+w = signal.windows.hann(N)
+plot(n, w, '-', label='window')
+plot(n, b_l, 'o-', label='sinc')
+b_l *= w
+plot(n, b_l, 'k.-', label='sinc * window')
+legend()
+grid()
+
+--- Code Cell 8 ---
+b_l /= b_l.sum() # Ensure that the gain at 0Hz is 1. 
+ds = signal.dlti(b_l, [1], dt=1/fs)
+o, gain, phase = ds.bode(w=1000)
+plot(o/(2*pi), gain)
+axvline(fc, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+
+
+--- Code Cell 9 ---
+plot(o/(2*pi), phase)
+grid()
+
+--- Markdown Cell 10 ---
+## Designing a highpass FIR filter based on the above lowpass filter
+
+--- Code Cell 11 ---
+fh = 40
+n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+b_h = sin(2*pi*n*fh/fs)/(n*pi)
+# or
+n = arange(N) - N//2
+b_h[n!=0] = sin(2*pi*n[n!=0]*fh/fs)/(n[n!=0]*pi)
+b_h[n==0] = 2*fh/fs
+#------
+b_h *= w
+b_h *= -1
+b_h[N//2] += 1
+
+b_h /= np.abs(np.sum(b_h * (-1) ** np.arange(N)))# Ensure that the gain at Nyquist is 1. 
+ds = signal.dlti(b_h, [1], dt=1/fs)
+# alternative 1 ----
+o, gain, phase = ds.bode(w=1000)
+f = o/(2*pi)
+# alternative 2
+#o, H = ds.freqresp(w=1000)
+#gain, phase = 20*log10(abs(H)), angle(H)*180/pi
+#f = o/(2*pi)*fs
+#-------------------
+plot(f, gain)
+axvline(fh, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+
+--- Code Cell 12 ---
+# gain at the highest freq. close to unity (0dB) because the last freq. is not exactly pi
+print(gain[-1])
+
+--- Code Cell 13 ---
+plot(n, b_h)
+
+--- Code Cell 14 ---
+# Checking that indeed the gain at Nyquist is unity
+o, H = signal.freqz(b_h, worN=array([pi]))
+print(abs(H))
+
+--- Markdown Cell 15 ---
+## Designing a bandpass FIR filter based on the above lowpass filter
+
+--- Code Cell 16 ---
+n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n*pi)
+b_h = sin(2*pi*n*fh/fs)/(n*pi)
+b = b_l - b_h
+# taper
+b *= w
+print(b)
+# normalization
+f0 = (fl + fh)/2
+omega0 = 2*pi*f0/fs
+H0 = np.sum(b * np.exp(-1j * omega0 * np.arange(N)))
+b /= abs(H0)
+#------
+ds = signal.dlti(b, [1], dt=1/fs)
+o, gain, phase = ds.bode(w=1000)
+f = o/(2*pi)
+plot(f, gain)
+axvline(fl, linestyle=':')
+axvline(fh, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+
+
+--- Markdown Cell 17 ---
+
+
+########## LAB 12 ##########
+--- Markdown Cell 0 ---
+###  Using classical digitized filters
+
+--- Code Cell 1 ---
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
+
+fs = 44100
+fc = 500
+order = 6
+
+# Butterworth low-pass filter
+b, a = signal.butter(
+    order,
+    fc,
+    btype='lowpass',
+    fs=fs
+)
+
+ds = signal.dlti(b, a,  dt=1/fs)
+w, gain, phase = ds.bode()
+plt.plot(w/2/np.pi, gain, '.-', label='default res.')
+# the same with higher resolution
+w, gain, phase = ds.bode(w=1000)
+plt.plot(w/2/np.pi, gain, label='high res.')
+plt.axhline(-3, linestyle=':')
+plt.axvline(fc, linestyle=':')
+plt.xlim([0, 5000])
+plt.ylim([-100, 10])
+plt.grid()
+plt.legend()
+
+--- Code Cell 2 ---
+# Frequency response 
+w, h = signal.freqz(b, a, worN=1000, fs=fs)
+plt.figure(figsize=(8, 4))
+plt.plot(w, 20*np.log10(np.maximum(np.abs(h), 1e-12)))
+plt.axvline(fc, linestyle='--', label='2000 Hz cutoff')
+plt.axhline(-3.0103, linestyle=':', label='-3 dB')
+plt.xlabel("Frequency [Hz]")
+plt.ylabel("Magnitude [dB]")
+plt.title("Butterworth  filter")
+plt.grid(True)
+plt.legend()
+plt.xlim([0, 5000])
+plt.ylim([-100, 10])
+
+--- Code Cell 3 ---
+from scipy.io import wavfile
+import scipy.io
+fs, data = wavfile.read("02. School Boy-9.wav")
+print(fs, data.shape)
+print(data[:,0])
+print(data.min(), data.max())
+
+--- Code Cell 4 ---
+x = data[:, 0]
+plt.plot(x)
+y = signal.lfilter(b, a, x)
+plt.plot(y)
+plt.xlim([0,5000])
+
+--- Code Cell 5 ---
+f, sx = signal.welch(
+    x,
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+f, sy = signal.welch(
+    y,
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+plt.loglog(f, sx)
+plt.loglog(f, sy)
+plt.grid()
+#plt.xlim([0, 250])
+#plt.ylim([10**(-5), 10**(7)])
+
+--- Code Cell 6 ---
+data_filtered = signal.lfilter(b, a, data, axis=0)
+data_filtered /= np.max(np.abs(data_filtered))
+# normalize safely to int16 range
+
+stereo_int16 = np.int16(data_filtered * 32767)
+print(stereo_int16)
+wavfile.write("output_filtered.wav", fs, stereo_int16)
+
+--- Code Cell 7 ---
+f, sy = signal.welch(
+    data_filtered[:,0],
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+plt.loglog(f, sy)
+plt.grid()
+
+--- Code Cell 8 ---
+from pylab import *
+from scipy import signal
+fs, fl, N = 44100, 500, 251
+n = arange(N) - N//2 + 1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n/pi)
+w = signal.windows.hann(N)
+b_l *= w
+b_l /= b_l.sum() # Ensure that the gain at 0Hz is 1. 
+
+ds = signal.dlti(b_l, [1], dt=1/fs)
+
+--- Code Cell 9 ---
+data_filtered = signal.lfilter(b_l, [1], data, axis=0)
+data_filtered /= np.max(np.abs(data_filtered))
+
+stereo_int16 = np.int16(data_filtered * 32767)
+print(stereo_int16)
+wavfile.write("output_filtered.wav", fs, stereo_int16)
+
+--- Code Cell 10 ---
+# Demonstrate the phase delay introduced by FIR filters
+# and fixing it by forward-backward filtering using 'signal.filtfilt'
+from pylab import *
+from scipy import signal
+
+# Load EEG
+fs = 200.0
+x = fromfile("eeg.bin", dtype=float32)
+
+# FIR low-pass design
+fc = 2.0
+fc = 2.0
+numtaps = 401              # odd length
+delay = (numtaps - 1) // 2 # samples
+
+b = signal.firwin(
+    numtaps,
+    fc,
+    fs=fs,
+    window="hamming",
+    pass_zero="lowpass"
+)
+
+# FIR band-pass design
+#fc = [9,15]
+#numtaps = 401              # odd length
+#delay = (numtaps - 1) // 2 # samples
+
+#b = signal.firwin(
+#    numtaps,
+#    fc,
+#    fs=fs,
+#    window="hamming",
+#    pass_zero="bandpass"
+#)
+
+# Causal (forward) FIR filtering: introduces linear phase delay 
+y = signal.lfilter(b, 1, x)
+
+# Delay-compensated version
+y_aligned = roll(y, -delay)
+y_aligned[-delay:] = nan
+
+# Zero-phase reference: forward-backward filtering
+y_zero = signal.filtfilt(b, 1, x)
+
+# Time axis
+t = arange(len(x)) / fs
+
+# Plot a short segment
+i0 = 1000
+i1 = int(15 * fs)
+
+figure(figsize=(12, 5))
+plot(t[i0:i1], x[i0:i1], alpha=0.4, label="raw EEG")
+plot(t[i0:i1], y[i0:i1], label="FIR output")
+plot(t[i0:i1], y_aligned[i0:i1], label="FIR shifted back")
+plot(t[i0:i1], y_zero[i0:i1], "--", label="filtfilt")
+xlabel("Time [s]")
+ylabel("Amplitude")
+title(f"Low-pass FIR, fc={fc} Hz, delay={delay} samples = {delay/fs:.3f} s")
+legend()
+grid()
+show()
+
+--- Code Cell 11 ---
+
+
+########## LAB 13 ##########
+--- Markdown Cell 0 ---
+## Continuous wavelets
+
+--- Code Cell 1 ---
+
+# Create a Python script to analyze a time series using the Continuous Wavelet Transform (CWT) and plot the time-frequency representation.
+import numpy as np
+import matplotlib.pyplot as plt
+import pywt
+
+# Generate a sample time series
+t = np.linspace(0, 10, 12000, endpoint=False)
+fs = 1/(t[1] - t[0])
+x = np.zeros(len(t))
+x[:len(x)//3*2] += np.sin(2 * np.pi * 50  * t[:len(t)//3*2])
+x[len(x)//3:  ] += np.sin(2 * np.pi * 100 * t[len(t)//3:])
+plt.plot(t, x, '.-')
+plt.xlim([3.2, 3.5])
+
+--- Code Cell 2 ---
+# Define the wavelet and the desired frequency range
+wavelet = 'cmor12-1.0'  # Specify the bandwidth frequency and center frequency
+#wavelet = 'morl'  # Specify the bandwidth frequency and center frequency
+
+# Calculate scales to match the desired frequencies
+min_freq = 1  # Minimum frequency of interest in Hz
+max_freq = 150  # Maximum frequency of interest in Hz
+frequencies = np.linspace(min_freq, max_freq, num=150)
+scales = pywt.central_frequency(wavelet) * fs / frequencies
+print(pywt.central_frequency(wavelet))
+print(scales)
+# Compute the CWT using the specified wavelet
+coefficients, _ = pywt.cwt(x, scales, wavelet, sampling_period=1/fs)
+
+# Plot the time-frequency representation
+plt.figure(figsize=(10, 6))
+plt.imshow(np.abs(coefficients), extent=[0, 1, max_freq, min_freq], cmap='PRGn', aspect='auto')
+plt.axvline(1/3, color='white', linewidth=1, linestyle=':')
+plt.axvline(2/3, color='white', linewidth=1, linestyle=':')
+plt.title('Continuous Wavelet Transform (CWT)')
+plt.ylabel('Frequency [Hz]')
+plt.xlabel('Time [sec]')
+plt.colorbar(label='Magnitude')
+plt.ylim(max_freq, min_freq)  # Ensure correct y-axis limits
+plt.gca().invert_yaxis()  # Invert y-axis to have low frequencies at the bottom
+plt.show()
+
+
+--- Code Cell 3 ---
+# Implement a Python script to compute and plot the Short Time Fourier Transform (STFT) of a given signal.
+# Method 1: using spectrogram
+from pylab import *
+from scipy import signal
+from numpy import random
+f, t, s = signal.spectrogram(x, fs=sampling_frequency, nperseg=128, noverlap=100) # better resolution
+imshow(s, extent=[t.min(), t.max(), f.min(), f.max()], aspect='auto', origin='lower')
+ylim([0, 145])
+
+--- Code Cell 4 ---
+# Method 2: using stft
+from scipy.signal import stft
+
+# Compute the STFT
+f, t, Zxx = stft(x, fs, nperseg=256)
+
+# Plot the STFT magnitude
+plt.pcolormesh(t, f, np.abs(Zxx), shading='gouraud')
+plt.title('STFT Magnitude')
+plt.ylabel('Frequency [Hz]')
+plt.xlabel('Time [sec]')
+plt.colorbar(label='Magnitude')
+plt.ylim([0, 145])
+	
+
+--- Code Cell 5 ---
+pywt.wavelist()
+
+--- Code Cell 6 ---
+# Write a Python function to compute the continuous wavelet transform (CWT) of a given signal using the real Morlet wavelet.
+import numpy as np
+import matplotlib.pyplot as plt
+import pywt
+
+# Define the signal
+t = np.linspace(0, 1, 1000, endpoint=False)
+x = np.cos(2 * np.pi * 7 * t) + np.sin(2 * np.pi * 13 * t)
+
+# Compute the CWT
+scales = np.arange(1, 128)
+coefficients, frequencies = pywt.cwt(x, scales, 'morl', 1/1000)
+
+# Plot the CWT
+plt.imshow(np.abs(coefficients), extent=[0, 1, 1, 128],  aspect='auto', vmax=abs(coefficients).max(), vmin=-abs(coefficients).max())
+plt.title('CWT with real Morlet')
+plt.ylabel('Scale')
+plt.xlabel('Time [sec]')
+plt.show()
+	
+
+
+--- Code Cell 7 ---
+# CWT of a sound file
+from pylab import *
+from scipy.io import wavfile
+import pywt
+
+fs, data = wavfile.read("02. School Boy-9.wav")
+
+# stereo -> mono
+x = data.mean(axis=1) if data.ndim == 2 else data
+x = x.astype(float)
+x = x / abs(x).max()
+
+# first 20 seconds
+x = x[:int(20 * fs)]
+
+# simple downsampling
+q = 5
+x = x[::q]
+fs = fs / q   # 8820 Hz
+
+t = arange(len(x)) / fs
+
+# CWT
+wavelet = "cmor12.5-1.0"
+freqs = geomspace(80, 3000, 100)
+
+scales = pywt.central_frequency(wavelet) * fs / freqs
+
+coef, freq_out = pywt.cwt(
+    x,
+    scales,
+    wavelet,
+    sampling_period=1/fs,
+    method="fft"
+)
+
+power = abs(coef)
+Z = log10(power + 1e-12)
+# plot every few time samples
+step = 5
+
+# normalize each frequency row
+#Z = Z - Z.mean(axis=1, keepdims=True)
+#Z = Z / Z.std(axis=1, keepdims=True)
+
+figure(figsize=(14, 6))
+pcolormesh(t[::step], freq_out, Z[:, ::step], cmap=cm.hsv, shading="auto")
+yscale("log")
+ylim(80, 3000)
+xlabel("Time [s]")
+ylabel("Frequency [Hz]")
+title("CWT scalogram of audio")
+colorbar(label="|CWT coefficient|")
+tight_layout()
+show()
+
+--- Markdown Cell 8 ---
+### visualizing spindles in sleep EEG signals
+<img src="spindles.png">
+
+--- Code Cell 9 ---
+
+from pylab import *
+import pywt
+
+# EEG
+fs = 200.0
+x = fromfile("eeg.bin", dtype=float32)
+x = x[10000:16000:2]
+fs = fs/2
+# remove DC
+x = x - x.mean()
+
+b, a = signal.butter(
+    4,
+    [10, 14],
+    btype="bandpass",
+    fs=fs
+)
+
+# zero-phase filtering
+xo = x.copy()
+x = signal.filtfilt(b, a, x)
+
+# frequencies of interest
+freqs = linspace(8, 17, 100)
+
+wavelet = "cmor15.5-1.0"
+
+scales = pywt.central_frequency(wavelet) * fs / freqs
+
+coef, freq_out = pywt.cwt(
+    x,
+    scales,
+    wavelet,
+    sampling_period=1/fs,
+    method="fft"
+)
+
+# log-amplitude
+Z = (abs(coef) + 1e-12)**2
+
+# optional: normalize each frequency band
+#Z = Z - Z.mean(axis=1, keepdims=True)
+
+t = arange(len(x)) / fs
+
+figure(figsize=(14,2))
+plot(t, xo, linewidth=2, alpha=0.5, label='raw')
+plot(t, x, 'k-', linewidth=0.5, label='filtered')
+xlim([0,30])
+legend()
+
+figure(figsize=(14,2))
+pcolormesh(
+    t,
+    freq_out,
+    Z,
+    shading="auto",
+    cmap="gray"
+)
+ylim(freqs[0], freqs[-1])
+#yscale('log')
+xlabel("Time [s]")
+ylabel("Frequency [Hz]")
+title("EEG CWT (0.5-30 Hz)")
+colorbar(label="log |CWT|")
+tight_layout()
+show()
+
+--- Markdown Cell 10 ---
+## Discrete wavelets
+
+--- Code Cell 11 ---
+import numpy as np
+import pywt
+import matplotlib.pyplot as plt
+
+# Define the signal
+t = np.linspace(0, 1, 1024)
+x = np.sin(2 * np.pi * 5 * t) + np.random.randn(1024) * 0.1
+
+# Compute the DWT using the Haar wavelet
+coeffs = pywt.wavedec(x, 'haar', level=4)
+
+plt.figure()
+
+# Plot the approximation and detail coefficients
+plt.figure(figsize=(10, 6))
+for i, coeff in enumerate(coeffs):
+    plt.subplot(len(coeffs), 1, i+1)
+    plt.plot(coeff)
+    plt.title(f'Coefficients at Level {i}')
+    plt.tight_layout()
+    plt.show()
+
+--- Code Cell 12 ---
+import numpy as np
+import pywt
+import matplotlib.pyplot as plt
+
+# Generate a noisy signal
+t = np.linspace(0, 1, 1024)
+x = np.sin(2 * np.pi * 5 * t) + np.random.randn(1024) * 0.4
+
+# Perform wavelet denoising using Daubechies wavelets
+wavelet = 'db4'
+coeffs = pywt.wavedec(x, wavelet)
+threshold = np.sqrt(2 * np.log(len(x)))
+denoised_coeffs = map(lambda x: pywt.threshold(x, threshold, mode='soft'), coeffs)
+denoised_signal = pywt.waverec(list(denoised_coeffs), wavelet)
+
+# Plot the original and denoised signals
+plt.figure(figsize=(10, 6))
+plt.plot(t, x, label='Noisy Signal')
+plt.plot(t, denoised_signal, label='Denoised Signal', linestyle='--')
+plt.legend()
+plt.title('Wavelet Denoising with Daubechies Wavelets')
+plt.xlabel('Time')
+plt.ylabel('Amplitude')
+plt.show()
+
+--- Code Cell 13 ---
+# Create a Python script to demonstrate the effect of vanishing moments in wavelets by denoising a signal.
+import numpy as np
+import matplotlib.pyplot as plt
+import pywt
+import pywt.data
+
+# Load a noisy signal
+original = pywt.data.ecg()
+noisy = original + 5.1 * np.random.randn(len(original))
+
+# Wavelet denoising using Daubechies wavelets with different vanishing moments
+wavelet = 'db6'
+coeffs = pywt.wavedec(noisy, wavelet)
+threshold = 0.5
+coeffs[1:] = [pywt.threshold(i, value=threshold*max(i)) for i in coeffs[1:]]
+reconstructed = pywt.waverec(coeffs, wavelet)
+
+# Plot
+plt.figure(figsize=(10, 6))
+plt.plot(original, label='Original Signal', linewidth=1, alpha=0.6)
+plt.figure(figsize=(10, 6))
+plt.plot(noisy, 'k-', label='Noisy Signal')
+plt.figure(figsize=(10, 6))
+plt.plot(reconstructed, 'r.-', label='Denoised Signal')
+
+plt.figure(figsize=(10, 6))
+plt.plot(original, label='Original Signal', linewidth=5, alpha=0.6)
+plt.plot(noisy, 'k-', label='Noisy Signal')
+plt.plot(reconstructed, 'r.-', label='Denoised Signal')
+plt.legend()
+plt.title('Wavelet Denoising with Daubechies Wavelets')
+plt.xlabel('Sample')
+plt.ylabel('Amplitude')
+plt.show()
+
+
+--- Markdown Cell 14 ---
+## Colored noise generation
+
+--- Code Cell 15 ---
+###########################
+# Generating 'coloured' noise
+###########################
+# white noise
+from  numpy import random
+r = random.randn(10000000) # normally distributed random numbers
+r = r- r.mean()
+# check the flat PSD
+s, f = mlab.psd(r, Fs=2, NFFT=1024, noverlap=512)
+plot(f, s)
+s, f = mlab.psd(r, Fs=2, NFFT=128, noverlap=100) # the same as welch
+plot(f, s, linewidth=5, alpha=0.5)
+
+
+--- Code Cell 16 ---
+h = hist(r, bins=1000)
+
+--- Code Cell 17 ---
+# brown noise
+cr = r.cumsum()
+plot(r[:1000000:10])
+plot(cr[:1000000:10])
+
+--- Code Cell 18 ---
+# demonstrate the self-similarity of the brownian noise by changing the range
+# at all ranges the behavior is similar (can't tell from the image which is the one with 10000 and which the one with 1000000 points)
+plot(cr[:10000]/abs(cr[:10000]).max())
+plot(cr[:100000:10]/abs(cr[:100000:10]).max())
+plot(cr[:1000000:100]/abs(cr[:1000000:100]).max())
+plot(cr[:10000000:1000]/abs(cr[:10000000:1000]).max())
+
+--- Code Cell 19 ---
+# check the ~1/f^2 PSD
+cs, f = mlab.psd(cr, Fs=2, NFFT=2**14, noverlap=2**13)
+loglog(f[3:], cs[3:]/cs[3], '.-')
+loglog(f[3:], 1/(f[3:]/f[3])**2)
+grid()
+
+
+--- Code Cell 20 ---
+# any coloured noise by inverse Fourier transform
+f = linspace(0, 1, 2**20)+ 1e-8 # generate frequencies shifted so that we don't have problem in zero
+a = f**(-1.5)  # amplitude is a power function of frequency -> PSD(f)~f**(-3.0)
+a *= random.rand(len(a))*0.05 # add some noise over the smooth dependence
+a = a[3:] # avoid the divergence at 0Hz
+f = f[3:]
+loglog(f, a)
+
+grid()
+print(a)
+
+--- Code Cell 21 ---
+X = a*exp(2*pi*1j*random.rand(len(a))) # multiply with random phase factor
+noise = irfft(X[:len(X)//2+1])         # get the signal (coloured noise)
+plot(noise[:1000000])
+
+--- Code Cell 22 ---
+s, f = mlab.psd(noise, Fs=2, NFFT=2**10) # check the PSD
+loglog(f[4:], s[4:]/s[4], '.-')
+loglog(f[4:], (f[4:]/f[4])**(-3), '.-')
+grid()
+
+--- Markdown Cell 23 ---
+## Surrogate data
+
+--- Code Cell 24 ---
+# create a surrogate sound file with the same spectral density as the original 
+from scipy.io import wavfile
+from pylab import *
+from scipy import signal
+from numpy import fft
+from numpy import random
+fs, data = wavfile.read("02. School Boy-9.wav")
+x = data[:,0]
+dt = 1/fs
+X = dt*fft.fft((x))
+print(X)
+xx = fs*fft.ifft(X)
+X_surr = abs(X)*exp(1j*2*pi*random.rand(len(xx)))
+x_surr = irfft(X_surr[:len(X)//2+1])
+x_surr
+
+--- Code Cell 25 ---
+f, sy = signal.welch(
+    x_surr,
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+plt.loglog(f, sy/sy.max())
+plt.grid()
+f, sx = signal.welch(
+    x,
+    fs=fs,
+    window="hann",
+    nperseg=2**15,
+    noverlap=2**14,
+    detrend="constant",
+    scaling="density"
+)
+plt.loglog(f, sx/sx.max())
+plt.grid()
+
+--- Code Cell 26 ---
+x_surr = int16(32767*x_surr/abs(x_surr).max())
+
+data_surr = column_stack([x_surr, x_surr])
+wavfile.write("surr.wav", fs, data_surr)
+
+--- Code Cell 27 ---
+
+

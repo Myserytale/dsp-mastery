@@ -1,0 +1,165 @@
+=== HOMEWORK 5 QUESTIONS ===
+Homework 05 - Reconstruction & the discrete Fourier transform
+Deadline: 2nd test (date to be determined but not earlier than the 9th of April)
+The mandatory questions account for 100 points, while the optional questions together contribute up to an additional
+50 points.
+1. Sketch diagrammatically the steps for sampling and reconstruction of a continuous signal. Explain it!
+2. What is the condition for a continuous signal to be reconstructible from its discrete time samples?
+3. What is an antialiasing filter? What is its role (benefits & limitations) ?
+4. Using the scripts made available to you demonstrate the reconstruction process for a “continuous” signal x(t)
+with a parabolic spectrum
+(
+f02 − f 2 , |f | < f0 ,
+,
+f0 > 0
+X(f ) =
+0
+|f | ⩾ f0 .
+(a) Create and represent the above function
+(b) Compute and represent the x(t) signal.
+(c) Demonstrate the sampling process.
+(d) Compute the Fourier transform of the sampled signal.
+(e)
+
+Reconstruct the original signal from the sampled signal and show that the reconstruction is not complete
+if f0 is larger than the Nyquist frequency.
+
+5. Show that uniform sampling of a signal leads to a periodic Fourier transform.
+6. What is the period of the Fourier transform of a sampled signal?
+7. Show that a periodic signal has a sampled Fourier transform.
+8. What is the sampling period of the Fourier transform of a periodic signal?
+9.
+
+Derive the discrete Fourier transform X[k] of x[n], a T sampled N T periodic signal. Derive also the expression
+of the inverse Fourier transform returning x[n] from X[k].
+
+10. What is the frequency resolution of the discrete Fourier transform of a T sampled signal?
+11. What are the frequency limits (min/max) of the discrete Fourier transform of a T sampled signal?
+12.
+
+Show that
+N
+−1
+X
+
+(
+e
+
+2πi
+N (m−n)k
+
+k=0
+
+13.
+
+=
+
+N , m=n
+0 , m 6= n
+
+Test that indeed applying subsequently the DFT and its inverse we can restore the original sampled and
+periodic signal.
+
+1
+
+
+
+=== LAB 05 CODE ===
+########## LAB 05 ##########
+--- Markdown Cell 0 ---
+## Sampling and reconstruction
+
+--- Code Cell 1 ---
+from numpy import *
+from numpy.fft import ifft, fftfreq, fftshift
+from matplotlib.pyplot import *
+
+--- Markdown Cell 2 ---
+### Create the 'continuous' signal starting from a finite support Fourier transform
+
+$$
+\text{triangle spectrum}\qquad X(f) = 
+\begin{cases}
+1 - \frac{|f|}{f_\text{max}}\ ,& |f| \leq f_\text{max} \\
+0 & |f| > f_\text{max}
+\end{cases}
+$$
+
+
+
+--- Code Cell 3 ---
+# We shall create a 'continuous' signal with a triangle shaped Fourier transform
+dt = 0.001 
+fs = 1/dt # resolution of the 'continuous' signal
+
+fmax = 4.0 # maximum frequency (half width of the triangle)
+N = 4096 # the size of our 'continuous' signal: N points, i.e. N*T long
+f = fftfreq(N, dt) # the 'continous' Fourier transform will have the same number of points at the same number of frequencies
+X = zeros(N)
+X[abs(f) <= fmax] = (1 - abs(f)/fmax)[abs(f) <= fmax] # triangle shape
+X  # the peak is at index 0. Good!
+
+--- Code Cell 4 ---
+plot(fftshift(f), fftshift(X), '.-')
+
+--- Code Cell 5 ---
+plot(fftshift(f), fftshift(X), '.-')
+xlim([-10,10]) # zoom in to see better (non-interactive)
+
+--- Code Cell 6 ---
+# get the signal as inverse Fourier transform
+x = fs*real(ifft(X)) # N*(fs/N)*ifft(X)
+x
+
+--- Code Cell 7 ---
+t = fftfreq(N, fs/N)
+plot(fftshift(t), fftshift(x), '.-')
+# Now we have our 'continuous' signal in x.
+
+--- Markdown Cell 8 ---
+### Sampling
+
+--- Code Cell 9 ---
+# Let's sample it by keeping only every 16th points
+m = 16
+T = dt*m # this is the sampling period
+xhat  = x[::m] # sampled (discrete time) signal
+tsamp = t[::m] # sampled time
+plot(fftshift(t), fftshift(x), '.-', label='original continuous')
+plot(fftshift(tsamp), fftshift(xhat), 'o', label='sampled')
+legend()
+
+--- Markdown Cell 10 ---
+### Reconstruction
+
+$$
+			\!\!\begin{aligned}
+					{x}(t) &= 	\mathcal{F}^{-1}[{X}](t)=
+					\hat{x}\ast \frac{1}{T}\operatorname{sinc}_\pi(t/T)=\\
+					&=\sum_{n=-\infty}^\infty\!\!\!\! x[n]\dfrac{\sin\pi(t-nT)/T}{\pi(t-nT)/T}\ .
+			\end{aligned}
+$$
+
+--- Code Cell 11 ---
+def sincpi(x):
+    x[x == 0] = 1e-13 # to avoid problems when dividint with it
+    return sin(pi*x)/(pi*x)
+# these are the different shifted 'sinc' functions the linear combination of which reconstructs the original 'continuous' signal
+plot(fftshift(t), fftshift(sincpi(t/T)))
+plot(fftshift(t), fftshift(sincpi(t/T - 1)))
+plot(fftshift(t), fftshift(sincpi(t/T - 2)))
+plot(fftshift(t), fftshift(sincpi(t/T - 3)))
+xlim([-0.2, 0.2])
+
+--- Code Cell 12 ---
+Nsamp = N//m # size of the sampled signal (the same as len(xhat))
+xrec = zeros(len(t)) # the reconstructed signal ('continuous')
+for n in arange(-Nsamp//2, Nsamp//2):
+    xrec += xhat[n]*sincpi(t/T - n)
+plot(fftshift(t), fftshift(x), '.-', label='original continuous')
+plot(fftshift(t), fftshift(xrec), '-', label='reconstructed')
+legend()
+
+--- Code Cell 13 ---
+
+

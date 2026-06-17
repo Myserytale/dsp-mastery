@@ -1,0 +1,314 @@
+=== HOMEWORK 11 QUESTIONS ===
+Homework 11 - FIR filters
+Deadline: 4th test date (4th of June)
+The mandatory questions account for 100 points, while the optional questions together contribute up to an additional
+50 points.
+18. Represent the frequency response of the moving average filter and establish the qualitative dependence
+of the cutoff frequency and roll-off on the length of
+the window.
+
+1. What do we mean by a finite impulse response (FIR)
+filter? How does it differ from IIR filters in terms of
+their linear constant-coefficient difference equation?
+2. Compare FIR and IIR filters.
+3. Explain the advantages and disadvantages of FIR filters compared to IIR filters. In what scenarios would
+you prefer one over the other?
+4. What is the Fourier/window method for designing
+FIR filters? How does it work and what are its key
+benefits?
+
+Study analytically the gain at the Nyquist frequency for the moving average filter.
+
+20.
+
+Study analytically the dependence of the cutoff
+frequency on the length of the moving window for
+very large window size.
+
+21. Why is the ideal response usually specified in the
+frequency domain first?
+
+5. Implement a Python script to compute and plot the
+frequency response of the FIR filter designed in the
+previous question.
+
+22. Consider
+h[n] = δ[n] − δ[n − 1].
+What type of filter is this: FIR/IIR, low-/high/passband? Justify!
+
+6. Explain the Fourier/window method for designing
+high-pass, band-pass, and band-stop FIR filters.
+Provide examples of the window functions used in
+each case.
+7.
+
+19.
+
+23. Why does a linear-phase FIR filter delay all frequency components equally?
+
+Prove that a symmetric FIR filter of odd length
+has a constant group delay. What is the value of this
+delay?
+
+24. Explain the difference between filter order, number
+of coefficients and impulse response length.
+25. Design a lowpass FIR filter of order 20 with a cutoff
+frequency of 84kHz and a sampling frequency of 20
+kHz using the Fourier/window method. Represent
+the frequency response and comment on the gain
+and phase relationship.
+
+8. Why does truncating the ideal sinc impulse response
+introduce ripples in the frequency response?
+9. Explain why an ideal low-pass filter cannot be both
+causal and finite length.
+10. Derive the impulse response of an ideal high-pass
+FIR filter.
+11. A FIR filter has coefficients
+h[n] = [1, 2, 3, 2, 1].
+
+26.
+
+Same task as above but for a highpass filter with
+a cutoff frequency of 8kHz.
+
+27.
+
+Same task as above but for a bandpass filter with
+passband of 4kHz- 8kH.
+
+28. Show that, to normalize the DC gain of a low-pass
+FIR filter, the coefficients blow [n] should be divided
+by
+N
+X
+blow [n].
+
+Is the filter linear phase?
+12. Why are FIR filters always BIBO stable?
+
+n=0
+
+13. Why does increasing the filter order improve the
+sharpness of the transition band?
+
+29.
+
+14. What happens if the FIR coefficients are not symmetric?
+15. Prove analytically
+that the zeros of the polynomial
+PN
+P (x) = n=0 xn are uniformly distributed around
+the unit circle in the complex plane apart from x =
+1. Show it also numerically using the numpy.roots
+method.
+
+Show that, to normalize the Nyquist-frequency
+gain of a high-pass FIR filter, the coefficients bhigh [n]
+should be divided by
+N
+X
+
+(−1)n bhigh [n] .
+
+n=0
+
+30.
+
+16. Compute and plot thePresponse of a 21-point
+N −1
+moving-average filter ( N1 k=0 x[n − k]).
+
+Show that, to normalize the gain of a band-pass
+FIR filter at the center frequency f0 , the coefficients
+bband [n] should be divided by
+N
+X
+
+17. Argue that the moving average filter acts as a lowpass filter.
+
+n=0
+
+1
+
+bband [n]e−j2πf0 n/fs ,
+
+f0 =
+
+fl + fh
+.
+2
+
+
+
+=== LAB 11 CODE ===
+########## LAB 11 ##########
+--- Markdown Cell 0 ---
+## Manually designed second-order notch filter
+
+We want a digital notch filter with the following properties:
+
+- attenuation of at least 40 dB at $f_0=20 $ Hz
+- bandwidth of $\Delta f = 4 $ Hz
+- the gain at 0 Hz should be 0 dB. 
+- sampling frequency is $f_s=160 $ Hz
+
+Let's find out the form of the transfer function $H(z)$.
+
+
+--- Code Cell 1 ---
+fs = 160
+fn = fs/2
+d = 1 - pi/40
+ds = signal.dlti([1, -sqrt(2), 1], [1, -sqrt(2)*d, d**2])
+w, gain, phase = ds.bode()
+f = w/(2*pi)*fs
+plot(f, gain, '.-', label='bode')
+hlines([-3], [0], [80], color='red')
+vlines([18, 22], [0, 0], [-200, -200],color='red')
+grid()
+
+--- Code Cell 2 ---
+# Let's see the in detail how well we satisfied the requirements (DC gain + cut off freq. gain)
+plot(f, gain, '.-', label='bode')
+hlines([-3], [0], [80], color='red')
+vlines([18, 22], [0, 0], [-200, -200],color='red')
+xlim([0.0, 25])
+ylim([-10, 1])
+grid()
+
+--- Markdown Cell 3 ---
+## Normalizing the DC gain
+
+However, at 0 Hz the gain is not exactly unity. We can fix it by reintroducing $k$ such that $|H(e^{j0})| = 1$: 
+
+$$
+k = \left|\frac{1 - 0.92\sqrt{2}+0.92^2}{2 - \sqrt{2}}\right|\approx 0.965
+$$
+
+Thus the filter coefficients are
+
+
+
+--- Code Cell 4 ---
+k = (1+d**2 - 2*d/sqrt(2))/(2 - sqrt(2))
+print(k)
+ds = signal.dlti(k*array([1, -sqrt(2), 1]), [1, -sqrt(2)*d, d**2])
+w, gain, phase = ds.bode()
+f = w/(2*pi)*fs
+plot(f, gain, '.-', label='bode')
+axvline(18, linestyle=':', color='red')
+axvline(22, linestyle=':', color='red')
+axhline(-3, linestyle=':', color='red')
+xlim([0, 25])
+ylim([-10, 1])
+grid()
+
+--- Markdown Cell 5 ---
+Observe that by normalizing the DC gain we (negligibly) distorted the the gain at the cutoff frequency.
+
+--- Markdown Cell 6 ---
+---
+## Designing a lowpass FIR filter using the Fourier (window) method
+
+--- Code Cell 7 ---
+from pylab import *
+from scipy import signal
+fs, fl, N = 100, 20, 51
+n = arange(N) - N//2 + 1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n/pi)
+w = signal.windows.hann(N)
+plot(n, w, '-', label='window')
+plot(n, b_l, 'o-', label='sinc')
+b_l *= w
+plot(n, b_l, 'k.-', label='sinc * window')
+legend()
+grid()
+
+--- Code Cell 8 ---
+b_l /= b_l.sum() # Ensure that the gain at 0Hz is 1. 
+ds = signal.dlti(b_l, [1], dt=1/fs)
+o, gain, phase = ds.bode(w=1000)
+plot(o/(2*pi), gain)
+axvline(fc, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+
+
+--- Code Cell 9 ---
+plot(o/(2*pi), phase)
+grid()
+
+--- Markdown Cell 10 ---
+## Designing a highpass FIR filter based on the above lowpass filter
+
+--- Code Cell 11 ---
+fh = 40
+n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+b_h = sin(2*pi*n*fh/fs)/(n*pi)
+# or
+n = arange(N) - N//2
+b_h[n!=0] = sin(2*pi*n[n!=0]*fh/fs)/(n[n!=0]*pi)
+b_h[n==0] = 2*fh/fs
+#------
+b_h *= w
+b_h *= -1
+b_h[N//2] += 1
+
+b_h /= np.abs(np.sum(b_h * (-1) ** np.arange(N)))# Ensure that the gain at Nyquist is 1. 
+ds = signal.dlti(b_h, [1], dt=1/fs)
+# alternative 1 ----
+o, gain, phase = ds.bode(w=1000)
+f = o/(2*pi)
+# alternative 2
+#o, H = ds.freqresp(w=1000)
+#gain, phase = 20*log10(abs(H)), angle(H)*180/pi
+#f = o/(2*pi)*fs
+#-------------------
+plot(f, gain)
+axvline(fh, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+
+--- Code Cell 12 ---
+# gain at the highest freq. close to unity (0dB) because the last freq. is not exactly pi
+print(gain[-1])
+
+--- Code Cell 13 ---
+plot(n, b_h)
+
+--- Code Cell 14 ---
+# Checking that indeed the gain at Nyquist is unity
+o, H = signal.freqz(b_h, worN=array([pi]))
+print(abs(H))
+
+--- Markdown Cell 15 ---
+## Designing a bandpass FIR filter based on the above lowpass filter
+
+--- Code Cell 16 ---
+n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+b_l = sin(2*pi*n*fl/fs)/(n*pi)
+b_h = sin(2*pi*n*fh/fs)/(n*pi)
+b = b_l - b_h
+# taper
+b *= w
+print(b)
+# normalization
+f0 = (fl + fh)/2
+omega0 = 2*pi*f0/fs
+H0 = np.sum(b * np.exp(-1j * omega0 * np.arange(N)))
+b /= abs(H0)
+#------
+ds = signal.dlti(b, [1], dt=1/fs)
+o, gain, phase = ds.bode(w=1000)
+f = o/(2*pi)
+plot(f, gain)
+axvline(fl, linestyle=':')
+axvline(fh, linestyle=':')
+axhline(-3, linestyle=':')
+grid()
+
+
+--- Markdown Cell 17 ---
+
+

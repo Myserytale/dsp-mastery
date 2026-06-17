@@ -1,0 +1,318 @@
+=== HOMEWORK 8 QUESTIONS ===
+Homework 08 - Poles, zeros of continuous systems & z-transform basics
+Deadline: 3rd test date (14th of May)
+The mandatory questions account for 100 points, while the optional questions together contribute up to an additional
+50 points.
+(d) Time reversal:
+
+1. Write a Python script using sympy to compute the
+Laplace transform of f (t) = e−2t and g(t) = sin(3t).
+Calculate their convolution and prove the validity of
+the convolution theorem for its Laplace transform.
+
+Z{x[−n]} = X(z −1 )
+(e)
+
+Convolution:
+
+2. Define poles and zeros in the context of the Laplace
+transform. How do they influence the behavior of a
+system?
+
+Z{x[n] ∗ y[n]} = X(z) Y (z)
+14. Calculate the z-transform of the following sequences
+and determine their region of convergence:
+(
+0, n < 0
+(a) u[n] =
+1, n ≥ 0
+(
+1, n = 0
+(b) δ[n] =
+0, n 6= 0
+
+3. Discuss the significance of the pole-zero plot in analyzing the stability of a system.
+4. Explain why all-pole analogue filters can only be lowpass or band-pass.
+5. What kind of filter does the transfer function H(s) =
+s
+s+1 represent? Argue it using words instead of calculations.
+
+15. Compute the z-transform of the sequence x[n] =
+an u[n]. Verify your result by checking the region
+of convergence (ROC).
+
+6. What is a Bode plot, and how is it used to analyze
+continuous-time systems? What are the key components of a Bode plot?
+
+16. Show that the z-transform of x[n] = δ[n] − δ[n − 1]
+is X(z) = 1 − z −1 .
+
+7. Explain how to interpret the gain and phase plots in
+a Bode diagram.
+
+z
+17. Determine the inverse z-transform of X(z) = z−a
+for different regions of convergence and explain the
+steps involved.
+
+8. Compute and plot the Bode plot for the transfer
+s+1
+. Comment each step to
+function H(s) = s2 +3s+2
+explain the code.
+
+18. Show that if sampled at intervals T , the z-transform
+of the functions below are:
+
+9. Using Python, create a function to compute and plot
+the frequency response of an LTI system given its
+transfer function H(s). Compare the results with
+those obtained from a Bode plot.
+
+Tz
+(a) t → (z−1)
+2
+2
+
+z(z+1)
+(b) t2 → T(z−1)
+3
+
+(c) e−at → z−ez−aT
+
+10. What is the z-transform, and how does it differ from
+the Fourier transform?
+11. Explain the region of convergence (ROC) for the ztransform. Why is it important?
+12. How does the z-transform of the convolution of two
+sequences relate to the individual z-transforms of the
+two sequences?
+
+T ze
+te−at → (z−e
+−aT )2
+
+(e)
+
+z sin(ωT )
+sin(ωt) → z2 −2z
+cos(ωT )+1
+
+(f)
+
+))
+cos(ωt) → z2z(z−cos(ωT
+−2z cos(ωT )+1
+
+19. If the input to a system, having a transfer function
+of 1 + 2z −1 − z −2 , is a discrete unit step, show that
+the first four terms of the output sequence are 1, 3,
+2, 2.
+
+13. Prove the following properties of the z-transform of
+two sequences x[n] and y[n]:
+
+20. When a discrete signal 1, −2 is inputted to a processing system, the output sequence is 1, −5, 8, −4.
+
+(a) Linearity:
+Z{ax[n] + by[n]} = aX(z) + bY (z)
+
+(a) Derive the transfer function for the system.
+(b)
+
+(b) Time shifting:
+Z{x[n − k]} = z −k X(z),
+
+−aT
+
+(d)
+
+k∈Z
+21.
+
+(c) Scaling in the z-domain (modulation in time):
+z 
+Z{an x[n]} = X
+, a 6= 0
+a
+1
+
+Find the first three terms of the output sequence in response to the finite input sequence
+of 2, 2, 1.
+
+Implement a Python script to compute the ztransform of x[n] = (0.5)n u[n] and verify the region
+of convergence by visualizing a heat map of the ztransform for a dense grid of complex z values.
+
+
+
+=== LAB 08 CODE ===
+########## LAB 08 ##########
+--- Markdown Cell 0 ---
+## Gain and phase of continuous time system's transfer function: the Bode plot
+
+--- Markdown Cell 1 ---
+Find the gain and phase angle for angular frequencies 0 rad/s (d.c.), 2 rad/s and for very large frequencies if the system is characterised by the transfer function
+$$
+				H(s) = \dfrac{s+1}{s+2}\rightarrow |H(j\omega)|=\sqrt{\dfrac{\omega^2 + 1}{\omega^2 + 4}}\ ,\quad \angle H(j\omega)=\arctan\frac{\omega}{1} - \arctan\frac{\omega}{2}
+			$$
+<img src="Meddins_splane_freqresponse_2.png" width="400">				
+				
+$\omega = 0$ rad/s $\rightarrow$ {Gain} = 0.5, phase angle = 0$^\circ$
+				
+$\omega = 2$ rad/s $\rightarrow$ {Gain} =$\sqrt{\frac{5}{8}}\approx 0,79$, phase angle = $\arctan 2 - \arctan 1 = 18.4^\circ$
+				
+
+
+--- Code Cell 2 ---
+from pylab import *
+from scipy import signal
+num, den = [1, 1], [1, 2]
+o, gain, phase = signal.bode((num, den))
+def gain_theory(o):
+    return 20*log10(sqrt(o**2 + 1)/sqrt(o**2+4))
+def phase_theory(o):
+    return (arctan(o) - arctan(o/2))*180/pi
+plot(o, gain           , linewidth=7, alpha=0.5, label='gain numeric') # o is omega in rad/s, gain in decibels
+plot(o, phase          , linewidth=7, alpha=0.5, label='phase numeric') # phase in degrees
+plot(o, gain_theory (o), 'k-'                  , label='gain theory'  )
+plot(o, phase_theory(o), 'b-'                  , label='phase theory' )
+plot([0], [gain_theory (0)], 'ro', [2], [gain_theory (2)], 'go')
+plot([0], [phase_theory(0)], 'ro', [2], [phase_theory(2)], 'go')
+grid()
+legend()
+print(10**(gain_theory(0)/20) , phase_theory (0),'deg', 10**(gain_theory(2)/20), phase_theory(2),'deg')
+
+--- Code Cell 3 ---
+o
+
+--- Code Cell 4 ---
+gain
+
+--- Code Cell 5 ---
+phase
+
+--- Code Cell 6 ---
+signal.bode?
+
+--- Code Cell 7 ---
+
+
+--- Code Cell 8 ---
+# Let's create our own general Bode plot calculator
+# and compare it to the one in the 'signal' package
+def my_bode(transfer_function, omega = linspace(0.01, 10,100)):
+    return omega,\
+           20*log10(abs(transfer_function(1j*omega))),\
+           180/pi*angle(transfer_function(1j*omega))
+
+--- Code Cell 9 ---
+H = lambda s: (s+1)/(s+2)
+o1, gain1, phase1 = my_bode(H)
+print(o1, gain1, phase1)
+
+--- Code Cell 10 ---
+plot(o, gain           , linewidth=7, alpha=0.5, label='gain (signal.bode)') # o is omega in rad/s, gain in decibels
+plot(o, phase          , linewidth=7, alpha=0.5, label='phase (signal.bode)') # phase in degrees
+plot(o1, gain1, 'k-'                  , label='gain (my_bode)'  )
+plot(o1, phase1, 'b-'                  , label='phase (my_bode)' )
+legend()
+
+--- Markdown Cell 11 ---
+<hr style="border:2px solid black;">
+
+--- Markdown Cell 12 ---
+## The $z$ transform
+
+--- Markdown Cell 13 ---
+## Power series recap:
+$$
+S_N = \sum_{n=0}^{N} r^n
+$$
+
+Multiply by $r$:
+$$
+rS_N = \sum_{n=0}^{N} r^{n+1}
+= \sum_{n=1}^{N+1} r^n=S_{N} + r^{N+1} - 1
+$$
+
+
+--- Markdown Cell 14 ---
+---
+## Exercise
+Calculate the  $z$-transform of 
+$$		
+					u[n] = \begin{cases}
+						0\ , & n < 0\\
+						1\ , & n\geqslant 0	
+					\end{cases}
+$$
+### Solution:
+
+
+--- Markdown Cell 15 ---
+---
+## Exercise
+Show that if sampled at intervals $T$ the $z$-transform of $x(t) = t$ is
+$\frac{Tz}{(z-1)^2}$; 
+
+### Solution
+
+
+Sampling $x(t)=t$ at intervals $T$ gives
+$$
+
+
+--- Markdown Cell 16 ---
+---
+## Exercise
+Show that if sampled at intervals $T$ the $z$-transform of $x(t) =e^{-at}$ is $\frac{z}{z-e^{-aT}}$
+
+### Solution
+
+Sampling $x(t)=e^{-at}$ at intervals $T$ gives
+$$
+x[n]=x(nT)=e^{-anT}=\left(e^{-aT}\right)^n,\qquad n\ge 0.
+$$
+
+
+--- Markdown Cell 17 ---
+---
+## Exercise
+Show that if sampled at intervals $T$, the $z$-transform of
+$x(t)=\sin \omega t$ is
+$$
+X_{\sin}(z)=\frac{z\sin\omega T}{z^2-2z\cos\omega T+1},
+$$
+and the $z$-transform of $x(t)=\cos \omega t$ is
+$$
+X_{\cos}(z)=\frac{z(z-\cos\omega T)}{z^2-2z\cos\omega T+1}.
+
+
+--- Markdown Cell 18 ---
+## Exercise
+If the input to a system, having a transfer function of $ 1 + 2z^{-1} - z^{-2} $, is a discrete unit step, show that the first four terms of the output sequence are 1, 3, 2, 2.
+
+### Solution 1
+$$
+H(z)=1+2z^{-1}-z^{-2}
+$$
+
+
+$
+
+
+--- Markdown Cell 19 ---
+## Exercise
+When a discrete signal \( 1, -2 \) is inputted to a processing system, the output sequence is \( 1, -5, 8, -4 \).
+
+a. Derive the transfer function for the system.
+
+b. Find the first three terms of the output sequence in response to the finite input sequence of \( 2, 2, 1 \).
+
+### Solution 1
+
+
+
+
+--- Code Cell 20 ---
+
+
