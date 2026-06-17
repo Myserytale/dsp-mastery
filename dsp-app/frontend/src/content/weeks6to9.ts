@@ -395,9 +395,8 @@ for name, func in windows.items():
     print(f"{name:<15} | {width:<25.2f} | {sidelobe:.2f} dB")
 \`\`\`
 
----
-
-## 🔬 Lab 06 Walkthrough: FFT Implementation and Analysis
+---`,
+    labWalkthrough: `## 🔬 Lab 06 Walkthrough: FFT Implementation and Analysis
 
 This section documents and walks through the provided code snippets from Lab 06, explaining the core digital signal processing concepts implemented within.
 
@@ -541,9 +540,6 @@ d: Because the sinc function eliminates quantization noise during reconstruction
 answer: b
 explanation: The Fourier transform of a rectangular function in frequency (an ideal brick-wall lowpass filter passing everything below fs/2) is the sinc function in time. Since perfect reconstruction requires an ideal lowpass filter, sinc interpolation is the theoretically exact method. Option (a) is wrong — sinc is actually impractical because it extends to infinity and requires infinite computation. Option (c) is wrong because sinc has infinite support (it never truly reaches zero), which is one of its main practical drawbacks. Option (d) confuses reconstruction with quantization error correction, which are separate concerns.
 \`\`\`
-`,
-    labWalkthrough: `
-
 `,
 
     keyFormulas: `## Week 6 Key Formulas

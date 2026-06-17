@@ -2065,9 +2065,8 @@ Based on the proof in Problem 12, the inner sum equals $N$ when $n=m$ and $0$ ot
 $$x[n] = \\frac{1}{N} x[n] (N) = x[n]$$
 This proves that applying the DFT and its inverse perfectly restores the original sampled sequence.
 
----
-
-## 🔬 Lab 05 Walkthrough: Sampling and Reconstruction Code
+---`,
+    labWalkthrough: `## 🔬 Lab 05 Walkthrough: Sampling and Reconstruction Code
 
 This section conceptually breaks down the provided Python script to demonstrate the mathematics of the Whittaker-Shannon interpolation formula.
 
@@ -2167,9 +2166,6 @@ d: Leakage only occurs when the signal contains noise.
 answer: b
 explanation: Multiplying a signal by a rectangular window (i.e., observing only a finite segment) is multiplication in time, which becomes convolution with the window’s spectrum (a sinc function) in frequency. The sinc’s sidelobes spread spectral energy beyond the true frequency bins, creating leakage. Option (a) confuses aliasing (too-low sample rate) with leakage (finite observation). Option (c) is wrong — the DFT computes exact frequencies; leakage is a windowing artifact. Option (d) is wrong because leakage occurs even for perfectly clean sinusoidal signals.
 \`\`\`
-`,
-    labWalkthrough: `
-
 `,
 
     keyFormulas: `## Week 5 Key Formulas

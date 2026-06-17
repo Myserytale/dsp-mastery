@@ -249,19 +249,25 @@ html, body, #root {
 .hljs-meta { color: #5e81ac; }
 
 /* ─── KaTeX overrides for dark theme ─── */
-.katex { color: #eceff4; }
+.katex { 
+  color: #eceff4; 
+  font-size: 1.15em;
+}
 
 .katex-display {
-  margin: 1em 0;
-  padding: 0.75em;
-  background: rgba(46, 52, 64, 0.3);
+  margin: 1.25em 0;
+  padding: 1em;
+  background: rgba(46, 52, 64, 0.6);
   border-radius: 8px;
-  border: 1px solid rgba(46, 52, 64, 0.5);
+  border: 1px solid rgba(136, 192, 208, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow-x: auto;
 }
 
 .katex-display > .katex {
   color: #88c0d0;
+  font-size: 1.25em;
+  text-shadow: 0 0 8px rgba(136, 192, 208, 0.2);
 }
 
 /* ─── Code block copy button ─── */
