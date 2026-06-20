@@ -327,21 +327,46 @@ This week also covers **notch filters** — a practical design technique for rem
       },
     ],
 
-    homeworkGuide: `Created At: 2026-06-17T00:35:41Z
-Completed At: 2026-06-17T00:35:41Z
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":159,"LineContent":"    homeworkGuide: \`## 📝 Homework 10 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":380,"LineContent":"    homeworkGuide: \`## 📝 Homework 11 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":566,"LineContent":"    homeworkGuide: \`## 📝 Homework 12 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":821,"LineContent":"    homeworkGuide: \`## 📝 Comprehensive Exam Overview \\u0026 Solved Examples"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":134,"LineContent":"    homeworkGuide: \`## 📝 Homework 6 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":407,"LineContent":"    homeworkGuide: \`## 📝 Homework 7 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":679,"LineContent":"    homeworkGuide: \`## 📝 Homework 8 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":958,"LineContent":"    homeworkGuide: \`## 📝 Homework 9 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":185,"LineContent":"    homeworkGuide: \`## 📝 Homework 1 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":664,"LineContent":"    homeworkGuide: \`## 📝 Homework 2 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1039,"LineContent":"    homeworkGuide: \`## 📝 Homework 3 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1309,"LineContent":"    homeworkGuide: \`## 📝 Homework 4 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}
+    homeworkGuide: `## 📝 Homework 11 Solutions\n\n[Open HW PDF →](/pdfs/hw11.pdf)\n\n## 📝 Homework 11 Solutions
+
+### 📌 Problem 1: What do we mean by a finite impulse response (FIR) filter? How does it differ from IIR filters in terms of their linear constant-coefficient difference equation?
+A **Finite Impulse Response (FIR)** filter is a filter whose impulse response $h[n]$ is of finite duration, meaning it settles to zero in finite time. In terms of the linear constant-coefficient difference equation (LCCDE), the output of an FIR filter depends only on the current and past input values, and not on past output values.
+For an FIR filter, the difference equation is given by:
+$$ y[n] = \\sum_{k=0}^{N} b_k x[n-k] $$
+In contrast, an **Infinite Impulse Response (IIR)** filter depends on both past inputs and past outputs (it has feedback). Its difference equation is:
+$$ y[n] = \\sum_{k=0}^{N} b_k x[n-k] - \\sum_{k=1}^{M} a_k y[n-k] $$
+Thus, the main difference in the LCCDE is that FIR filters have $a_k = 0$ for all $k \\ge 1$, which means they have no feedback terms.
+
+### 📌 Problem 2: Compare FIR and IIR filters.
+- **Impulse Response Duration**: FIR filters have a finite impulse response, whereas IIR filters have an infinite duration impulse response.
+- **Phase Response**: FIR filters can be easily designed to have exact linear phase (which implies a constant group delay). IIR filters typically have a non-linear phase response.
+- **Stability**: FIR filters are inherently strictly bounded-input bounded-output (BIBO) stable since their poles are located at the origin (in the $z$-domain). IIR filters can become unstable if their poles move outside the unit circle.
+- **Filter Order and Complexity**: For a given set of magnitude specifications (e.g., sharp cutoff), FIR filters generally require a much higher filter order (more coefficients) compared to IIR filters, which means higher computational cost (more multiplications and additions per sample).
+- **Feedback**: FIR filters are non-recursive (no feedback), while IIR filters are recursive (feedback is present).
+
+### 📌 Problem 3: Explain the ad
+<truncated 27928 bytes>
+ are:
+$$ b_{\\text{low, norm}}[n] = \\frac{b_{\\text{low}}[n]}{\\sum_{n=0}^N b_{\\text{low}}[n]} $$
+
+### 📌 Problem 29: Show that, to normalize the Nyquist-frequency gain of a high-pass FIR filter, the coefficients $b_{\\text{high}}[n]$ should be divided by $|\\sum_{n=0}^N (-1)^n b_{\\text{high}}[n]|$.
+The Nyquist frequency corresponds to the normalized angular frequency $\\omega = \\pi$.
+The frequency response at the Nyquist frequency is:
+$$ H(e^{j\\pi}) = \\sum_{n=0}^{N} b_{\\text{high}}[n] e^{-j\\pi n} $$
+Since $e^{-j\\pi} = -1$, this becomes:
+$$ H(e^{j\\pi}) = \\sum_{n=0}^{N} b_{\\text{high}}[n] (-1)^n $$
+To normalize the gain at the Nyquist frequency to $1$, we need to ensure that the magnitude $|H(e^{j\\pi})|$ equals $1$. We divide all coefficients by the absolute value of the unnormalized gain:
+$$ \\text{Normalized Gain} = \\frac{|H(e^{j\\pi})|}{\\left| \\sum_{n=0}^{N} (-1)^n b_{\\text{high}}[n] \\right|} = 1 $$
+Thus, we divide the coefficients by $\\left| \\sum_{n=0}^N (-1)^n b_{\\text{high}}[n] \\right|$.
+
+### 📌 Problem 30: Show that, to normalize the gain of a band-pass FIR filter at the center frequency $f_0$, the coefficients $b_{\\text{band}}[n]$ should be divided by $|\\sum_{n=0}^N b_{\\text{band}}[n] e^{-j 2\\pi f_0 n / f_s}|$, $f_0 = \\frac{f_l + f_h}{2}$.
+The center frequency of the band-pass filter is $f_0$. In terms of normalized angular frequency, $\\omega_0 = 2\\pi \\frac{f_0}{f_s}$.
+The frequency response at $\\omega_0$ is:
+$$ H(e^{j\\omega_0}) = \\sum_{n=0}^{N} b_{\\text{band}}[n] e^{-j \\omega_0 n} = \\sum_{n=0}^{N} b_{\\text{band}}[n] e^{-j 2\\pi \\frac{f_0}{f_s} n} $$
+To normalize the filter such that the magnitude of the gain at the center frequency is exactly $1$, we divide the filter coefficients by the magnitude of the current gain at $f_0$.
+Thus, each coefficient is divided by:
+$$ \\left| H(e^{j\\omega_0}) \\right| = \\left| \\sum_{n=0}^{N} b_{\\text{band}}[n] e^{-j 2\\pi f_0 n / f_s} \\right| $$
+This scaling factor ensures that the peak transmission strictly hits unity (0 dB).
 
 ### 🧠 Knowledge Check
 
@@ -652,21 +677,344 @@ Everything we've learned comes together when we process **real signals** — aud
       },
     ],
 
-    homeworkGuide: `Created At: 2026-06-17T00:35:41Z
-Completed At: 2026-06-17T00:35:41Z
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":159,"LineContent":"    homeworkGuide: \`## 📝 Homework 10 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":380,"LineContent":"    homeworkGuide: \`## 📝 Homework 11 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":566,"LineContent":"    homeworkGuide: \`## 📝 Homework 12 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks10to13.ts","LineNumber":821,"LineContent":"    homeworkGuide: \`## 📝 Comprehensive Exam Overview \\u0026 Solved Examples"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":134,"LineContent":"    homeworkGuide: \`## 📝 Homework 6 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":407,"LineContent":"    homeworkGuide: \`## 📝 Homework 7 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":679,"LineContent":"    homeworkGuide: \`## 📝 Homework 8 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks6to9.ts","LineNumber":958,"LineContent":"    homeworkGuide: \`## 📝 Homework 9 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":185,"LineContent":"    homeworkGuide: \`## 📝 Homework 1 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":664,"LineContent":"    homeworkGuide: \`## 📝 Homework 2 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1039,"LineContent":"    homeworkGuide: \`## 📝 Homework 3 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1309,"LineContent":"    homeworkGuide: \`## 📝 Homework 4 Solutions"}
-{"File":"/home/lev/UNI/UNI.3/dsp/dsp (2)/dsp-app/frontend/src/content/weeks1to5.ts","LineNumber":1657,"LineContent":"    homeworkGuide: \`## 📝 Homework 5 Solutions"}
+    homeworkGuide: `## 📝 Homework 12 Solutions\n\n[Open HW PDF →](/pdfs/hw12.pdf)\n\n## 📝 Homework 12 Solutions
+
+### 📌 Problem 1: Filtering White Noise with a Bandpass FIR Filter
+
+**Question:** Implement a Python script to filter white noise with a bandpass FIR filter and compare spectra.
+
+**Solution:**
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import firwin, lfilter, welch
+
+# 1. Generate white noise
+fs = 1000  # Sampling frequency in Hz
+t = np.arange(0, 10, 1/fs)  # 10 seconds of data
+# Generate normally distributed white noise
+white_noise = np.random.randn(len(t))
+
+# 2. Design a bandpass FIR filter
+lowcut = 100.0   # Lower cutoff frequency in Hz
+highcut = 300.0  # Upper cutoff frequency in Hz
+numtaps = 101    # Filter order + 1 (must be odd for bandpass)
+# The firwin function calculates the FIR filter coefficients
+# fs specifies the sampling rate, pass_zero=False creates a bandpass filter
+fir_coeff = firwin(numtaps, [lowcut, highcut], fs=fs, pass_zero=False)
+
+# 3. Apply the filter to the white noise
+# lfilter applies the digital filter defined by fir_coeff to the noise array
+filtered_noise = lfilter(fir_coeff, 1.0, white_noise)
+
+# 4. Compare the spectra using Welch's method
+# Calculate Power Spectral Density (PSD) for the original noise
+f_orig, Pxx_orig = welch(white_noise, fs, nperseg=1024)
+# Calculate PSD for the filtered noise
+f_filt, Pxx_filt = welch(filtered_noise, fs, nperseg=1024)
+
+# 5. Plot the results
+plt.figure(figsize=(10, 6))
+# Plot original noise spectrum
+plt.semilogy(f_orig, Pxx_orig, label='Original White Noise')
+# Plot filtered noise spectrum
+plt.semilogy(f_filt, Pxx_filt, label='Filtered Noise (100-300 Hz Bandpass)')
+plt.title('Power Spectral Density Comparison')
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Power/Frequency (V^2/Hz)')
+plt.legend()
+plt.grid(True, which="both", ls="-", alpha=0.5)
+plt.show()
+\`\`\`
+
+### 📌 Problem 2: Determining Sampling Frequency from EEG Power-Line Interference
+
+**Question:** Load the data from the eeg.bin file, which contains a continuous sequence of 32-bit floating-point EEG samples. Determine the sampling frequency of the recording. Hint: EEG recordings often contain a narrow spectral peak caused by power-line interference.
+
+**Solution:**
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# 1. Load the EEG signal
+# The eeg.bin file contains 32-bit floating-point samples
+# np.fromfile reads the binary data directly into a NumPy array
+file_path = 'eeg.bin'
+try:
+    eeg_data = np.fromfile(file_path, dtype=np.float32)
+except FileNotFoundError:
+    # Creating dummy data for demonstration if file is missing
+    print("eeg.bin not found. Using simulated data for demonstration.")
+    fs_sim = 250  # Simulated sampling frequency
+    t_sim = np.arange(0, 10, 1/fs_sim)
+    eeg_data = np.sin(2 * np.pi * 50 * t_sim) + 0.1 * np.random.randn(len(t_sim))
+
+# 2. Calculate the Fast Fourier Transform (FFT) to find the spectral peak
+N = len(eeg_data)
+# Applying a Hanning window to reduce spectral leakage
+windowed_data = eeg_data * np.hanning(N)
+spectrum = np.abs(np.fft.fft(windowed_data))
+
+# Since the signal is purely real, we only need the first half of the spectrum
+half_N = N // 2
+spectrum = spectrum[:half_N]
+
+# 3. Determine the normalized frequency peak
+# Find the index of the maximum peak in the spectrum
+# We skip the DC component (index 0) to avoid false positives
+peak_index = np.argmax(spectrum[1:]) + 1 
+
+# Normalized frequency (cycles per sample) corresponding to the peak
+normalized_freq = peak_index / N
+
+# 4. Infer the sampling frequency
+# EEG recordings in Europe typically have power-line interference at 50 Hz.
+# Assuming 50 Hz based on prior coursework context (e.g., notch filter applications):
+power_line_freq = 50.0  # Hz
+
+# We know the relation: normalized_freq * fs = true_freq
+# Therefore: fs = true_freq / normalized_freq
+estimated_fs = power_line_freq / normalized_freq
+
+print(f"Index of spectral peak: {peak_index}")
+print(f"Normalized frequency of peak: {normalized_freq:.6f} cycles/sample")
+print(f"Estimated Sampling Frequency: {estimated_fs:.2f} Hz")
+
+# 5. Plot the spectrum against normalized frequency
+plt.figure(figsize=(10, 4))
+normalized_freq_axis = np.arange(half_N) / N
+plt.plot(normalized_freq_axis, spectrum)
+plt.axvline(x=normalized_freq, color='r', linestyle='--', label='50 Hz Peak')
+plt.title('Spectrum of EEG Signal (Normalized Frequency)')
+plt.xlabel('Normalized Frequency (cycles/sample)')
+plt.ylabel('Magnitude')
+plt.legend()
+plt.grid(True)
+plt.show()
+\`\`\`
+
+### 📌 Problem 3: Low-pass Filtering EEG Data and Phase Shift Mitigation
+
+**Question:** Load the EEG signal from the eeg.bin file and apply both a low-pass FIR filter and a low-pass IIR filter with a cutoff frequency of 2 Hz. Demonstrate the effect of phase shift in the outputs of the two filters and compare their phase characteristics. Then apply forward–backward filtering and show how it mitigates phase distortion in both cases.
+
+**Solution:**
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import firwin, butter, lfilter, filtfilt
+
+# 1. Load the EEG signal
+file_path = 'eeg.bin'
+try:
+    eeg_data = np.fromfile(file_path, dtype=np.float32)
+except FileNotFoundError:
+    print("eeg.bin not found. Using simulated data.")
+    fs_sim = 250
+    t_sim = np.arange(0, 10, 1/fs_sim)
+    # Simulate a low frequency (1Hz) base signal with higher frequency noise
+    eeg_data = np.sin(2 * np.pi * 1 * t_sim) + 0.5 * np.sin(2 * np.pi * 10 * t_sim)
+
+# Assume the sampling frequency is exactly 250 Hz based on previous analysis
+fs = 250.0  
+cutoff = 2.0  # Cutoff frequency of 2 Hz
+
+# 2. Design the FIR filter
+numtaps = 101  # Length of the FIR filter (number of coefficients)
+fir_coeff = firwin(numtaps, cutoff, fs=fs)
+
+# 3. Design the IIR filter
+iir_order = 4  # Order of the Butterworth filter
+# butter returns numerator (b) and denominator (a) polynomials of the IIR filter
+b_iir, a_iir = butter(iir_order, cutoff, btype='low', fs=fs)
+
+# 4. Apply forward filtering (introduces phase shift / time delay)
+# lfilter processes the data sequentially in one direction
+eeg_fir_forward = lfilter(fir_coeff, 1.0, eeg_data)
+eeg_iir_forward = lfilter(b_iir, a_iir, eeg_data)
+
+# 5. Apply forward-backward filtering (zero-phase filtering)
+# filtfilt processes data forwards then backwards, neutralizing phase distortion
+eeg_fir_zerophase = filtfilt(fir_coeff, 1.0, eeg_data)
+eeg_iir_zerophase = filtfilt(b_iir, a_iir, eeg_data)
+
+# 6. Plotting to demonstrate the phase shift and its mitigation
+t_axis = np.arange(len(eeg_data)) / fs
+window_start = int(1.0 * fs)
+window_end = int(4.0 * fs)
+
+t_window = t_axis[window_start:window_end]
+orig_window = eeg_data[window_start:window_end]
+
+plt.figure(figsize=(14, 8))
+
+# Subplot 1: Forward filtering shows phase distortion (shift in time)
+plt.subplot(2, 1, 1)
+plt.plot(t_window, orig_window, label='Original EEG', color='lightgray', linewidth=2)
+plt.plot(t_window, eeg_fir_forward[window_start:window_end], label='FIR Forward (lfilter)', linestyle='--')
+plt.plot(t_window, eeg_iir_forward[window_start:window_end], label='IIR Forward (lfilter)', linestyle=':')
+plt.title('Forward Filtering (Demonstrating Phase Shift / Time Delay)')
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.legend()
+plt.grid(True)
+
+# Subplot 2: Forward-backward filtering corrects the phase shift
+plt.subplot(2, 1, 2)
+plt.plot(t_window, orig_window, label='Original EEG', color='lightgray', linewidth=2)
+plt.plot(t_window, eeg_fir_zerophase[window_start:window_end], label='FIR Zero-Phase (filtfilt)', linestyle='--')
+plt.plot(t_window, eeg_iir_zerophase[window_start:window_end], label='IIR Zero-Phase (filtfilt)', linestyle=':')
+plt.title('Forward-Backward Filtering (Mitigated Phase Distortion)')
+plt.xlabel('Time (s)')
+plt.ylabel('Amplitude')
+plt.legend()
+plt.grid(True)
+
+plt.tight_layout()
+plt.show()
+\`\`\`
+
+### 📌 Problem 4: Purpose of the Short Time Fourier Transform (STFT)
+
+**Question:** Describe the purpose of the Short Time Fourier Transform (STFT).
+
+**Solution:**
+The purpose of the Short Time Fourier Transform (STFT) is to analyze the spectral content of non-stationary signals where frequency components change over time. By segmenting a long signal into shorter, overlapping windows and applying the Fourier Transform to each segment, the STFT provides a time-frequency representation (often visualized as a spectrogram). This allows us to observe not only *what* frequencies are present in a signal, but *when* they occur.
+
+### 📌 Problem 5: Heisenberg Uncertainty Principle in Signal Processing
+
+**Question:** What is the Heisenberg Uncertainty Principle in the context of signal processing?
+
+**Solution:**
+In signal processing, the Heisenberg Uncertainty Principle (also known as the Gabor limit) dictates that a signal cannot be perfectly localized in both the time and frequency domains simultaneously. Mathematically, it is expressed as:
+
+$\\Delta t \\cdot \\Delta f \\geq \\frac{1}{4\\pi}$
+
+This principle imposes a fundamental trade-off in time-frequency analysis (like the STFT): 
+- A short time window gives excellent time resolution ($\\Delta t$ is small) but poor frequency resolution ($\\Delta f$ is large).
+- A long time window gives excellent frequency resolution ($\\Delta f$ is small) but poor time resolution ($\\Delta t$ is large).
+
+### 📌 Problem 6: Continuous Wavelet Transform (CWT) Formula
+
+**Question:** Write up the continuous wavelet transform (CWT) formula and explain its components.
+
+**Solution:**
+The Continuous Wavelet Transform (CWT) of a signal $x(t)$ is defined as:
+
+$X_w(a, b) = \\frac{1}{\\sqrt{|a|}} \\int_{-\\infty}^{\\infty} x(t) \\psi^*\\left(\\frac{t-b}{a}\\right) dt$
+
+**Components:**
+- **$x(t)$**: The continuous-time signal being analyzed.
+- **$\\psi(t)$**: The "mother wavelet", a continuous waveform with limited duration and zero mean.
+- **$\\psi^*$**: The complex conjugate of the mother wavelet.
+- **$a$**: The scale parameter. It controls the dilation (stretching) or compression of the wavelet. High scales correspond to low frequencies (stretched wavelet), and low scales correspond to high frequencies (compressed wavelet).
+- **$b$**: The translation parameter. It determines the temporal position of the wavelet as it slides along the signal.
+- **$\\frac{1}{\\sqrt{|a|}}$**: A normalization factor that ensures the energy of the scaled wavelet remains the same across all scales $a$.
+
+### 📌 Problem 7: Relationship between CWT and Bandpass Filtering
+
+**Question:** Explain the relationship between the Continuous Wavelet Transform (CWT) and bandpass filtering.
+
+**Solution:**
+The CWT can be interpreted as passing the signal $x(t)$ through a continuous bank of bandpass filters. The scaled and translated wavelet $\\psi\\left(\\frac{t-b}{a}\\right)$ essentially acts as the impulse response of a bandpass filter. 
+As the scale parameter $a$ varies, both the center frequency and the bandwidth of the filter change. However, their ratio remains invariant, meaning the CWT behaves as a **constant-Q** filter bank (where $Q = \\frac{\\text{Center Frequency}}{\\text{Bandwidth}}$ is constant). This makes it highly effective: it uses narrow bandwidths for low frequencies (yielding high frequency resolution) and wide bandwidths for high frequencies (yielding high time resolution).
+
+### 📌 Problem 8: Concept of Vanishing Moments
+
+**Question:** Explain the concept of vanishing moments in wavelet theory.
+
+**Solution:**
+A wavelet $\\psi(t)$ is said to have $p$ vanishing moments if it is orthogonal to polynomials up to degree $p-1$. Mathematically:
+
+$\\int_{-\\infty}^{\\infty} t^k \\psi(t) dt = 0 \\quad \\text{for } k = 0, 1, \\dots, p-1$
+
+In practice, if a signal contains a smooth, polynomial trend of degree up to $p-1$, a wavelet with $p$ vanishing moments will yield wavelet coefficients equal to zero for that trend. This property allows wavelets to naturally suppress low-frequency background trends and isolate higher-frequency variations, transients, or singularities in the signal.
+
+### 📌 Problem 9: Admissibility Criterion implies Zero-Mean Condition
+
+**Question:** Show that the admissibility criterion implies the zero-mean condition.
+
+**Solution:**
+The admissibility criterion ensures that a function $\\psi(t)$ can be used as a wavelet and that its inverse transform exists. It is given by:
+
+$C_\\psi = \\int_{-\\infty}^{\\infty} \\frac{|\\Psi(f)|^2}{|f|} df < \\infty$
+
+where $\\Psi(f)$ is the Fourier transform of the wavelet $\\psi(t)$.
+
+For this integral to be finite, the integrand must not blow up at the origin $f = 0$. Because there is a $1/|f|$ term, the numerator $|\\Psi(f)|^2$ must approach $0$ fast enough to cancel the singularity. Therefore, we must strictly have:
+
+$\\Psi(0) = 0$
+
+By the definition of the Fourier transform evaluated at $f = 0$:
+
+$\\Psi(0) = \\int_{-\\infty}^{\\infty} \\psi(t) e^{-j2\\pi(0)t} dt = \\int_{-\\infty}^{\\infty} \\psi(t) dt$
+
+Setting this to zero yields:
+
+$\\int_{-\\infty}^{\\infty} \\psi(t) dt = 0$
+
+This proves that the admissibility criterion strictly requires the wavelet to have a zero mean.
+
+### 📌 Problem 10: Main Purpose of Wavelet Transform
+
+**Question:** What is the main purpose of wavelet transform in signal processing?
+
+**Solution:**
+The main purpose of the wavelet transform is to provide a multi-resolution time-frequency analysis of non-stationary signals. Unlike the STFT, which uses a fixed-size analysis window resulting in rigid time-frequency tradeoffs, the wavelet transform utilizes variable window sizes. It uses long windows for capturing low-frequency components (giving high frequency resolution) and short windows for capturing high-frequency transients (giving high time resolution). This makes it exceptional for analyzing signals with sudden spikes, discontinuities, or varying frequency characteristics.
+
+### 📌 Problem 11: Scaling Function in Wavelet Transforms
+
+**Question:** Define the term "scaling function" in the context of wavelet transforms.
+
+**Solution:**
+In Multi-Resolution Analysis (MRA) for wavelet transforms, the scaling function (often denoted as $\\phi(t)$ and called the "father wavelet") represents the low-pass, coarse approximation of the signal. While the wavelet function $\\psi(t)$ acts as a high-pass filter that captures the fine "detail" between different scales, the scaling function acts as a low-pass filter that captures the baseline background up to a specific scale. Linear combinations of translated scaling functions allow the representation of the signal at any given resolution level.
+
+### 📌 Problem 12: Difference between CWT and DWT
+
+**Question:** What is the difference between the Continuous Wavelet Transform (CWT) and the Discrete Wavelet Transform (DWT)?
+
+**Solution:**
+- **Continuous Wavelet Transform (CWT):** Evaluates the wavelet coefficients over continuous ranges of both the scale $a$ and translation $b$ parameters. The output is highly redundant and produces a dense, continuous 2D time-scale surface, making it ideal for feature extraction and visual analysis of signals.
+- **Discrete Wavelet Transform (DWT):** Evaluates the transform only at a discrete subset of scales and translations (usually using dyadic powers of 2). It forms an orthogonal or bi-orthogonal basis, resulting in a non-redundant and highly efficient representation. It is typically implemented via fast digital filter banks (successive low-pass and high-pass filtering) and is the primary tool for signal compression (e.g., JPEG2000) and denoising.
+
+### 📌 Problem 13: Haar Scaling and Wavelet Functions
+
+**Question:** For the Haar scaling function:
+$\\phi(t) = 1$ for $0 \\leq t < 1$, and $0$ otherwise.
+Show that the two-scale relation $\\phi(t) = \\phi(2t) + \\phi(2t-1)$ is satisfied. Then, using $\\psi(t) = \\phi(2t) - \\phi(2t-1)$, derive the Haar wavelet function explicitly.
+
+**Solution:**
+First, we analyze the components of the right-hand side of the two-scale relation:
+
+For the first term, $\\phi(2t)$:
+$\\phi(2t) = 1$ when $0 \\leq 2t < 1 \\implies 0 \\leq t < 0.5$
+$\\phi(2t) = 0$ otherwise.
+
+For the second term, $\\phi(2t-1)$:
+$\\phi(2t-1) = 1$ when $0 \\leq 2t-1 < 1$
+Adding 1: $1 \\leq 2t < 2$
+Dividing by 2: $0.5 \\leq t < 1$
+$\\phi(2t-1) = 0$ otherwise.
+
+Adding the two components together:
+$\\phi(2t) + \\phi(2t-1) = \\begin{cases} 1 + 0 = 1, & \\text{for } 0 \\leq t < 0.5 \\\\ 0 + 1 = 1, & \\text{for } 0.5 \\leq t < 1 \\\\ 0 + 0 = 0, & \\text{otherwise} \\end{cases}$
+
+Combining the intervals $0 \\leq t < 0.5$ and $0.5 \\leq t < 1$, we get:
+$\\phi(2t) + \\phi(2t-1) = 1$ for $0 \\leq t < 1$ (and $0$ otherwise).
+This exactly matches the definition of $\\phi(t)$, thus proving the two-scale relation is satisfied.
+
+**Deriving the Haar Wavelet Function $\\psi(t)$:**
+Using the given equation $\\psi(t) = \\phi(2t) - \\phi(2t-1)$:
+Subtracting the two previously defined terms:
+
+For $0 \\leq t < 0.5$: $\\psi(t) = 1 - 0 = 1$
+For $0.5 \\leq t < 1$: $\\psi(t) = 0 - 1 = -1$
+Otherwise: $\\psi(t) = 0 - 0 = 0$
+
+Thus, the explicit form of the Haar wavelet function is:
+$\\psi(t) = \\begin{cases} 1, & 0 \\leq t < 0.5 \\\\ -1, & 0.5 \\leq t < 1 \\\\ 0, & \\text{otherwise} \\end{cases}$
 
 ### 🧠 Knowledge Check
 
