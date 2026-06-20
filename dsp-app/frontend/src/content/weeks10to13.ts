@@ -1563,9 +1563,9 @@ A signal is any physical quantity that varies with time, space, or any other ind
 *   **Biological:** EEG (brainwaves), ECG (heart electrical activity).
 
 ### 2. Fourier transform of the Dirac comb
-The Dirac comb (or impulse train) is defined as $III_T(t) = \sum_{k=-\infty}^{\infty} \delta(t - kT)$.
+The Dirac comb (or impulse train) is defined as $III_T(t) = \\sum_{k=-\\infty}^{\\infty} \\delta(t - kT)$.
 Its continuous Fourier transform is also a Dirac comb in the frequency domain, scaled by the fundamental frequency $f_s = 1/T$:
-$$ \mathcal{F}\{III_T(t)\} = f_s \sum_{k=-\infty}^{\infty} \delta(f - k f_s) = \frac{1}{T} \sum_{k=-\infty}^{\infty} \delta\left(f - \frac{k}{T}\right) $$
+$$ \\mathcal{F}\\{III_T(t)\\} = f_s \\sum_{k=-\\infty}^{\\infty} \\delta(f - k f_s) = \\frac{1}{T} \\sum_{k=-\\infty}^{\\infty} \\delta\\left(f - \\frac{k}{T}\\right) $$
 This property is fundamental to the mathematical proof of the sampling theorem.
 
 ### 3. What do we mean by the Nyquist limit?
@@ -1576,32 +1576,32 @@ The Nyquist limit (or Nyquist frequency) is the highest frequency component of a
 *   **Reconstruction filter:** An analog low-pass filter applied *after* the Digital-to-Analog Converter (DAC). It smooths out the "staircase" output of the DAC by removing the high-frequency image replicas created by the discrete sampling process, reconstructing the smooth continuous-time signal.
 
 ### 5. Impulse response and relevance to LTI systems
-The impulse response, $h(t)$ or $h[n]$, is the output of a system when presented with a Dirac delta function $\delta(t)$ or unit impulse $\delta[n]$ as its input.
+The impulse response, $h(t)$ or $h[n]$, is the output of a system when presented with a Dirac delta function $\\delta(t)$ or unit impulse $\\delta[n]$ as its input.
 *   **Relevance:** For any Linear Time-Invariant (LTI) system, the impulse response completely characterizes the system. The output to *any* arbitrary input signal can be found simply by convolving the input with the impulse response: $y[n] = x[n] * h[n]$.
 
 ### 6. What is a decibel?
 A decibel (dB) is a logarithmic unit used to express the ratio of two values of a physical quantity, typically power or intensity.
-*   For power ratios: $L_{dB} = 10 \log_{10}(P_1 / P_0)$
-*   For amplitude/voltage ratios: $L_{dB} = 20 \log_{10}(A_1 / A_0)$
+*   For power ratios: $L_{dB} = 10 \\log_{10}(P_1 / P_0)$
+*   For amplitude/voltage ratios: $L_{dB} = 20 \\log_{10}(A_1 / A_0)$
 It is widely used in DSP to represent the magnitude of frequency responses (Bode plots) because it allows vast dynamic ranges (e.g., a filter attenuating by a factor of 100,000) to be represented compactly (-100 dB).
 
 ### 7. Laplace transform poles and signal characteristics
-The locations of poles in the s-plane ($s = \sigma + j\omega$) dictate the time-domain behavior of the signal $e^{st}$:
-*   **(a) Negative real part:** The signal decays exponentially to zero as $t \to \infty$ (Stable).
-    **Positive real part:** The signal grows exponentially to infinity as $t \to \infty$ (Unstable).
+The locations of poles in the s-plane ($s = \\sigma + j\\omega$) dictate the time-domain behavior of the signal $e^{st}$:
+*   **(a) Negative real part:** The signal decays exponentially to zero as $t \\to \\infty$ (Stable).
+    **Positive real part:** The signal grows exponentially to infinity as $t \\to \\infty$ (Unstable).
 *   **(b) Imaginary component:** The signal has an oscillatory (sinusoidal) component.
 *   **(c) Lying on the imaginary axis:** The signal is a pure, sustained sinusoid (marginal stability).
     **Lying on the real axis:** The signal has no oscillation; it purely decays or grows exponentially.
-*   **(d) In the origin:** The signal is the unit step function $u(t)$ (a constant value for $t \ge 0$).
+*   **(d) In the origin:** The signal is the unit step function $u(t)$ (a constant value for $t \\ge 0$).
 
 ### 8. Mapping techniques for IIR filters
-*   **Bilinear Transform:** A conformal mapping $s = \frac{2}{T} \frac{1 - z^{-1}}{1 + z^{-1}}$ that maps the entire left half of the continuous s-plane into the inside of the unit circle in the discrete z-plane. It completely avoids aliasing but introduces frequency warping, which is corrected via pre-warping.
+*   **Bilinear Transform:** A conformal mapping $s = \\frac{2}{T} \\frac{1 - z^{-1}}{1 + z^{-1}}$ that maps the entire left half of the continuous s-plane into the inside of the unit circle in the discrete z-plane. It completely avoids aliasing but introduces frequency warping, which is corrected via pre-warping.
 *   **Impulse Invariant Method:** The digital filter is designed such that its impulse response is an exact sampled version of the analog filter's impulse response: $h[n] = T_s h_a(nT_s)$. Because the analog frequency response is aliased (summed shifted copies), this method is only suitable for strictly bandlimited analog filters (like lowpass or bandpass).
 
 ### 9. Wavelet functions, scaling functions, and filters
 In Multi-Resolution Analysis (MRA) using Discrete Wavelet Transforms:
-*   The **Scaling Function** $\phi(t)$ captures the low-frequency, coarse-grained approximations of the signal. It corresponds to passing the signal through a discrete **Low-pass filter** $h[n]$.
-*   The **Wavelet Function** $\psi(t)$ captures the high-frequency, fine details of the signal. It corresponds to passing the signal through a discrete **High-pass filter** $g[n]$.
+*   The **Scaling Function** $\\phi(t)$ captures the low-frequency, coarse-grained approximations of the signal. It corresponds to passing the signal through a discrete **Low-pass filter** $h[n]$.
+*   The **Wavelet Function** $\\psi(t)$ captures the high-frequency, fine details of the signal. It corresponds to passing the signal through a discrete **High-pass filter** $g[n]$.
 Together, these functions form an orthogonal filter bank (Quadrature Mirror Filters) that decomposes the signal into distinct frequency bands while preserving time localization.
 
 ---
@@ -1611,69 +1611,69 @@ Together, these functions form an orthogonal filter bank (Quadrature Mirror Filt
 ### 1. System Properties ($y[n]$ with input $x[n]$)
 **(a) $y[n] = x[n]u[n]$**
 *   **Linearity:** Linear. $a x_1[n]u[n] + b x_2[n]u[n] = (a x_1[n] + b x_2[n])u[n]$.
-*   **Time-Invariance:** Time-Varying. A shift in the input by $k$ yields $y_1[n] = x[n-k]u[n]$. A shift in the system yields $y[n-k] = x[n-k]u[n-k]$. Since $y_1 \neq y[n-k]$, it is time-varying.
+*   **Time-Invariance:** Time-Varying. A shift in the input by $k$ yields $y_1[n] = x[n-k]u[n]$. A shift in the system yields $y[n-k] = x[n-k]u[n-k]$. Since $y_1 \\neq y[n-k]$, it is time-varying.
 *   **Causality:** Causal. $y[n]$ only depends on $x[n]$ at the current time $n$.
 *   **Memory:** Memoryless. Depends only on the present input.
-*   **Stability:** Stable. If $|x[n]| < M$, then $|y[n]| = |x[n]u[n]| \le M$.
+*   **Stability:** Stable. If $|x[n]| < M$, then $|y[n]| = |x[n]u[n]| \\le M$.
 
-**(b) $y[n] = \prod_{k=0}^5 a[k]x[n-k]$**
+**(b) $y[n] = \\prod_{k=0}^5 a[k]x[n-k]$**
 *   **Linearity:** Non-linear. The product of inputs means scaling the input by $c$ scales the output by $c^6$, not $c$.
 *   **Time-Invariance:** Time-Invariant. The coefficients $a[k]$ are constant.
 *   **Causality:** Causal. It depends on inputs $x[n], x[n-1], ..., x[n-5]$ (only present and past).
 *   **Memory:** Has memory (it uses past 5 samples).
-*   **Stability:** Stable. If $|x[n]| \le M$, the product is bounded by $M^6 \prod |a[k]|$.
+*   **Stability:** Stable. If $|x[n]| \\le M$, the product is bounded by $M^6 \\prod |a[k]|$.
 
 ### 2. Discrete-Time Signal $x(n)$
-$x(n) = -0.3\delta(n+2) + 2.0\delta(n) + 1.5\delta(n-3) - \delta(n-5)$
+$x(n) = -0.3\\delta(n+2) + 2.0\\delta(n) + 1.5\\delta(n-3) - \\delta(n-5)$
 
 **(a) Sketch $x(n)$:**
 It has amplitude $-0.3$ at $n=-2$, $2.0$ at $n=0$, $1.5$ at $n=3$, and $-1.0$ at $n=5$. All other values are zero.
 
 **(b) Z-transform $X(z)$:**
-Using $\mathcal{Z}\{\delta(n-k)\} = z^{-k}$:
+Using $\\mathcal{Z}\\{\\delta(n-k)\\} = z^{-k}$:
 $X(z) = -0.3z^{2} + 2.0 + 1.5z^{-3} - z^{-5}$
 
 **(c) Define $G(z) = z^{-2}X(z)$ and sketch $g(n)$:**
 $G(z) = z^{-2}(-0.3z^{2} + 2.0 + 1.5z^{-3} - z^{-5}) = -0.3 + 2.0z^{-2} + 1.5z^{-5} - z^{-7}$
-Thus, $g(n) = -0.3\delta(n) + 2.0\delta(n-2) + 1.5\delta(n-5) - \delta(n-7)$.
+Thus, $g(n) = -0.3\\delta(n) + 2.0\\delta(n-2) + 1.5\\delta(n-5) - \\delta(n-7)$.
 This is simply $x(n)$ shifted to the right (delayed) by 2 samples.
 
 ### 3. Ideal Continuous-Time Band-Stop Filter
-$H^f(\omega) = 1$ for $|\omega| \le \omega_1$ and $|\omega| \ge \omega_2$, and $0$ otherwise.
+$H^f(\\omega) = 1$ for $|\\omega| \\le \\omega_1$ and $|\\omega| \\ge \\omega_2$, and $0$ otherwise.
 
-**(a) Sketch $H^f(\omega)$:**
-It is a "V-shaped" block. It equals 1 from $-\omega_1$ to $\omega_1$ (a lowpass region), then drops to 0, and jumps back to 1 from $-\infty$ to $-\omega_2$ and $\omega_2$ to $\infty$ (a highpass region).
+**(a) Sketch $H^f(\\omega)$:**
+It is a "V-shaped" block. It equals 1 from $-\\omega_1$ to $\\omega_1$ (a lowpass region), then drops to 0, and jumps back to 1 from $-\\infty$ to $-\\omega_2$ and $\\omega_2$ to $\\infty$ (a highpass region).
 
 **(b) Impulse response $h(t)$:**
-Using the linearity of the Inverse Fourier Transform, we split $H^f(\omega)$ into a lowpass filter (LPF) with cutoff $\omega_1$ and a highpass filter (HPF) with cutoff $\omega_2$.
-$h_{LPF}(t) = \frac{\omega_1}{\pi} \text{sinc}(\omega_1 t / \pi)$
-$h_{HPF}(t) = \delta(t) - \frac{\omega_2}{\pi} \text{sinc}(\omega_2 t / \pi)$
-$h(t) = h_{LPF}(t) + h_{HPF}(t) = \delta(t) + \frac{\omega_1}{\pi} \text{sinc}(\omega_1 t / \pi) - \frac{\omega_2}{\pi} \text{sinc}(\omega_2 t / \pi)$
+Using the linearity of the Inverse Fourier Transform, we split $H^f(\\omega)$ into a lowpass filter (LPF) with cutoff $\\omega_1$ and a highpass filter (HPF) with cutoff $\\omega_2$.
+$h_{LPF}(t) = \\frac{\\omega_1}{\\pi} \\text{sinc}(\\omega_1 t / \\pi)$
+$h_{HPF}(t) = \\delta(t) - \\frac{\\omega_2}{\\pi} \\text{sinc}(\\omega_2 t / \\pi)$
+$h(t) = h_{LPF}(t) + h_{HPF}(t) = \\delta(t) + \\frac{\\omega_1}{\\pi} \\text{sinc}(\\omega_1 t / \\pi) - \\frac{\\omega_2}{\\pi} \\text{sinc}(\\omega_2 t / \\pi)$
 
 **(c) Implementation using LPF and HPF:**
-A band-stop filter passes low frequencies and high frequencies but blocks the middle. Because the passbands are parallel, it is implemented by passing the input signal through an ideal LPF (cutoff $\omega_1$) and an ideal HPF (cutoff $\omega_2$) **in parallel**, and summing their outputs together.
+A band-stop filter passes low frequencies and high frequencies but blocks the middle. Because the passbands are parallel, it is implemented by passing the input signal through an ideal LPF (cutoff $\\omega_1$) and an ideal HPF (cutoff $\\omega_2$) **in parallel**, and summing their outputs together.
 
 ### 4. Transfer Function Analysis
-$H(z) = \frac{z(z + 2)}{(z - 1/2)(z + 4)}$
+$H(z) = \\frac{z(z + 2)}{(z - 1/2)(z + 4)}$
 
-**(a) Find the frequency response $H^f(\omega)$:**
+**(a) Find the frequency response $H^f(\\omega)$:**
 We are told the system is "stable". It has poles at $z=1/2$ and $z=-4$. For an LTI system to be stable, the Region of Convergence (ROC) must include the unit circle ($|z|=1$). This implies the ROC is $1/2 < |z| < 4$.
-To find the frequency response, we evaluate $H(z)$ on the unit circle by substituting $z = e^{j\omega}$:
-$H^f(\omega) = H(e^{j\omega}) = \frac{e^{j\omega}(e^{j\omega} + 2)}{(e^{j\omega} - 1/2)(e^{j\omega} + 4)}$
+To find the frequency response, we evaluate $H(z)$ on the unit circle by substituting $z = e^{j\\omega}$:
+$H^f(\\omega) = H(e^{j\\omega}) = \\frac{e^{j\\omega}(e^{j\\omega} + 2)}{(e^{j\\omega} - 1/2)(e^{j\\omega} + 4)}$
 
-**(b) Calculate value at $\omega = 0.2\pi$:**
-Substitute $\omega = 0.2\pi$:
-$e^{j0.2\pi} \approx 0.809 + j0.588$
-$H^f(0.2\pi) = \frac{(0.809 + j0.588)(2.809 + j0.588)}{(-0.309 + j0.588)(4.809 + j0.588)}$
+**(b) Calculate value at $\\omega = 0.2\\pi$:**
+Substitute $\\omega = 0.2\\pi$:
+$e^{j0.2\\pi} \\approx 0.809 + j0.588$
+$H^f(0.2\\pi) = \\frac{(0.809 + j0.588)(2.809 + j0.588)}{(-0.309 + j0.588)(4.809 + j0.588)}$
 Let's compute the magnitude and phase programmatically or carefully by hand:
-Numerator magnitude: $|1 \angle 0.2\pi| \cdot \sqrt{2.809^2 + 0.588^2} \approx 1 \cdot 2.87 = 2.87$
-Denominator magnitude: $\sqrt{(-0.309)^2 + 0.588^2} \cdot \sqrt{4.809^2 + 0.588^2} \approx 0.664 \cdot 4.845 \approx 3.217$
-Magnitude $|H(e^{j0.2\pi})| \approx 2.87 / 3.217 \approx 0.892$
+Numerator magnitude: $|1 \\angle 0.2\\pi| \\cdot \\sqrt{2.809^2 + 0.588^2} \\approx 1 \\cdot 2.87 = 2.87$
+Denominator magnitude: $\\sqrt{(-0.309)^2 + 0.588^2} \\cdot \\sqrt{4.809^2 + 0.588^2} \\approx 0.664 \\cdot 4.845 \\approx 3.217$
+Magnitude $|H(e^{j0.2\\pi})| \\approx 2.87 / 3.217 \\approx 0.892$
 
-**(c) Find output $y(n)$ for $x(n) = \cos(0.2\pi n)$:**
-For an LTI system, a cosine input results in a cosine output scaled by the magnitude of $H(e^{j\omega})$ and shifted by its phase:
-$y(n) = |H^f(0.2\pi)| \cos(0.2\pi n + \angle H^f(0.2\pi))$
-$y(n) \approx 0.892 \cos(0.2\pi n + \phi)$ where $\phi$ is the calculated phase angle.
+**(c) Find output $y(n)$ for $x(n) = \\cos(0.2\\pi n)$:**
+For an LTI system, a cosine input results in a cosine output scaled by the magnitude of $H(e^{j\\omega})$ and shifted by its phase:
+$y(n) = |H^f(0.2\\pi)| \\cos(0.2\\pi n + \\angle H^f(0.2\\pi))$
+$y(n) \\approx 0.892 \\cos(0.2\\pi n + \\phi)$ where $\\phi$ is the calculated phase angle.
 
 ---
 `,
@@ -1736,7 +1736,7 @@ plt.show()
 
 ### Step 3: Demonstrate Sampling & Nyquist Theorem
 
-We now sample the continuous signal. The Nyquist theorem states that we must sample at least twice the maximum frequency present in the signal to avoid aliasing. Our maximum frequency component is at index \`4\`, meaning we need a sampling rate of at least $f_s \ge 8$.
+We now sample the continuous signal. The Nyquist theorem states that we must sample at least twice the maximum frequency present in the signal to avoid aliasing. Our maximum frequency component is at index \`4\`, meaning we need a sampling rate of at least $f_s \\ge 8$.
 
 \`\`\`python
 # 1(c) & (d): Demonstrate sampling and Nyquist reconstruction
