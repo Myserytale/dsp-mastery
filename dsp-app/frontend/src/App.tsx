@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import PdfViewer from './PdfViewer';
 import MarkdownRenderer from './MarkdownRenderer';
-import { EXAM_WALKTHROUGH_MD } from './content/examWalkthrough';
 import type { WeekContent } from './content';
 import { getAllWeeks } from './content';
 import { EXAM_BANK } from './content/examBank';
@@ -15,7 +14,7 @@ declare global {
   }
 }
 
-type ContentTab = 'lesson' | 'homework' | 'lab' | 'formulas' | 'exam' | 'exam_walkthrough';
+type ContentTab = 'lesson' | 'homework' | 'lab' | 'formulas' | 'exam';
 type RightTab = 'pdf' | 'editor';
 
 const WEEK_META = [
@@ -32,6 +31,7 @@ const WEEK_META = [
   { id: 11, title: 'Filter Structures', slide: 'dsp11.pdf', hw: 'dsp_homework11.pdf' },
   { id: 12, title: 'Advanced Topics', slide: 'dsp12.pdf', hw: 'dsp_homework12.pdf' },
   { id: 13, title: 'Review & Exam Prep', slide: 'dsp13.pdf', hw: null },
+  { id: 14, title: 'Final Exam Walkthrough', slide: 'dspexam24d.pdf', hw: null },
 ];
 
 const API_BASE = import.meta.env.VITE_API_BASE || import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -295,7 +295,6 @@ json.dumps({"output": output, "figures": figures})
     { key: 'lab', label: '🧪 Lab Code', accent: 'bg-nord-aurora-green' },
     { key: 'formulas', label: '📐 Formulas', accent: 'bg-nord-aurora-purple' },
     { key: 'exam', label: '🎯 Exam Sim', accent: 'bg-nord-aurora-red' },
-    { key: 'exam_walkthrough', label: '🚀 Exam Solution', accent: 'bg-nord-aurora-orange' },
   ];
 
   const renderContent = () => {
@@ -531,14 +530,6 @@ json.dumps({"output": output, "figures": figures})
           <div className="p-6">
             <h2 className="text-xs font-bold text-nord-aurora-purple uppercase tracking-[0.15em] mb-5">Key Formulas — Quick Reference</h2>
             <MarkdownRenderer content={activeWeek.keyFormulas} onCopyToIDE={handleCopyToIDE} />
-          </div>
-        );
-
-      case 'exam_walkthrough':
-        return (
-          <div className="p-6">
-            <h2 className="text-xs font-bold text-nord-aurora-orange uppercase tracking-[0.15em] mb-5">Exam Walkthrough (July 10, 2024)</h2>
-            <MarkdownRenderer content={EXAM_WALKTHROUGH_MD} onCopyToIDE={handleCopyToIDE} />
           </div>
         );
     }
