@@ -786,80 +786,95 @@ $$ L[\\delta(t-t_0)] = \\int_0^\\infty \\delta(t-t_0) e^{-st} dt = e^{-st_0} $$
 **(i) $L[H(t-t_0)]$**
 Where $H(t)$ is the Heaviside step function:
 $$ L[H(t-t_0)] = \\int_0^\\infty H(t-t_0) e^{-st} dt = \\int_{t_0}^\\infty e^{-st} dt = \\left[ -\\frac{1}{s} e^{-st} \\right]_{t_0}^\\infty = \\frac{e^{-st_0}}{s} $$
+$$ L[H(t-t_0)] = \int_0^\infty H(t-t_0) e^{-st} dt = \int_{t_0}^\infty e^{-st} dt = \left[ -\frac{1}{s} e^{-st} \right]_{t_0}^\infty = \frac{e^{-st_0}}{s} $$
 
 ### 📌 Problem 28: Convolution Theorem
 **Theorem:** $L[(f * g)(t)] = F(s)G(s)$.
 **Proof:**
-$$ L[(f * g)(t)] = \\int_0^\\infty \\left( \\int_0^t f(\\tau) g(t-\\tau) d\\tau \\right) e^{-st} dt $$
-Change the order of integration. The region is $0 \\le \\tau \\le t \\le \\infty$, which is equivalent to $0 \\le \\tau \\le \\infty$ and $\\tau \\le t \\le \\infty$.
-$$ = \\int_0^\\infty f(\\tau) \\left( \\int_\\tau^\\infty g(t-\\tau) e^{-st} dt \\right) d\\tau $$
-Let $u = t - \\tau$, then $dt = du$, and as $t$ goes from $\\tau$ to $\\infty$, $u$ goes from $0$ to $\\infty$.
-$$ = \\int_0^\\infty f(\\tau) \\left( \\int_0^\\infty g(u) e^{-s(u+\\tau)} du \\right) d\\tau $$
-$$ = \\int_0^\\infty f(\\tau) e^{-s\\tau} d\\tau \\int_0^\\infty g(u) e^{-su} du = F(s)G(s) $$
+$$ L[(f * g)(t)] = \int_0^\infty \left( \int_0^t f(\tau) g(t-\tau) d\tau \right) e^{-st} dt $$
+Change the order of integration. The region is $0 \le \tau \le t \le \infty$, which is equivalent to $0 \le \tau \le \infty$ and $\tau \le t \le \infty$.
+$$ = \int_0^\infty f(\tau) \left( \int_\tau^\infty g(t-\tau) e^{-st} dt \right) d\tau $$
+Let $u = t - \tau$, then $dt = du$, and as $t$ goes from $\tau$ to $\infty$, $u$ goes from $0$ to $\infty$.
+$$ = \int_0^\infty f(\tau) \left( \int_0^\infty g(u) e^{-s(u+\tau)} du \right) d\tau $$
+$$ = \int_0^\infty f(\tau) e^{-s\tau} d\tau \int_0^\infty g(u) e^{-su} du = F(s)G(s) $$
 
 ### 📌 Problem 29: Inverse Laplace Transforms
-*(Note: As specific functions (a)-(j) were omitted from the prompt's source text, here are derivations for a standard representative set covering partial fraction decomposition techniques).*
+Here are the step-by-step derivations for each subpoint (a)-(j):
 
-**(a) $F(s) = \\frac{1}{s^2}$**
-Direct table lookup.
-$f(t) = t$
+**(a) $F(s) = \\frac{3}{s^2+4}$**
+Multiply and divide by 2 to match the form $\\frac{\\omega}{s^2+\\omega^2}$ where $\\omega=2$.
+$F(s) = \\frac{3}{2} \\frac{2}{s^2+2^2} \\implies f(t) = \\frac{3}{2} \\sin(2t)$
 
-**(b) $F(s) = \\frac{3}{s-4}$**
-Linearity and exponential rule.
-$f(t) = 3e^{4t}$
+**(b) $F(s) = \\frac{3s}{s^2-s-6}$**
+Factor the denominator: $(s-3)(s+2)$.
+Partial Fraction Decomposition (PFD): $\\frac{3s}{(s-3)(s+2)} = \\frac{A}{s-3} + \\frac{B}{s+2}$
+$3s = A(s+2) + B(s-3)$
+Set $s = 3 \\implies 9 = 5A \\implies A = \\frac{9}{5}$.
+Set $s = -2 \\implies -6 = -5B \\implies B = \\frac{6}{5}$.
+$F(s) = \\frac{9/5}{s-3} + \\frac{6/5}{s+2} \\implies f(t) = \\frac{9}{5} e^{3t} + \\frac{6}{5} e^{-2t}$
 
-**(c) $F(s) = \\frac{s}{s^2+9}$**
-Direct table lookup for cosine, where $\\omega = 3$.
-$f(t) = \\cos(3t)$
+**(c) $F(s) = \\frac{5s+2}{s^2+2s+5}$**
+Complete the square for the denominator: $s^2+2s+1+4 = (s+1)^2 + 2^2$.
+Rewrite numerator to match the $s$-shift: $5s+2 = 5(s+1) - 3$.
+$F(s) = \\frac{5(s+1)}{(s+1)^2+2^2} - \\frac{3}{2} \\frac{2}{(s+1)^2+2^2}$
+$f(t) = 5e^{-t}\\cos(2t) - \\frac{3}{2}e^{-t}\\sin(2t)$
 
-**(d) $F(s) = \\frac{1}{(s+1)(s+2)}$**
-Partial Fraction Decomposition (PFD):
-$\\frac{1}{(s+1)(s+2)} = \\frac{A}{s+1} + \\frac{B}{s+2}$
-$1 = A(s+2) + B(s+1)$
-Set $s = -1 \\implies A = 1$. Set $s = -2 \\implies B = -1$.
-$F(s) = \\frac{1}{s+1} - \\frac{1}{s+2} \\implies f(t) = e^{-t} - e^{-2t}$
+**(d) $F(s) = \\frac{2s-3}{s^2-4}$**
+Factor denominator: $(s-2)(s+2)$.
+PFD: $\\frac{A}{s-2} + \\frac{B}{s+2}$
+$A(s+2) + B(s-2) = 2s-3$
+Set $s = 2 \\implies 4A = 1 \\implies A = \\frac{1}{4}$.
+Set $s = -2 \\implies -4B = -7 \\implies B = \\frac{7}{4}$.
+$F(s) = \\frac{1/4}{s-2} + \\frac{7/4}{s+2} \\implies f(t) = \\frac{1}{4} e^{2t} + \\frac{7}{4} e^{-2t}$
 
-**(e) $F(s) = \\frac{s+3}{s^2+3s+2}$**
-PFD factor denominator: $(s+1)(s+2)$.
-$\\frac{s+3}{(s+1)(s+2)} = \\frac{A}{s+1} + \\frac{B}{s+2}$
-$s+3 = A(s+2) + B(s+1)$
-$s = -1 \\implies A = 2$. $s = -2 \\implies B = -1$.
-$F(s) = \\frac{2}{s+1} - \\frac{1}{s+2} \\implies f(t) = 2e^{-t} - e^{-2t}$
+**(e) $F(s) = \\frac{8s^2-4s+12}{s(s^2+4)}$**
+PFD: $\\frac{A}{s} + \\frac{Bs+C}{s^2+4}$
+$A(s^2+4) + s(Bs+C) = 8s^2-4s+12 \\implies (A+B)s^2 + Cs + 4A = 8s^2-4s+12$
+$4A = 12 \\implies A = 3$.
+$C = -4$.
+$A+B = 8 \\implies 3+B = 8 \\implies B = 5$.
+$F(s) = \\frac{3}{s} + \\frac{5s}{s^2+4} - \\frac{4}{s^2+4} = \\frac{3}{s} + 5\\frac{s}{s^2+2^2} - 2\\frac{2}{s^2+2^2}$
+$f(t) = 3 + 5\\cos(2t) - 2\\sin(2t)$
 
-**(f) $F(s) = \\frac{1}{s^2+4s+13}$**
-Complete the square: $s^2+4s+4+9 = (s+2)^2 + 3^2$.
-$F(s) = \\frac{1}{(s+2)^2 + 3^2} = \\frac{1}{3} \\frac{3}{(s+2)^2 + 3^2}$.
-Using frequency shift $F(s-c) \\implies e^{ct}f(t)$.
-$f(t) = \\frac{1}{3} e^{-2t} \\sin(3t)$
+**(f) $F(s) = \\frac{1-2s}{s^2+4s+5}$**
+Complete the square: $s^2+4s+4+1 = (s+2)^2 + 1$.
+Rewrite numerator: $1-2s = -2(s+2) + 5$.
+$F(s) = \\frac{-2(s+2)}{(s+2)^2+1} + \\frac{5}{(s+2)^2+1}$
+$f(t) = -2e^{-2t}\\cos(t) + 5e^{-2t}\\sin(t)$
 
-**(g) $F(s) = \\frac{s}{(s^2+1)(s^2+4)}$**
-PFD: $\\frac{s}{(s^2+1)(s^2+4)} = \\frac{As+B}{s^2+1} + \\frac{Cs+D}{s^2+4}$.
-Substitute $x = s^2$: $\\frac{1}{(x+1)(x+4)} = \\frac{1/3}{x+1} - \\frac{1/3}{x+4}$.
-$F(s) = \\frac{1}{3} \\frac{s}{s^2+1} - \\frac{1}{3} \\frac{s}{s^2+4}$
-$f(t) = \\frac{1}{3} \\cos(t) - \\frac{1}{3} \\cos(2t)$
+**(g) $F(s) = \\frac{2s-3}{s^2+2s+10}$**
+Complete the square: $s^2+2s+1+9 = (s+1)^2 + 3^2$.
+Rewrite numerator: $2s-3 = 2(s+1) - 5$.
+$F(s) = \\frac{2(s+1)}{(s+1)^2+3^2} - \\frac{5}{3}\\frac{3}{(s+1)^2+3^2}$
+$f(t) = 2e^{-t}\\cos(3t) - \\frac{5}{3}e^{-t}\\sin(3t)$
 
-**(h) $F(s) = \\frac{e^{-2s}}{s+3}$**
-Time-shift property: $L[f(t-t_0)H(t-t_0)] = e^{-st_0}F(s)$.
-Here $F_1(s) = \\frac{1}{s+3} \\implies f_1(t) = e^{-3t}$.
-$f(t) = e^{-3(t-2)} H(t-2)$
+**(h) $F(s) = \\frac{s}{(s+1)(s^2+4)}$**
+PFD: $\\frac{A}{s+1} + \\frac{Bs+C}{s^2+4}$
+$A(s^2+4) + (Bs+C)(s+1) = s$
+Set $s = -1 \\implies 5A = -1 \\implies A = -1/5$.
+Coefficient of $s^2$: $A+B = 0 \\implies B = 1/5$.
+Constant term: $4A+C = 0 \\implies C = -4(-1/5) = 4/5$.
+$F(s) = \\frac{-1/5}{s+1} + \\frac{1}{5}\\frac{s}{s^2+4} + \\frac{2}{5}\\frac{2}{s^2+4}$
+$f(t) = -\\frac{1}{5}e^{-t} + \\frac{1}{5}\\cos(2t) + \\frac{2}{5}\\sin(2t)$
 
-**(i) $F(s) = \\frac{1}{s(s+1)^2}$**
-PFD for repeated roots:
-$\\frac{1}{s(s+1)^2} = \\frac{A}{s} + \\frac{B}{s+1} + \\frac{C}{(s+1)^2}$
-$1 = A(s+1)^2 + Bs(s+1) + Cs$
-$s=0 \\implies A=1$. $s=-1 \\implies C=-1$.
-Equate $s^2$ coefficients: $0 = A + B \\implies B = -1$.
-$F(s) = \\frac{1}{s} - \\frac{1}{s+1} - \\frac{1}{(s+1)^2}$
-$f(t) = 1 - e^{-t} - t e^{-t}$
+**(i) $F(s) = \\frac{1}{(s+1)^2(s^2+4)}$**
+PFD: $\\frac{A}{s+1} + \\frac{B}{(s+1)^2} + \\frac{Cs+D}{s^2+4}$
+$A(s+1)(s^2+4) + B(s^2+4) + (Cs+D)(s+1)^2 = 1$
+Set $s = -1 \\implies 5B = 1 \\implies B = 1/5$.
+Set $s = 0 \\implies 4A + 4(1/5) + D = 1 \\implies 4A + D = 1/5$.
+Match $s^3$ terms: $A+C = 0 \\implies C = -A$.
+Match $s^2$ terms: $A+B+2C+D = 0 \\implies A + 1/5 - 2A + D = 0 \\implies D - A = -1/5$.
+Solve system: $4A + D = 1/5$ and $-A + D = -1/5$. Subtract to get $5A = 2/5 \\implies A = 2/25$.
+$C = -2/25$. $D = 2/25 - 5/25 = -3/25$.
+$F(s) = \\frac{2/25}{s+1} + \\frac{1/5}{(s+1)^2} - \\frac{2}{25}\\frac{s}{s^2+4} - \\frac{3}{50}\\frac{2}{s^2+4}$
+$f(t) = \\frac{2}{25}e^{-t} + \\frac{1}{5}te^{-t} - \\frac{2}{25}\\cos(2t) - \\frac{3}{50}\\sin(2t)$
 
-**(j) $F(s) = \\frac{s^2}{(s^2+1)^2}$**
-Using the convolution theorem or derivative properties:
-$F(s) = s \\cdot \\frac{s}{(s^2+1)^2}$. We know $L[t \\sin t] = \\frac{2s}{(s^2+1)^2}$.
-So $\\frac{s}{(s^2+1)^2} = L[\\frac{1}{2} t \\sin t]$.
-Multiplying by $s$ is equivalent to taking the derivative in the time domain.
-$f(t) = \\frac{d}{dt} \\left( \\frac{1}{2} t \\sin t \\right) = \\frac{1}{2} (\\sin t + t \\cos t)$
+**(j) $F(s) = \\frac{G(s)}{s^2+1}$**
+Using the convolution theorem: $\\mathcal{L}^{-1}[G(s)H(s)] = (g * h)(t) = \\int_0^t g(\\tau)h(t-\\tau)d\\tau$.
+Since $\\mathcal{L}^{-1}\\left[\\frac{1}{s^2+1}\\right] = \\sin(t)$, the inverse is given by the convolution integral:
+$f(t) = \\int_0^t g(\\tau)\\sin(t-\\tau)d\\tau$
 
----
+------
 
 ## 🧪 Lab 07 Walkthrough
 
