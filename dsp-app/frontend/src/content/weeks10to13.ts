@@ -73,70 +73,223 @@ Filters are generally classified into four main categories based on the frequenc
 The key difference is their functional role: the passband preserves the signal's frequency components, while the stopband suppresses unwanted components.
 
 ### 📌 Problem 3: Cut-off Frequency
-The **cut-off frequency** (\`\\omega_c\` or \`f_c\`) is the boundary frequency that separates the passband from the transition band. Mathematically, it is typically defined as the frequency at which the filter's magnitude response drops to \`\\frac{1}{\\sqrt{2}}\` (approx. 0.707) of its maximum passband value. This corresponds to a signal power reduction of half, often referred to as the **-3dB point**.
+The **cut-off frequency** ($\\omega_c$ or $f_c$) is the boundary frequency that separates the passband from the transition band. Mathematically, it is typically defined as the frequency at which the filter's magnitude response drops to $\\frac{1}{\\sqrt{2}}$ (approx. 0.707) of its maximum passband value. This corresponds to a signal power reduction of half, often referred to as the **-3dB point**.
 
-*(Please refer to the PDF for the remaining theoretical problems, which cover rolloff, insertion loss, bilinear transforms, and filter mapping from the s-plane to the z-plane).*
+**Q4. Explain the concept of rolloff in filter design. How is it measured, and what does it indicate about a filter’s performance?**
+Rolloff refers to the steepness or the rate of attenuation in the transition band of a filter, bridging the passband and stopband. It is typically measured in decibels per decade (dB/decade) or decibels per octave (dB/octave). A higher (steeper) rolloff means the filter transitions more quickly from passing signals to stopping them, which indicates a sharper and more ideal frequency separation. Higher rolloff usually requires a higher-order filter.
 
-### 🧪 Lab 10: IIR Filter Implementation
+**Q5. Define the following terms in the context of filter design: passband, stopband, cutoff frequency, bandwidth, ripple, rolloff, insertion loss, and stop-band attenuation.**
+- **Passband**: The range of frequencies that a filter allows to pass through with minimal or no attenuation.
+- **Stopband**: The range of frequencies that the filter highly attenuates or rejects.
+- **Cutoff frequency ($f_c$)**: The frequency boundary that defines the edge of the passband. It's conventionally the point where the signal power is reduced to half ($-3$ dB point) of the passband value.
+- **Bandwidth**: The width of the passband, defined as the difference between the upper and lower cutoff frequencies (for bandpass filters) or just the cutoff frequency itself (for low-pass).
+- **Ripple**: Small, periodic fluctuations in the amplitude response within the passband or stopband.
+- **Rolloff**: The rate at which the filter's attenuation increases in the transition region between the passband and stopband.
+- **Insertion loss**: The loss of signal power resulting from the insertion of a filter into a circuit or transmission line, typically expressed in decibels (dB).
+- **Stop-band attenuation**: The minimum amount of attenuation applied to frequencies in the stopband, describing how effectively unwanted frequencies are blocked.
+
+**Q6. Explain the significance of the order of a filter. How does it relate to the number of poles in the z-domain?**
+The order of a filter dictates the mathematical complexity of its transfer function and determines how sharply the filter rolls off between the passband and stopband. A higher-order filter achieves a steeper rolloff and better frequency separation at the cost of increased computational complexity, phase distortion, and potential instability. In the z-domain, the order of an IIR filter corresponds to the maximum number of poles (or zeros, whichever is greater). For instance, an $N$-th order IIR filter has up to $N$ poles, which define the feedback terms in the time domain.
+
+**Q7. What is ripple in the context of filter design? How does it affect the filter’s performance in the passband and stopband?**
+Ripple refers to the periodic fluctuation in the magnitude of a filter's frequency response. 
+- **Passband ripple** causes some passing frequencies to be slightly amplified or attenuated relative to others, introducing amplitude distortion. 
+- **Stopband ripple** means the attenuation fluctuates; some stopband frequencies are attenuated less than others, though still meeting a minimum attenuation spec. 
+Allowing ripple (e.g., in Chebyshev or Elliptic filters) often yields a much steeper transition band for a given filter order compared to monotonic filters with no ripple (e.g., Butterworth).
+
+**Q8. Describe the trade-offs involved in filter design between the transition band, filter order, and ripple amplitude.**
+In filter design, achieving a narrow transition band (a steep rolloff) requires either increasing the filter order or allowing larger ripple amplitude:
+- **Increasing filter order**: Improves steepness without introducing ripple, but it costs more computational resources, increases group delay, and may lead to numerical instability.
+- **Increasing ripple**: Allowing larger ripple in the passband or stopband can significantly sharpen the transition band without requiring a higher filter order, but it introduces amplitude distortion at the specific frequencies where ripples peak or trough.
+
+**Q9. Explain the concept of a chirp signal. Sketch its waveform and also the effect of different types of filters on it (low-, high-, bandpass).**
+A chirp signal is a signal in which the frequency continuously increases (up-chirp) or decreases (down-chirp) over time. Its waveform visually resembles a sine wave that gets progressively compressed (higher frequency) or expanded (lower frequency) as time advances.
+- **Low-pass Filter**: When an up-chirp is passed through a low-pass filter, the output amplitude starts high and then gradually attenuates to zero as the chirp's frequency sweeps past the filter's cutoff.
+- **High-pass Filter**: The output amplitude starts heavily attenuated (near zero) and then grows to unity as the chirp sweeps up into the high-frequency passband.
+- **Band-pass Filter**: The output amplitude starts low, increases as the chirp enters the passband, and then attenuates again as the chirp frequency exceeds the upper cutoff boundary.
+
+**Q10. What are the different approaches to designing an IIR filter?**
+Common approaches include:
+1. **Direct Design (Pole-Zero Placement)**: Geometrically placing poles and zeros directly in the z-plane based on desired resonances and anti-resonances.
+2. **Analog Prototype Transformation**: Designing a continuous-time analog filter (e.g., Butterworth, Chebyshev, Elliptic) and transforming it into the discrete-time z-domain. 
+3. **Optimization/Numerical Methods**: Using iterative algorithms to find filter coefficients that minimize the error between the desired and actual frequency response.
+
+**Q11. Describe the process of digitizing an analog filter. What are the common methods used for this purpose?**
+Digitizing an analog filter involves mapping a continuous-time transfer function $H(s)$ to a discrete-time transfer function $H(z)$ while preserving key characteristics like the frequency response shape or the impulse response. 
+Common methods include:
+1. **Bilinear Transform**: Maps the entire $j\omega$ axis in the s-plane to the unit circle in the z-plane. It avoids aliasing and guarantees stability but warps the frequency scale.
+2. **Impulse Invariance Method**: Maps the continuous impulse response $h(t)$ directly to discrete time $h[n] = h(nT)$. It preserves time-domain characteristics but is susceptible to frequency aliasing.
+3. **Matched Z-Transform**: Maps the poles and zeros directly from the s-plane to the z-plane via $z = e^{sT}$.
+
+**Q12. What is the significance of the Nyquist frequency in digital filter design? How does it relate to the sampling rate? How is it represented in the z-plane?**
+The Nyquist frequency is exactly half the sampling rate ($f_s / 2$). It represents the absolute highest frequency that can be accurately captured or represented in a discrete-time system without aliasing. In digital filter design, all operable frequency bands and cutoffs must lie between $0$ Hz and the Nyquist frequency. In the z-plane, the Nyquist frequency is represented by the point $z = -1$ on the unit circle (an angle of $\pi$ radians).
+
+**Q13. Design a lowpass filter for signals sampled at 16 Hz such that the direct current gain is unity and the cutoff frequency is at 4Hz. Hint: Use the direct design method with a single zero and pole.**
+- **Sampling rate ($f_s$)**: $16$ Hz.
+- **Cutoff frequency ($f_c$)**: $4$ Hz.
+- The corresponding digital angular frequency is $\omega_c = 2\pi (f_c / f_s) = 2\pi (4 / 16) = \pi / 2$.
+- For a first-order low-pass filter, place a zero at $z = -1$ (Nyquist, to stop high frequencies) and a pole at $z = a$ on the real axis.
+- The transfer function is $H(z) = K \frac{z + 1}{z - a}$.
+- At the cutoff $\omega = \pi/2$, $z = j$. The squared magnitude must be half the DC power ($-3$ dB):
+  $$|H(j)|^2 = K^2 \frac{|j + 1|^2}{|j - a|^2} = K^2 \frac{2}{1 + a^2}$$
+- At DC ($z = 1$), the gain is unity:
+  $$H(1) = K \frac{2}{1 - a} = 1 \implies K = \frac{1 - a}{2}$$
+- Substituting $K$ into the magnitude squared equation and setting it to half the DC gain squared ($1/2$):
+  $$\left(\frac{1 - a}{2}\right)^2 \frac{2}{1 + a^2} = \frac{1}{2} \implies \frac{(1 - a)^2}{2(1 + a^2)} = \frac{1}{2} \implies (1 - a)^2 = 1 + a^2 \implies a = 0$$
+- If $a = 0$, the pole is at the origin, and $K = 1/2$.
+- **Resulting Filter**: $H(z) = 0.5 \frac{z + 1}{z} = 0.5 + 0.5z^{-1}$ (A simple two-point moving average).
+
+**Q14. What is a notch filter? What parameters are critical in defining the filter’s characteristics?**
+A notch filter is a highly targeted band-stop filter with an extremely narrow stopband. It is used to reject a single frequency or a very narrow band of frequencies (like 60 Hz power-line noise) while leaving the rest of the spectrum intact.
+Critical parameters:
+- **Notch Frequency ($f_0$)**: The exact frequency targeted for maximum rejection.
+- **Bandwidth**: The width of the rejected frequency band, typically measured at $-3$ dB.
+- **Q-factor**: The ratio of notch frequency to bandwidth ($f_0 / BW$), indicating the sharpness of the notch.
+- **Notch Depth**: The maximum attenuation (in dB) achieved at the notch frequency.
+
+**Q15. Explain the concept of notch depth in the context of notch filters. How is it related to stop-band attenuation?**
+Notch depth is the maximum reduction in signal amplitude at the exact center frequency of the notch filter, usually expressed in decibels (dB). Because a notch filter's stopband is effectively just a single point (or a tiny sliver of frequencies), the notch depth serves as the peak stop-band attenuation. A deeper notch indicates a more complete suppression of the unwanted frequency.
+
+**Q16. Design a notch filter with notch frequency of 20 Hz for signals sampled at 160 Hz. Attenuation should be of at least 40 dB and the bandwidth of 4 Hz. The gain in the passband should be unity. Hint: Use the direct design method with two poles and two zeros.**
+- **Digital notch frequency**: $\omega_0 = 2\pi (20 / 160) = \pi / 4$.
+- Place two zeros on the unit circle at angles $\pm \pi/4$ to create an infinite depth notch:
+  $z_{1,2} = e^{\pm j \pi/4}$.
+- Place two poles at the same angles but slightly inside the unit circle at radius $r$ to keep the notch narrow:
+  $p_{1,2} = r e^{\pm j \pi/4}$.
+- Bandwidth relation: $r \approx 1 - \pi \frac{BW}{f_s} = 1 - \pi \left(\frac{4}{160}\right) = 1 - \frac{\pi}{40} \approx 0.9215$.
+- The unscaled transfer function is $H_{unscaled}(z) = \frac{(z - e^{j\pi/4})(z - e^{-j\pi/4})}{(z - r e^{j\pi/4})(z - r e^{-j\pi/4})} = \frac{z^2 - 2z\cos(\pi/4) + 1}{z^2 - 2rz\cos(\pi/4) + r^2}$.
+- To achieve unity gain at DC ($z = 1$), calculate a scaling factor $K$:
+  $$H_{unscaled}(1) = \frac{1 - \sqrt{2} + 1}{1 - \sqrt{2}r + r^2} \approx \frac{0.586}{1 - 1.414(0.9215) + 0.849} \approx \frac{0.586}{0.546} \approx 1.073$$
+  $K = 1 / H_{unscaled}(1) \approx 0.932$.
+- **Resulting Filter**: $H(z) = 0.932 \frac{z^2 - 1.414z + 1}{z^2 - 1.303z + 0.849}$.
+
+**Q17. Implement a Python script to compute and plot the frequency response of the IIR filter designed in the previous question.**
 \`\`\`python
-import scipy.signal as signal
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import signal
 
-# Example: Create a lowpass filter
-b_low, a_low = signal.butter(4, Wn_low, btype='low', analog=False)
+# Filter specifications
+fs = 160.0
+f0 = 20.0
+bw = 4.0
 
-# Apply filter using filtfilt to achieve zero-phase distortion
-y_low = filtfilt(b_low, a_low, x_noisy)
-\`\`\`
-*Lab Insight*: If you plot \`y_low\`, you will notice that the chirp amplitude is preserved for the first second (up to 100 Hz), after which it rapidly attenuates. The 4th order configuration guarantees an $-80$ dB/decade rolloff.
+# Calculate digital frequency and pole radius
+w0 = 2 * np.pi * f0 / fs
+r = 1 - (np.pi * bw / fs)
 
-### Step 3: Notch Filter Implementation
-As solved in Problem 16, a notch filter suppresses a very specific frequency band. Here we target the \`50 Hz\` interference tone.
+# Transfer function coefficients: H(z) = K * (z^2 - 2*cos(w0)*z + 1) / (z^2 - 2*r*cos(w0)*z + r^2)
+b = [1, -2 * np.cos(w0), 1]
+a = [1, -2 * r * np.cos(w0), r**2]
 
-\`\`\`python
-# Design an IIR Notch Filter
-f0_notch = 50.0   # Frequency to remove
-Q = 30.0          # Quality factor (controls bandwidth)
+# Calculate K to ensure DC gain is 1
+K = sum(a) / sum(b)
+b = [K * coef for coef in b]
 
-# iirnotch directly returns the b and a coefficients 
-b_notch, a_notch = iirnotch(w0=f0_notch, Q=Q, fs=fs)
+# Compute frequency response
+w, h = signal.freqz(b, a, fs=fs)
 
-# Clean the signal
-y_clean = filtfilt(b_notch, a_notch, y_low)
-\`\`\`
-
-### Step 4: Visualizing the Results
-Plotting the time series allows us to visually inspect the behavior of our IIR designs.
-
-\`\`\`python
-plt.figure(figsize=(12, 8))
-
-# Subplot 1: Noisy Chirp
-plt.subplot(3, 1, 1)
-plt.plot(t, x_noisy, color='gray')
-plt.title('Original Chirp Signal with 50 Hz Interference')
-plt.ylabel('Amplitude')
-
-# Subplot 2: After Lowpass
-plt.subplot(3, 1, 2)
-plt.plot(t, y_low, color='blue')
-plt.title('After Butterworth Low-pass (Attenuates frequencies > 100 Hz)')
-plt.ylabel('Amplitude')
-
-# Subplot 3: After Lowpass AND Notch
-plt.subplot(3, 1, 3)
-plt.plot(t, y_clean, color='green')
-plt.title('After 50 Hz Notch Filter (Cleaned Signal)')
-plt.xlabel('Time [sec]')
-plt.ylabel('Amplitude')
-
-plt.tight_layout()
+# Plot magnitude response
+plt.figure(figsize=(10, 6))
+plt.plot(w, 20 * np.log10(np.abs(h)), 'b', linewidth=2)
+plt.title('Frequency Response of Notch Filter (20 Hz)')
+plt.ylabel('Magnitude [dB]')
+plt.xlabel('Frequency [Hz]')
+plt.grid(True)
 plt.show()
 \`\`\`
 
-### 💡 Lab Conclusion
-By executing this code, students can see directly how the theories discussed in Homework 10 map into digital reality. 
-1. The **Bilinear transform** inside \`butter\` successfully scaled the chirp off after 1 second (100 Hz mark).
-2. The **Notch filter**, utilizing complex conjugate zeros directly on the unit circle at precisely $50$ Hz, perfectly hollowed out the interference, validating our math on direct pole-zero placement.
+**Q18. Explain the bilinear transform method for designing digital filters from analog prototypes. Provide an example.**
+The bilinear transform is a mathematical mapping used to convert a continuous-time analog transfer function $H(s)$ into a discrete-time digital transfer function $H(z)$. It Maps the entire $j\omega$ (imaginary) axis in the s-plane onto the unit circle in the z-plane. This mapping avoids aliasing entirely and guarantees that a stable analog filter always produces a stable digital filter.
+It works by substituting $s$ with:
+$$s = \frac{2}{T} \frac{1 - z^{-1}}{1 + z^{-1}}$$
+where $T$ is the sampling period.
+**Example**: Digitizing a simple 1st-order analog lowpass filter $H(s) = \frac{\Omega_c}{s + \Omega_c}$:
+$$H(z) = \frac{\Omega_c}{\frac{2}{T} \frac{1 - z^{-1}}{1 + z^{-1}} + \Omega_c} = \frac{\Omega_c (1 + z^{-1})}{\frac{2}{T} (1 - z^{-1}) + \Omega_c (1 + z^{-1})}$$
+After expanding, you get a valid IIR digital filter function $H(z)$.
+
+**Q19. Derive the bilinear transformation formula.**
+The bilinear transform approximates continuous integration using the trapezoidal rule.
+The continuous-time integration definition:
+$$y(t) = \int_{0}^{t} x(\tau) d\tau$$
+In the Laplace domain, integration is represented by $H(s) = \frac{1}{s}$, meaning $Y(s) = \frac{1}{s} X(s)$.
+In discrete-time, applying the trapezoidal approximation to the integral gives the difference equation:
+$$y[n] = y[n-1] + \frac{T}{2} (x[n] + x[n-1])$$
+Taking the Z-transform:
+$$Y(z) = z^{-1} Y(z) + \frac{T}{2} (X(z) + z^{-1} X(z))$$
+$$Y(z) (1 - z^{-1}) = \frac{T}{2} X(z) (1 + z^{-1})$$
+Rearranging for the transfer function $H(z) = \frac{Y(z)}{X(z)}$:
+$$H(z) = \frac{T}{2} \frac{1 + z^{-1}}{1 - z^{-1}}$$
+Equating the continuous integrator $\frac{1}{s}$ to the discrete integrator $H(z)$:
+$$\frac{1}{s} \approx \frac{T}{2} \frac{1 + z^{-1}}{1 - z^{-1}}$$
+Solving for $s$ yields the bilinear transform substitution:
+$$s = \frac{2}{T} \frac{1 - z^{-1}}{1 + z^{-1}}$$
+
+**Q20. Design a low-pass IIR filter with a cutoff frequency of 5 Hz and a sampling frequency of 20 Hz using the bilinear transform method. Provide the filter coefficients.**
+- **Sampling rate**: $f_s = 20$ Hz $\implies T = 0.05$ s.
+- **Digital cutoff frequency**: $\omega_c = 2\pi (5 / 20) = \pi/2$ rad/sample.
+- **Pre-warped analog cutoff frequency**: 
+  $$\Omega_c = \frac{2}{T} \tan\left(\frac{\omega_c}{2}\right) = \frac{2}{0.05} \tan\left(\frac{\pi}{4}\right) = 40 \times 1 = 40 \text{ rad/s}$$
+- **Analog prototype** (1st-order Butterworth):
+  $$H(s) = \frac{\Omega_c}{s + \Omega_c} = \frac{40}{s + 40}$$
+- **Apply Bilinear Transform substitution**:
+  $$H(z) = \frac{40}{40 \frac{1 - z^{-1}}{1 + z^{-1}} + 40} = \frac{1}{\frac{1 - z^{-1}}{1 + z^{-1}} + 1}$$
+  $$H(z) = \frac{1 + z^{-1}}{(1 - z^{-1}) + (1 + z^{-1})} = \frac{1 + z^{-1}}{2} = 0.5 + 0.5z^{-1}$$
+- **Coefficients**:
+  - Numerator: $b_0 = 0.5$, $b_1 = 0.5$
+  - Denominator: $a_0 = 1.0$, $a_1 = 0.0$
+
+**Q21. Describe the concept of pre-warping in the bilinear transform method. Why is it necessary and how is it applied?**
+Because the bilinear transform compresses the infinite analog frequency domain into the finite digital frequency domain ($0$ to Nyquist), the mapping between analog frequencies ($\Omega$) and digital frequencies ($\omega$) is highly non-linear. This distortion is called "frequency warping".
+If we map an analog filter directly, its cutoff frequency will land at the wrong digital frequency. To compensate, we use **pre-warping**: we intentionally shift the analog design cutoff frequency so that, after the non-linear transformation, it lands exactly at our target digital cutoff frequency.
+It is applied by designing the analog prototype using the pre-warped frequency:
+$$\Omega_c = \frac{2}{T} \tan\left(\frac{\omega_c}{2}\right)$$
+
+**Q22. Estimate the correction in the cutoff frequency $\omega_c$ for a sampling rate of 100 Hz using the prewarping method.**
+Let the desired digital cutoff frequency be $f_c$. The digital angular frequency is $\omega_c = \frac{2\pi f_c}{100}$.
+Without prewarping (linear mapping), the corresponding analog frequency would be $\Omega_{linear} = \frac{\omega_c}{T} = 200\pi \frac{f_c}{100} = 2\pi f_c$.
+Using prewarping, the corrected analog frequency is:
+$$\Omega_{prewarped} = \frac{2}{T} \tan\left(\frac{\omega_c}{2}\right) = 200 \tan\left(\frac{\pi f_c}{100}\right)$$
+For small $f_c$ (low frequencies), $\tan(x) \approx x$, so $\Omega_{prewarped} \approx 2\pi f_c$, requiring very little correction. However, as $f_c$ approaches the Nyquist frequency ($50$ Hz), $\tan(x)$ grows non-linearly toward infinity. For instance, at $f_c = 25$ Hz, $\Omega_{linear} = 50\pi \approx 157$ rad/s, while $\Omega_{prewarped} = 200 \tan(\pi/4) = 200$ rad/s. The correction accommodates for the divergence of the tangent function as frequencies increase.
+
+**Q23. Derive up to second order the pre-warp correction using the MacLaurin series.**
+The pre-warping relationship is:
+$$\Omega = \frac{2}{T} \tan\left(\frac{\omega}{2}\right)$$
+Using the Maclaurin series expansion for the tangent function ($\tan(x) \approx x + \frac{x^3}{3} + \frac{2x^5}{15} + \dots$):
+Substitute $x = \frac{\omega}{2}$:
+$$\tan\left(\frac{\omega}{2}\right) = \left(\frac{\omega}{2}\right) + \frac{1}{3} \left(\frac{\omega}{2}\right)^3 + \dots = \frac{\omega}{2} + \frac{\omega^3}{24} + \dots$$
+Then $\Omega$ is expanded as:
+$$\Omega = \frac{2}{T} \left( \frac{\omega}{2} + \frac{\omega^3}{24} + \dots \right) = \frac{\omega}{T} + \frac{\omega^3}{12T}$$
+Since $\frac{\omega}{T}$ is simply the desired linear analog frequency $\Omega_{linear}$, the pre-warped frequency $\Omega$ can be rewritten as:
+$$\Omega \approx \Omega_{linear} + \frac{T^2 \Omega_{linear}^3}{12}$$
+Because the MacLaurin series for tangent only contains odd power terms, the second-order term ($\omega^2$) is strictly zero. The first non-linear correction factor is the cubic term $\frac{\omega^3}{12T}$.
+
+**Q24. Explain the impulse-invariant method for designing IIR filters. How does it work and what are its main advantages and disadvantages?**
+The impulse-invariant method creates a digital IIR filter by directly sampling the impulse response of a continuous-time analog filter prototype.
+- **How it works**: An analog filter $H(s)$ is transformed to its time-domain impulse response $h(t)$. This response is then sampled at regular intervals $T$ to yield a discrete sequence $h[n] = h(nT)$. The Z-transform is then applied to $h[n]$ to produce the digital transfer function $H(z)$. In practice, analog poles $s_k$ are mapped to digital poles $z_k = e^{s_k T}$.
+- **Advantages**: It perfectly preserves the shape of the analog filter's impulse response in the time domain. Because the frequency mapping is entirely linear ($\omega = \Omega T$), it avoids the frequency warping introduced by the bilinear transform.
+- **Disadvantages**: The periodic sampling causes the frequency response to alias. The continuous frequency response copies and wraps around every multiple of the sampling rate, making it inappropriate for designing high-pass or band-stop filters that don't naturally attenuate high frequencies prior to Nyquist.
+
+**Q25. Given the transfer function $H(z) = \frac{0.465z}{z-0.535}$, verify the correctness of this representation for a low-pass filter designed using the impulse-invariant method.**
+Rewrite $H(z)$:
+$$H(z) = \frac{0.465z}{z - 0.535} = \frac{0.465}{1 - 0.535z^{-1}}$$
+The inverse Z-transform yields the impulse response:
+$$h[n] = 0.465 \cdot (0.535)^n u[n]$$
+This is an exponentially decaying sequence, typical of a sampled 1st-order analog low-pass filter $H(s) = \frac{A}{s + a}$, whose impulse response is $h(t) = A e^{-at} u(t)$.
+In the impulse-invariant method, the continuous response is sampled as $h[n] = T h(nT) = AT e^{-anT} u[n]$:
+- The pole mapping checks out: $e^{-aT} = 0.535 \implies -aT = \ln(0.535) < 0$. The pole is at $0.535$, which is purely real and inside the unit circle, confirming standard stable low-pass behavior.
+- Next, we check the DC gain at $\omega = 0$ ($z = 1$):
+  $$H(1) = \frac{0.465}{1 - 0.535} = \frac{0.465}{0.465} = 1$$
+Because the DC gain is exactly unity and the system is stable with a positive real pole modeling exponential decay, it confirms the representation is correct for a normalized digital low-pass filter designed via impulse invariance.
+
+**Q26. Describe the process of mapping poles and zeros from the s-plane to the z-plane. Why is this important in digital filter design?**
+Mapping poles and zeros translates the stability criteria and frequency responses from the continuous-time domain (s-plane) to the discrete-time domain (z-plane).
+- **Process**: The exact mapping depends on the discretization method.
+  - In the **Bilinear Transform**, $s$ is substituted with $\frac{2}{T} \frac{1 - z^{-1}}{1 + z^{-1}}$. This mathematically maps the left half of the s-plane (stable region) to the interior of the unit circle ($|z| < 1$) in the z-plane, and maps the imaginary $j\omega$ axis entirely onto the perimeter of the unit circle.
+  - In the **Impulse-Invariant Method**, analog poles $s_k$ map to digital poles at $z_k = e^{s_k T}$. Zeros are not mapped directly but derived via partial fraction expansion.
+- **Importance**: This mapping is critical because it ensures that a stable analog prototype directly yields a stable digital filter. It dictates how resonances, attenuation, and phase shifts behave in the sampled system relative to the continuous original. Any pole with a negative real part in the s-plane *must* map inside the unit circle in the z-plane to maintain stability.
+
+---
 
 ### 🧠 Knowledge Check
 
@@ -187,11 +340,9 @@ explanation: The Parks-McClellan algorithm uses the Chebyshev approximation (min
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 10 Walkthrough
+This section provides a walkthrough of the provided code for Lab 10, exploring the characteristics and behavior of continuous and discrete Linear Time-Invariant (LTI) filters using \`scipy.signal\`.
 
-This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
-
-### Step 1: Implementation
-
+### Continuous LTI System Impulse Response (Cell 0)
 \`\`\`python
 # impulse response of a simple cont. LTI
 cs = signal.lti([10], [1, 10])
@@ -200,90 +351,49 @@ plot(t, sig, '.')
 yscale('log')
 plot(t, 10*exp(-10*t))
 \`\`\`
+- **What it does**: Defines a 1st-order continuous-time LTI system with the transfer function $H(s) = \frac{10}{s + 10}$.
+- **Observations**: It computes the impulse response of the system and plots it. The theoretical impulse response is an exponential decay: $h(t) = 10e^{-10t}u(t)$. The code overlays the simulated response with the mathematical theoretical curve to show they match perfectly. The use of \`yscale('log')\` maps the exponential decay to a linearly descending straight line, making verification easy.
 
-*Explanation*: impulse response of a simple cont. LTI
-
-### Step 2: Implementation
-
+### Discrete LTI System Impulse Response (Cell 1 & 2)
 \`\`\`python
 ds = signal.dlti([1], [1, -0.5])
 n, h = ds.impulse()
 stem(n, h[0], 'o')
 show()
 \`\`\`
+- **What it does**: Defines a discrete-time LTI filter using numerator \`[1]\` and denominator \`[1, -0.5]\`, producing the transfer function $H(z) = \frac{1}{1 - 0.5z^{-1}}$. This is a simple recursive moving average (low-pass) filter.
+- **Observations**: In Cell 1, \`ds.impulse()\` calculates the discrete impulse response, plotting it via a \`stem\` plot. The response is a decaying sequence. 
+- **Cell 2 Verification**: Cell 2 constructs the theoretical array $0.5^n$ using \`ht[1:] = 0.5**arange(...)\` and plots it against the measured impulse response. The plots perfectly overlap, verifying the expected geometric decay formula for a real pole at $z = 0.5$.
 
-### Step 3: Implementation
-
-\`\`\`python
-plot(n, h[0], 'o')
-ht = zeros(len(h[0]))
-ht[1:] = 0.5**arange(len(h[0]) - 1)
-plot(n, ht,'.-')
-plot(n, h[0], 'o')
-yscale('log')
-plot(n, h[0], 'o')
-show()
-\`\`\`
-
-### Step 4: Implementation
-
+### Second-Order Discrete System and Oscillation (Cell 3, 4, 5)
 \`\`\`python
 w, h = signal.freqz([1], [1, -1, 0.5])
 ds = signal.dlti([1], [1, -1, 0.5])
 n, hn = ds.impulse()
-stem(n, hn[0])
-show()
 \`\`\`
+- **What it does**: Evaluates a 2nd-order discrete IIR filter with transfer function $H(z) = \frac{1}{1 - z^{-1} + 0.5z^{-2}}$.
+- **Poles**: The roots of $z^2 - z + 0.5 = 0$ are at $z = 0.5 \pm 0.5j$. Converting to polar form, the radius is $r = \frac{1}{\sqrt{2}} \approx 0.707$ and the angle is $\theta = \pm \pi/4$.
+- **Analytical Overlay**: Because the poles have a non-zero imaginary component, the impulse response is an underdamped, exponentially decaying sinusoid. Cell 4 implements the theoretical closed-form solution:
+  $$h[n] = 2 \sin((n-1)\pi/4) \cdot \left(\frac{1}{\sqrt{2}}\right)^{n-1}$$
+  The plot clearly shows the red analytical line intercepting exactly at the stems. 
+- **Logarithmic View (Cell 5)**: Cell 5 plots the absolute value of the analytical sequence on a semi-logarithmic scale. The peaks of the oscillation fall perfectly along a straight line, explicitly illustrating that the envelope decays exponentially.
 
-### Step 5: Implementation
-
-\`\`\`python
-ds = signal.dlti([1], [1, -1, 0.5])
-n, h = ds.impulse()
-stem(n, h[0], 'o')
-ht = zeros(len(h[0]))
-# see from last week analytical approach
-ht[1:] = (lambda n: 2*sin((n-1)*pi/4)/sqrt(2)**(n-1))(arange(1, len(h[0])))
-stem(n, h[0])
-plot(n, ht, 'r-')
-\`\`\`
-
-*Explanation*: see from last week analytical approach
-
-### Step 6: Implementation
-
-\`\`\`python
-# to illustrate that it is an exponentially decaying oscillation
-semilogy(n, abs(ht))
-grid()
-\`\`\`
-
-*Explanation*: to illustrate that it is an exponentially decaying oscillation
-
-### Step 7: Implementation
-
+### Analyzing Poles, Zeros, and Frequency Response (Cell 6 & 7)
 \`\`\`python
 # to_zpk() method of an LTI system returns the zeros and poles
 print(ds.to_zpk())
-\`\`\`
 
-*Explanation*: to_zpk() method of an LTI system returns the zeros and poles
-
-### Step 8: Implementation
-
-\`\`\`python
 # to verify the frequency response (magnitude and phase)
 w, H = ds.freqresp() # complex freq. response including both
-# compare freq. response and the output of the bode() method
 w, gain, phase = ds.bode(w = w)
 semilogy(w, 20*log10(abs(H)), 'r-', linewidth=15, alpha=0.3)
 semilogy(w, gain, 'k-', linewidth=2, alpha=1)
 \`\`\`
-
-*Explanation*: to verify the frequency response (magnitude and phase) compare freq. response and the output of the bode() method
-
-`,
-
+- **Pole-Zero Extraction**: Cell 6 uses the \`.to_zpk()\` method to automatically calculate and output the exact zeros and poles of the transfer function.
+- **Frequency Response Verification**: Cell 7 calculates the frequency response of the filter using two distinct SciPy functions:
+  1. \`freqresp()\`: Computes the complex array $H(e^{j\omega})$ from which magnitude is manually derived using $20\log_{10}(|H|)$.
+  2. \`bode()\`: Directly calculates the magnitude gain in decibels.
+- **Observations**: Plotting the manually calculated dB magnitude (thick red line) beneath the direct output of \`bode()\` (thin black line) shows a 100% overlap, verifying that both methods correctly compute the exact same frequency domain magnitude response.`,
     keyFormulas: `## Week 10 Key Formulas
 
 | Formula | Description |
@@ -424,57 +534,66 @@ explanation: In a recursive filter with finite-precision arithmetic, rounding or
 \`\`\`
 `,
     labWalkthrough: `## 🔬 Lab 11 Walkthrough
+In this lab, we will manually design a second-order IIR notch filter, normalize its DC gain, and then use the Fourier (window) method to design low-pass, high-pass, and band-pass FIR filters.
 
-This lab walks through practical implementations of the concepts covered in this week's homework. The following code demonstrates step-by-step applications.
+## 1. Manually designed second-order notch filter
 
-### Step 1: Implementation
+We want a digital notch filter with the following properties:
+- attenuation of at least 40 dB at $f_0=20 $ Hz
+- bandwidth of $\Delta f = 4 $ Hz
+- the gain at 0 Hz should be 0 dB. 
+- sampling frequency is $f_s=160 $ Hz
+
+Let's find out the form of the transfer function $H(z)$.
 
 \`\`\`python
+from pylab import *
+from scipy import signal
+
 fs = 160
 fn = fs/2
 d = 1 - pi/40
+
+# Define filter using poles and zeros mapping
 ds = signal.dlti([1, -sqrt(2), 1], [1, -sqrt(2)*d, d**2])
 w, gain, phase = ds.bode()
 f = w/(2*pi)*fs
+
 plot(f, gain, '.-', label='bode')
 hlines([-3], [0], [80], color='red')
 vlines([18, 22], [0, 0], [-200, -200],color='red')
 grid()
 \`\`\`
 
-### Step 2: Implementation
+Let's zoom in to see how well we satisfied the requirements (DC gain + cut off freq. gain):
 
 \`\`\`python
-# Let's see the in detail how well we satisfied the requirements (DC gain + cut off freq. gain)
 plot(f, gain, '.-', label='bode')
 hlines([-3], [0], [80], color='red')
 vlines([18, 22], [0, 0], [-200, -200],color='red')
 xlim([0.0, 25])
 ylim([-10, 1])
 grid()
+\`\`\`
 
---- Markdown Cell 3 ---
-## Normalizing the DC gain
+### Normalizing the DC gain
 
 However, at 0 Hz the gain is not exactly unity. We can fix it by reintroducing $k$ such that $|H(e^{j0})| = 1$: 
 
 $$
-k = \\left|\\frac{1 - 0.92\\sqrt{2}+0.92^2}{2 - \\sqrt{2}}\\right|\\approx 0.965
+k = \left|\frac{1 - 0.92\sqrt{2}+0.92^2}{2 - \sqrt{2}}\right|\approx 0.965
 $$
 
-Thus the filter coefficients are
-\`\`\`
-
-*Explanation*: Let's see the in detail how well we satisfied the requirements (DC gain + cut off freq. gain) Normalizing the DC gain
-
-### Step 3: Implementation
+Thus the filter coefficients are updated:
 
 \`\`\`python
 k = (1+d**2 - 2*d/sqrt(2))/(2 - sqrt(2))
-print(k)
+print(f"Gain k: {k}")
+
 ds = signal.dlti(k*array([1, -sqrt(2), 1]), [1, -sqrt(2)*d, d**2])
 w, gain, phase = ds.bode()
 f = w/(2*pi)*fs
+
 plot(f, gain, '.-', label='bode')
 axvline(18, linestyle=':', color='red')
 axvline(22, linestyle=':', color='red')
@@ -482,152 +601,137 @@ axhline(-3, linestyle=':', color='red')
 xlim([0, 25])
 ylim([-10, 1])
 grid()
-
---- Markdown Cell 5 ---
-Observe that by normalizing the DC gain we (negligibly) distorted the the gain at the cutoff frequency.
-
---- Markdown Cell 6 ---
----
-## Designing a lowpass FIR filter using the Fourier (window) method
 \`\`\`
 
-*Explanation*: Designing a lowpass FIR filter using the Fourier (window) method
+Observe that by normalizing the DC gain we (negligibly) distorted the gain at the cutoff frequency.
 
-### Step 4: Implementation
+---
+
+## 2. Designing a lowpass FIR filter using the Fourier (window) method
+
+First, we generate an ideal lowpass filter (the sinc function) and apply a Hann window.
 
 \`\`\`python
 from pylab import *
 from scipy import signal
+
 fs, fl, N = 100, 20, 51
 n = arange(N) - N//2 + 1e-12 # tiny shift so that we don't get 0/0
-b_l = sin(2*pi*n*fl/fs)/(n/pi)
+
+# Ideal sinc response
+b_l = sin(2*pi*n*fl/fs)/(n*pi)
+
+# Hann window
 w = signal.windows.hann(N)
 plot(n, w, '-', label='window')
 plot(n, b_l, 'o-', label='sinc')
+
+# Apply window
 b_l *= w
 plot(n, b_l, 'k.-', label='sinc * window')
 legend()
 grid()
 \`\`\`
 
-### Step 5: Implementation
+We normalize the DC gain and plot the Bode magnitude and phase response:
 
 \`\`\`python
 b_l /= b_l.sum() # Ensure that the gain at 0Hz is 1. 
 ds = signal.dlti(b_l, [1], dt=1/fs)
 o, gain, phase = ds.bode(w=1000)
+
+fc = fl # Cutoff frequency
 plot(o/(2*pi), gain)
 axvline(fc, linestyle=':')
 axhline(-3, linestyle=':')
 grid()
 \`\`\`
 
-### Step 6: Implementation
-
 \`\`\`python
 plot(o/(2*pi), phase)
 grid()
-
---- Markdown Cell 10 ---
-## Designing a highpass FIR filter based on the above lowpass filter
 \`\`\`
 
-*Explanation*: Designing a highpass FIR filter based on the above lowpass filter
+---
 
-### Step 7: Implementation
+## 3. Designing a highpass FIR filter based on the above lowpass filter
+
+To create a highpass filter, we subtract the ideal lowpass from a unit impulse.
 
 \`\`\`python
 fh = 40
 n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+
+# Ideal lowpass for high cutoff
 b_h = sin(2*pi*n*fh/fs)/(n*pi)
-# or
-n = arange(N) - N//2
-b_h[n!=0] = sin(2*pi*n[n!=0]*fh/fs)/(n[n!=0]*pi)
-b_h[n==0] = 2*fh/fs
-#------
+
+# Apply window
 b_h *= w
+
+# Transform lowpass to highpass: delta[n] - h_lp[n]
 b_h *= -1
 b_h[N//2] += 1
 
-b_h /= np.abs(np.sum(b_h * (-1) ** np.arange(N)))# Ensure that the gain at Nyquist is 1. 
+# Normalize gain at Nyquist
+b_h /= np.abs(np.sum(b_h * (-1) ** np.arange(N))) 
+
 ds = signal.dlti(b_h, [1], dt=1/fs)
-# alternative 1 ----
 o, gain, phase = ds.bode(w=1000)
 f = o/(2*pi)
-# alternative 2
-#o, H = ds.freqresp(w=1000)
-#gain, phase = 20*log10(abs(H)), angle(H)*180/pi
-#f = o/(2*pi)*fs
-#-------------------
+
 plot(f, gain)
 axvline(fh, linestyle=':')
 axhline(-3, linestyle=':')
 grid()
 \`\`\`
 
-*Explanation*: or ------ alternative 1 ---- alternative 2 o, H = ds.freqresp(w=1000) gain, phase = 20*log10(abs(H)), angle(H)*180/pi f = o/(2*pi)*fs -------------------
-
-### Step 8: Implementation
+Let's check the gain at the Nyquist frequency to ensure it's properly normalized:
 
 \`\`\`python
 # gain at the highest freq. close to unity (0dB) because the last freq. is not exactly pi
-print(gain[-1])
-\`\`\`
+print(f"Gain at Nyquist: {gain[-1]} dB")
 
-*Explanation*: gain at the highest freq. close to unity (0dB) because the last freq. is not exactly pi
-
-### Step 9: Implementation
-
-\`\`\`python
-plot(n, b_h)
-\`\`\`
-
-### Step 10: Implementation
-
-\`\`\`python
 # Checking that indeed the gain at Nyquist is unity
 o, H = signal.freqz(b_h, worN=array([pi]))
-print(abs(H))
-
---- Markdown Cell 15 ---
-## Designing a bandpass FIR filter based on the above lowpass filter
+print(f"Absolute Gain at Nyquist: {abs(H)}")
 \`\`\`
 
-*Explanation*: Checking that indeed the gain at Nyquist is unity Designing a bandpass FIR filter based on the above lowpass filter
+---
 
-### Step 11: Implementation
+## 4. Designing a bandpass FIR filter based on the above lowpass filter
+
+To build a bandpass filter, we subtract an ideal high-cutoff lowpass filter from a low-cutoff lowpass filter.
 
 \`\`\`python
 n = arange(N) - N//2+1e-12 # tiny shift so that we don't get 0/0
+
 b_l = sin(2*pi*n*fl/fs)/(n*pi)
 b_h = sin(2*pi*n*fh/fs)/(n*pi)
+
+# Bandpass = LP_high_cut - LP_low_cut
 b = b_l - b_h
-# taper
+
+# Taper with window
 b *= w
-print(b)
-# normalization
+
+# Normalization at center frequency
 f0 = (fl + fh)/2
 omega0 = 2*pi*f0/fs
 H0 = np.sum(b * np.exp(-1j * omega0 * np.arange(N)))
 b /= abs(H0)
-#------
+
 ds = signal.dlti(b, [1], dt=1/fs)
 o, gain, phase = ds.bode(w=1000)
 f = o/(2*pi)
+
 plot(f, gain)
 axvline(fl, linestyle=':')
 axvline(fh, linestyle=':')
 axhline(-3, linestyle=':')
 grid()
-
-
---- Markdown Cell 17 ---
 \`\`\`
 
-*Explanation*: taper normalization ------
-
-`,
-
+This completes the FIR filter design walkthrough.`,
     keyFormulas: `## Week 11 Key Formulas
 
 | Formula | Description |
