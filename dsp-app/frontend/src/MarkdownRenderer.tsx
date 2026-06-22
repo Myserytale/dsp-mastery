@@ -383,10 +383,12 @@ export default function MarkdownRenderer({ content, onCopyToIDE }: MarkdownRende
             const text = String(children);
             if (text.includes('📌') || text.includes('Problem') || text.includes('Step ')) {
               return (
-                <div className="mt-14 mb-6 pt-7 border-t-2 border-nord-polar-2/50 relative">
-                  <h3 className="absolute -top-[15px] left-4 inline-flex items-center bg-nord-surface px-4 py-1 text-nord-frost-1 font-bold text-[0.95rem] rounded-full border border-nord-polar-2/50 shadow-sm" {...props}>
-                    {children}
-                  </h3>
+                <div className="mt-14 border-t-2 border-nord-polar-2/50">
+                  <div className="flex -mt-[17px] mb-6">
+                    <h3 className="inline-flex bg-nord-surface px-4 py-1 text-nord-frost-1 font-bold text-[0.95rem] rounded-2xl border border-nord-polar-2/50 shadow-sm mx-4" {...props}>
+                      {children}
+                    </h3>
+                  </div>
                 </div>
               );
             }
