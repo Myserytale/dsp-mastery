@@ -203,8 +203,8 @@ plt.show()`);
     setPyodideLoadingMsg('⏳ Initializing Pyodide (this may take a minute on first run)...');
     try {
       const pyodide = await window.loadPyodide();
-      setPyodideLoadingMsg('⏳ Loading Python packages (numpy, scipy, matplotlib)...');
-      await pyodide.loadPackage(['numpy', 'scipy', 'matplotlib']);
+      setPyodideLoadingMsg('⏳ Loading Python packages (numpy, scipy, matplotlib, sympy)...');
+      await pyodide.loadPackage(['numpy', 'scipy', 'matplotlib', 'sympy']);
       window.pyodideInstance = pyodide;
       setPyodideLoadingMsg('');
       return pyodide;
