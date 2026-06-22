@@ -938,25 +938,34 @@ Thus, it approaches $\\delta(x)$.
 ---
 
 ### 📌 Problem 2: Properties of Periodic Functions
-Let $f_P(x)$ and $g_P(x)$ be periodic with period $P$. By definition, $f_P(x+P) = f_P(x)$.
+Let $f_P(x)$ and $g_P(x)$ be periodic with period $P$. By definition, $f_P(x+P) = f_P(x)$ and $g_P(x+P) = g_P(x)$.
 
-**(a) Scaling:** $h_P(x) = \\alpha f_P(x) \\implies h_P(x+P) = \\alpha f_P(x+P) = \\alpha f_P(x) = h_P(x)$.
+**(a) $\\alpha f_P(x) = h_P(x)$**
+$h_P(x+P) = \\alpha f_P(x+P) = \\alpha f_P(x) = h_P(x)$.
 
-**(b) Shifting value:** $h_P(x) = \\alpha + f_P(x) \\implies h_P(x+P) = \\alpha + f_P(x+P) = \\alpha + f_P(x) = h_P(x)$.
+**(b) $\\alpha + f_P(x) = h_P(x)$**
+$h_P(x+P) = \\alpha + f_P(x+P) = \\alpha + f_P(x) = h_P(x)$.
 
-**(c) Shifting time:** $h_P(x) = f_P(x+\\alpha) \\implies h_P(x+P) = f_P(x+P+\\alpha) = f_P(x+\\alpha) = h_P(x)$.
+**(c) $f_P(x+\\alpha) = h_P(x)$**
+$h_P(x+P) = f_P(x+P+\\alpha) = f_P((x+\\alpha)+P) = f_P(x+\\alpha) = h_P(x)$.
 
-**(d) Addition:** $f_P(x+P) + g_P(x+P) = f_P(x) + g_P(x)$.
+**(d) $f_P(x) + g_P(x) = h_P(x)$**
+$h_P(x+P) = f_P(x+P) + g_P(x+P) = f_P(x) + g_P(x) = h_P(x)$.
 
-**(e) Multiplication:** $f_P(x+P) \\cdot g_P(x+P) = f_P(x) \\cdot g_P(x)$.
+**(e) $f_P(x) \\cdot g_P(x) = h_P(x)$**
+$h_P(x+P) = f_P(x+P) \\cdot g_P(x+P) = f_P(x) \\cdot g_P(x) = h_P(x)$.
 
-**(f) Functions of periodic functions:** $\\mathcal{F}(f_P(x+P)) = \\mathcal{F}(f_P(x))$.
+**(f) $F(f_P(x)) = g_P(x)$**
+$g_P(x+P) = F(f_P(x+P)) = F(f_P(x)) = g_P(x)$.
 
-**(g) Time-scaling:** $h(x) = f_P(\\alpha x)$. $h(x + P/\\alpha) = f_P(\\alpha(x + P/\\alpha)) = f_P(\\alpha x + P) = f_P(\\alpha x) = h(x)$. Thus the new period is $P/\\alpha$.
+**(g) $f_P(\\alpha x) = f_{P/\\alpha}(x)$**
+Let $h(x) = f_P(\\alpha x)$. Then $h(x + P/\\alpha) = f_P(\\alpha(x + P/\\alpha)) = f_P(\\alpha x + P) = f_P(\\alpha x) = h(x)$. Thus the new period is $P/\\alpha$.
 
-**(h) Harmonic addition:** $g_{kP}(x)$ has period $kP$. $f_P(x)$ repeats every $P$, so it also repeats every $kP$. Their sum has period $kP$.
+**(h) $f_P(x) + g_{k \\cdot P}(x) = h_{k \\cdot P}(x)$**
+For any $k \\in \\mathbb{N}^*$, $f_P(x)$ repeats every $P$, meaning it also inherently repeats every $kP$ ($f_P(x + kP) = f_P(x)$). Thus, $h_{k \\cdot P}(x+kP) = f_P(x+kP) + g_{k \\cdot P}(x+kP) = f_P(x) + g_{k \\cdot P}(x) = h_{k \\cdot P}(x)$.
 
-**(i) Commensurate periods:** The sum of two periodic functions is periodic if their periods $P_1, P_2$ have a common multiple $P = n P_1 = m P_2$.
+**(i) $f_{P_1}(x) + g_{P_2}(x) = h_P(x)$, if $\\exists n,m \\in \\mathbb{N}^*, P = n P_1 = m P_2$, i.e., $\\frac{P_2}{P_1} = \\frac{n}{m}$**
+$h_P(x+P) = f_{P_1}(x+P) + g_{P_2}(x+P) = f_{P_1}(x + n P_1) + g_{P_2}(x + m P_2) = f_{P_1}(x) + g_{P_2}(x) = h_P(x)$.
 
 ---
 
@@ -977,7 +986,7 @@ $$c_k = \\frac{(-1)^k \\sin(a\\pi)}{2\\pi} \\left( \\frac{1}{a-k} + \\frac{1}{a+
 Prove $\\sum_{n=-\\infty}^{\\infty} e^{in \\frac{2\\pi}{L} x} = L \\sum_{n=-\\infty}^{\\infty} \\delta(x - nL)$.
 
 **Proof:** 
-The right side is a periodic pulse train (Dirac comb) with period $L$. We can express it as a Fourier series.
+The right side is a periodic pulse train (Dirac comb) with period $L$. We can express it as a Fourier series $f(x) = \\sum_{k=-\\infty}^{\\infty} c_k e^{j k \\frac{2\\pi}{L} x}$.
 $c_k = \\frac{1}{L} \\int_{-L/2}^{L/2} L \\delta(x) e^{-jk \\frac{2\\pi}{L} x} dx = 1$.
 Reconstructing the signal from the Fourier series:
 $f(x) = \\sum_{n=-\\infty}^{\\infty} c_n e^{in \\frac{2\\pi}{L} x} = \\sum_{n=-\\infty}^{\\infty} 1 \\cdot e^{in \\frac{2\\pi}{L} x}$.
@@ -987,25 +996,74 @@ Thus, the sum of complex exponentials exactly yields the periodic Dirac comb.
 
 ### 📌 Problem 5: Properties of the Fourier Transform
 
-**(a) Time Scaling:** $\\mathcal{F}\\{f(at)\\} = \\int f(at)e^{-j2\\pi ft} dt$. Let $u=at, du=a\\,dt$. $= \\frac{1}{|a|} \\int f(u)e^{-j2\\pi \\frac{f}{a} u} du = \\frac{1}{|a|}\\hat{f}\\left(\\frac{f}{a}\\right)$.
+Assuming the unitary, symmetric definition $\\mathcal{F}[f(t)] = \\hat{f}(\\omega) = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^{\\infty} f(t) e^{-i\\omega t} dt$.
 
-**(b) Frequency Shift:** $\\mathcal{F}\\{f(t)e^{i a t}\\} = \\int f(t)e^{i a t}e^{-j\\omega t} dt = \\int f(t)e^{-j(\\omega-a)t} dt = \\hat{f}(\\omega-a)$.
+**(a) Time Scaling: $\\mathcal{F}[f(at)] = \\frac{1}{|a|} \\hat{f}(\\omega/a)$**
+$\\mathcal{F}[f(at)] = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^{\\infty} f(at)e^{-i\\omega t} dt$. 
+If $a > 0$, let $u=at \\implies du=a dt$. $= \\frac{1}{a\\sqrt{2\\pi}} \\int_{-\\infty}^{\\infty} f(u)e^{-i\\omega(u/a)} du = \\frac{1}{a}\\hat{f}(\\omega/a)$.
+If $a < 0$, the integration bounds swap, contributing a negative sign that cancels with $a$, yielding $\\frac{1}{|a|}\\hat{f}(\\omega/a)$.
 
-**(c) Time Derivative:** $\\mathcal{F}\\{f'(t)\\} = \\int f'(t)e^{-j\\omega t} dt$. Integration by parts gives $j\\omega \\hat{f}(\\omega)$.
+**(b) Frequency Shift: $\\mathcal{F}[f(t)e^{iat}] = \\hat{f}(\\omega - a)$**
+$\\mathcal{F}[f(t)e^{iat}] = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^{\\infty} f(t)e^{iat}e^{-i\\omega t} dt = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^{\\infty} f(t)e^{-i(\\omega-a)t} dt = \\hat{f}(\\omega-a)$.
 
-**(e) Convolution:** $\\mathcal{F}\\{f * g\\} = \\iint f(\\tau)g(t-\\tau)e^{-j\\omega t} d\\tau dt$. Let $u=t-\\tau$. The integral separates: $\\int f(\\tau)e^{-j\\omega \\tau} d\\tau \\int g(u)e^{-j\\omega u} du = \\hat{f}(\\omega)\\cdot\\hat{g}(\\omega)$.
+**(c) Parseval's Theorem: $\\int_{-\\infty}^{\\infty} |f(t)|^2 dt = \\int_{-\\infty}^{\\infty} |\\hat{f}(\\omega)|^2 d\\omega$**
+Using $f(t) = \\frac{1}{\\sqrt{2\\pi}} \\int \\hat{f}(\\omega) e^{i\\omega t} d\\omega$:
+$\\int f(t)f^*(t) dt = \\int f(t) \\left( \\frac{1}{\\sqrt{2\\pi}} \\int \\hat{f}^*(\\omega) e^{i\\omega t} d\\omega \\right) dt = \\int \\hat{f}^*(\\omega) \\left( \\frac{1}{\\sqrt{2\\pi}} \\int f(t) e^{i\\omega t} dt \\right) d\\omega = \\int \\hat{f}^*(\\omega)\\hat{f}(\\omega) d\\omega = \\int |\\hat{f}(\\omega)|^2 d\\omega$.
+
+**(d) Time Multiplication: $\\mathcal{F}[(-it)^n f(t)] = \\frac{d^n}{d\\omega^n} \\hat{f}(\\omega)$**
+Taking the derivative of the transform: $\\frac{d}{d\\omega} \\hat{f}(\\omega) = \\frac{1}{\\sqrt{2\\pi}} \\int f(t) (-it) e^{-i\\omega t} dt = \\mathcal{F}[(-it)f(t)]$.
+Repeating this operation $n$ times yields the property.
+
+**(e) Time Derivative: $\\mathcal{F}[\\frac{d^n}{dt^n} f(t)] = (i\\omega)^n \\hat{f}(\\omega)$**
+Integration by parts: $\\mathcal{F}[f'(t)] = \\frac{1}{\\sqrt{2\\pi}} \\left( [f(t)e^{-i\\omega t}]_{-\\infty}^{\\infty} - \\int f(t) (-i\\omega) e^{-i\\omega t} dt \\right) = 0 + i\\omega \\hat{f}(\\omega)$.
+Repeating $n$ times yields $(i\\omega)^n \\hat{f}(\\omega)$.
+
+**(f) Duality Example: $\\mathcal{F}[\\frac{1}{1+t^2}] = \\sqrt{\\frac{\\pi}{2}} e^{-|\\omega|}$**
+We know $\\mathcal{F}[e^{-|t|}] = \\frac{1}{\\sqrt{2\\pi}} \\int_{-\\infty}^{\\infty} e^{-|t|} e^{-i\\omega t} dt = \\frac{1}{\\sqrt{2\\pi}} \\frac{2}{1+\\omega^2} = \\sqrt{\\frac{2}{\\pi}} \\frac{1}{1+\\omega^2}$.
+Applying the duality property $\\mathcal{F}[\\mathcal{F}[f(t)]](\\omega) = f(-\\omega)$:
+$\\mathcal{F}\\left[ \\sqrt{\\frac{2}{\\pi}} \\frac{1}{1+t^2} \\right] = e^{-|-\\omega|} = e^{-|\\omega|} \\implies \\mathcal{F}\\left[ \\frac{1}{1+t^2} \\right] = \\sqrt{\\frac{\\pi}{2}} e^{-|\\omega|}$.
+
+**(g) Dirac Comb: $\\mathcal{F}[\\text{III}_T(t)] = \\frac{1}{T} \\text{III}_{1/T}(\\nu)$** *(Using frequency $\\nu$ instead of $\\omega$)*
+$\\text{III}_T(t) = \\sum_{n=-\\infty}^{\\infty} \\delta(t-nT)$. We can express it as a Fourier series: $\\sum_{k=-\\infty}^{\\infty} c_k e^{j 2\\pi k t / T}$, where $c_k = \\frac{1}{T}$.
+Taking the Fourier transform of both sides over $\\nu$:
+$\\mathcal{F}[\\text{III}_T(t)] = \\sum_{k=-\\infty}^{\\infty} \\frac{1}{T} \\delta(\\nu - k/T) = \\frac{1}{T} \\text{III}_{1/T}(\\nu)$.
 
 ---
 
-### 📌 Problem 6: Symmetry Properties
+### 📌 Problem 6: Symmetry Properties of the Fourier Transformation
 
-**(a) Real:** $x(t)$ is real. $X(-f) = \\int x(t)e^{j2\\pi ft} dt = \\left( \\int x(t)e^{-j2\\pi ft} dt \\right)^* = X^*(f)$.
+**(a) $x(t)$ is real $\\iff X(-f) = X^*(f)$**
+Proof: $X(-f) = \\int x(t) e^{-j 2\\pi (-f) t} dt = \\int x(t) e^{j 2\\pi f t} dt$.
+Since $x(t)$ is real, $x(t) = x^*(t)$. Thus $X(-f) = \\int x^*(t) (e^{-j 2\\pi f t})^* dt = \\left( \\int x(t) e^{-j 2\\pi f t} dt \\right)^* = X^*(f)$.
 
-**(c) Even:** $x(-t) = x(t)$. $X(f) = \\int x(-t)e^{-j2\\pi ft} dt = \\int x(\\tau)e^{j2\\pi f\\tau} d\\tau = X(-f)$. $X(f)$ is even.
+**(b) $x(t)$ is imaginary $\\iff X(-f) = -X^*(f)$**
+Proof: If $x(t)$ is imaginary, $x^*(t) = -x(t)$.
+$X^*(f) = \\left( \\int x(t) e^{-j 2\\pi f t} dt \\right)^* = \\int x^*(t) e^{j 2\\pi f t} dt = \\int -x(t) e^{j 2\\pi f t} dt = -X(-f)$. Thus $X(-f) = -X^*(f)$.
 
-**(f) Real & Odd:** Since real, $X(-f) = X^*(f)$. Since odd, $X(f)$ is odd. Thus $X(f) = -X(-f) = -X^*(f)$. This means $X(f)$ must be purely imaginary.
+**(c) $x(t)$ is even $\\iff X(f)$ is even**
+Proof: $x(-t) = x(t)$. $X(-f) = \\int_{-\\infty}^{\\infty} x(t) e^{j 2\\pi f t} dt$. Let $u = -t$, $dt = -du$.
+$X(-f) = \\int_{\\infty}^{-\\infty} x(-u) e^{-j 2\\pi f u} (-du) = \\int_{-\\infty}^{\\infty} x(u) e^{-j 2\\pi f u} du = X(f)$.
 
----
+**(d) $x(t)$ is odd $\\iff X(f)$ is odd**
+Proof: $x(-t) = -x(t)$. $X(-f) = \\int_{-\\infty}^{\\infty} x(t) e^{j 2\\pi f t} dt$. Let $u = -t$.
+$X(-f) = \\int_{-\\infty}^{\\infty} x(-u) e^{-j 2\\pi f u} du = \\int_{-\\infty}^{\\infty} -x(u) e^{-j 2\\pi f u} du = -X(f)$.
+
+**(e) $x(t)$ is real & even $\\iff X(f)$ is real & even**
+Proof: From (a), $X(-f) = X^*(f)$. From (c), $X(-f) = X(f)$.
+Therefore, $X^*(f) = X(f) \\implies X(f)$ is real. And $X(f) = X(-f) \\implies X(f)$ is even.
+
+**(f) $x(t)$ is real & odd $\\iff X(f)$ is imaginary & odd**
+Proof: From (a), $X(-f) = X^*(f)$. From (d), $X(-f) = -X(f)$.
+Therefore, $X^*(f) = -X(f) \\implies X(f)$ is purely imaginary. And $X(-f) = -X(f) \\implies X(f)$ is odd.
+
+**(g) $x(t)$ is imaginary & even $\\iff X(f)$ is imaginary & even**
+Proof: From (b), $X(-f) = -X^*(f)$. From (c), $X(-f) = X(f)$.
+Therefore, $-X^*(f) = X(f) \\implies X(f)$ is purely imaginary. And $X(-f) = X(f) \\implies X(f)$ is even.
+
+**(h) $x(t)$ is imaginary & odd $\\iff X(f)$ is real & odd**
+Proof: From (b), $X(-f) = -X^*(f)$. From (d), $X(-f) = -X(f)$.
+Therefore, $-X^*(f) = -X(f) \\implies X^*(f) = X(f) \\implies X(f)$ is real. And $X(-f) = -X(f) \\implies X(f)$ is odd.
+
 
 ### 📌 Problem 7: Convolution Properties
 
