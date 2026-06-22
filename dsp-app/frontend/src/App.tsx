@@ -238,17 +238,17 @@ plt.show()`);
       
       // Inject setup code for matplotlib
       const setupCode = `
-import sys
-import io
-import base64
-from contextlib import redirect_stdout
-import matplotlib
-matplotlib.use('Agg')
+import sys as __sys
+import io as __io
+import base64 as __base64
+import json as __json
+import matplotlib as __matplotlib
+__matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 plt.clf()
-sys.stdout = io.StringIO()
-sys.stderr = io.StringIO()
+__sys.stdout = __io.StringIO()
+__sys.stderr = __io.StringIO()
 `;
       await pyodide.runPythonAsync(setupCode);
 
@@ -257,7 +257,7 @@ sys.stderr = io.StringIO()
         await pyodide.runPythonAsync(code);
       } catch (err: any) {
         // Output the error
-        const stderr = await pyodide.runPythonAsync(`sys.stderr.getvalue()`);
+        const stderr = await pyodide.runPythonAsync(`__sys.stderr.getvalue()`);
         setCodeOutput(`❌ Error:\n${err}\n${stderr}`);
         setCodeRunning(false);
         return;
@@ -265,17 +265,16 @@ sys.stderr = io.StringIO()
 
       // Capture output and figures
       const captureCode = `
-import json
-output = sys.stdout.getvalue()
+output = __sys.stdout.getvalue()
 figures = []
 for i in plt.get_fignums():
     fig = plt.figure(i)
-    buf = io.BytesIO()
+    buf = __io.BytesIO()
     fig.savefig(buf, format='png', bbox_inches='tight')
     buf.seek(0)
-    figures.append(base64.b64encode(buf.read()).decode('utf-8'))
+    figures.append(__base64.b64encode(buf.read()).decode('utf-8'))
     plt.close(fig)
-json.dumps({"output": output, "figures": figures})
+__json.dumps({"output": output, "figures": figures})
 `;
       const resultJson = await pyodide.runPythonAsync(captureCode);
       const { output, figures } = JSON.parse(resultJson);
