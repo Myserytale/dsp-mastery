@@ -427,7 +427,6 @@ With a sampling frequency $f_s = 1000$ and $N = 1000$ samples, the frequency res
 - If you call \`show_fft(10)\`, the input is exactly 10 Hz. This matches an FFT bin perfectly, meaning there are an integer number of cycles in the observation window. The plot will show a single, perfect vertical spike with zero spectral leakage.
 - If you call \`show_fft(10.5)\`, the frequency falls exactly between the 10 Hz and 11 Hz bins. Because an incomplete cycle ends the window abruptly, the signal's energy "leaks" out over all surrounding bins (Spectral Leakage), and the true peak amplitude is severely attenuated (Scalloping Loss). This hands-on function vividly demonstrates why applying window functions (like Hann or Blackman) is a fundamental prerequisite in practical signal processing.
 
-
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
@@ -786,17 +785,16 @@ $$ L[\\delta(t-t_0)] = \\int_0^\\infty \\delta(t-t_0) e^{-st} dt = e^{-st_0} $$
 **(i) $L[H(t-t_0)]$**
 Where $H(t)$ is the Heaviside step function:
 $$ L[H(t-t_0)] = \\int_0^\\infty H(t-t_0) e^{-st} dt = \\int_{t_0}^\\infty e^{-st} dt = \\left[ -\\frac{1}{s} e^{-st} \\right]_{t_0}^\\infty = \\frac{e^{-st_0}}{s} $$
-$$ L[H(t-t_0)] = \int_0^\infty H(t-t_0) e^{-st} dt = \int_{t_0}^\infty e^{-st} dt = \left[ -\frac{1}{s} e^{-st} \right]_{t_0}^\infty = \frac{e^{-st_0}}{s} $$
 
 ### 📌 Problem 28: Convolution Theorem
 **Theorem:** $L[(f * g)(t)] = F(s)G(s)$.
 **Proof:**
-$$ L[(f * g)(t)] = \int_0^\infty \left( \int_0^t f(\tau) g(t-\tau) d\tau \right) e^{-st} dt $$
-Change the order of integration. The region is $0 \le \tau \le t \le \infty$, which is equivalent to $0 \le \tau \le \infty$ and $\tau \le t \le \infty$.
-$$ = \int_0^\infty f(\tau) \left( \int_\tau^\infty g(t-\tau) e^{-st} dt \right) d\tau $$
-Let $u = t - \tau$, then $dt = du$, and as $t$ goes from $\tau$ to $\infty$, $u$ goes from $0$ to $\infty$.
-$$ = \int_0^\infty f(\tau) \left( \int_0^\infty g(u) e^{-s(u+\tau)} du \right) d\tau $$
-$$ = \int_0^\infty f(\tau) e^{-s\tau} d\tau \int_0^\infty g(u) e^{-su} du = F(s)G(s) $$
+$$ L[(f * g)(t)] = \\int_0^\\infty \\left( \\int_0^t f(\\tau) g(t-\\tau) d\\tau \\right) e^{-st} dt $$
+Change the order of integration. The region is $0 \\le \\tau \\le t \\le \\infty$, which is equivalent to $0 \\le \\tau \\le \\infty$ and $\\tau \\le t \\le \\infty$.
+$$ = \\int_0^\\infty f(\\tau) \\left( \\int_\\tau^\\infty g(t-\\tau) e^{-st} dt \\right) d\\tau $$
+Let $u = t - \\tau$, then $dt = du$, and as $t$ goes from $\\tau$ to $\\infty$, $u$ goes from $0$ to $\\infty$.
+$$ = \\int_0^\\infty f(\\tau) \\left( \\int_0^\\infty g(u) e^{-s(u+\\tau)} du \\right) d\\tau $$
+$$ = \\int_0^\\infty f(\\tau) e^{-s\\tau} d\\tau \\int_0^\\infty g(u) e^{-su} du = F(s)G(s) $$
 
 ### 📌 Problem 29: Inverse Laplace Transforms
 Here are the step-by-step derivations for each subpoint (a)-(j):
@@ -956,7 +954,6 @@ P_freq_sum = np.sum(Pxx_one_sided) * df
 \`\`\`
 By integrating the area under our one-sided PSD curve (\`Sum * df\`), we extract the total signal power \`P_freq_sum\`, mapping directly back to the time-domain mean squared value \`P_time\`.
 
-
 ### 🧠 Knowledge Check
 
 \`\`\`quiz
@@ -1035,7 +1032,6 @@ def apply_window(x, window):
     else:
         # Window is an array → pointwise multiplication
         return window * x
-
 
 #----------------------------------------------------------------    
 def _spectral_helper(x, NFFT=256, Fs=2, detrend=detrend_none,
@@ -1258,12 +1254,10 @@ print(len(s), len(Pxx))
 --- Markdown Cell 10 ---
 ## Parseval theorem
 
-
 $$
 \\int_{-\\infty}^{\\infty} |x(t)|^2 \\, dt
 =
 \\int_{-\\infty}^{\\infty} |X(f)|^2 \\, df
-$$
 $$
 \\sum_{n=0}^{N-1} |x[n]|^2
 \`\`\`
@@ -1948,7 +1942,6 @@ plt.legend()
 plt.show()
 \`\`\`
 
-
 *Observation:* Notice how the magnitude drops off sharply at $-20$ dB/decade past $\\omega = 10$. This visually confirms the "Low-Pass" nature we discussed theoretically.
 
 ### Part 2: Discrete Systems & The Z-Plane
@@ -2470,7 +2463,6 @@ plt.show()
 **Lab Exercise Takeaway:** The time-domain application perfectly reflects our frequency-domain analysis. Frequencies situated near our Zeros (the notches) are completely attenuated from the output \`y\`, while the remaining signal propagates through.
 
 **End of Lab 09 Walkthrough**
-
 
 ### 🧠 Knowledge Check
 
