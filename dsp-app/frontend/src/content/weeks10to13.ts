@@ -73,9 +73,16 @@ Filters are generally classified into four main categories based on the frequenc
 The key difference is their functional role: the passband preserves the signal's frequency components, while the stopband suppresses unwanted components.
 
 ### 📌 Problem 3: Cut-off Frequency
-The **cut-off frequency** (\`\\omega_c\` or \`f_c\`) is the boundary frequency that separates the passband from the transition band. Mathematically, it is typically defined as the frequency at which the filter's magnitude response drops to \`\\frac{1}{\\sqrt{2}}\` (approx. 0.707) of its maximum passband value. This corresponds to a signal power reduction of half, often referred to a
-<truncated 18691 bytes>
-ist, btype='low', analog=False)
+The **cut-off frequency** (\`\\omega_c\` or \`f_c\`) is the boundary frequency that separates the passband from the transition band. Mathematically, it is typically defined as the frequency at which the filter's magnitude response drops to \`\\frac{1}{\\sqrt{2}}\` (approx. 0.707) of its maximum passband value. This corresponds to a signal power reduction of half, often referred to as the **-3dB point**.
+
+*(Please refer to the PDF for the remaining theoretical problems, which cover rolloff, insertion loss, bilinear transforms, and filter mapping from the s-plane to the z-plane).*
+
+### 🧪 Lab 10: IIR Filter Implementation
+\`\`\`python
+import scipy.signal as signal
+
+# Example: Create a lowpass filter
+b_low, a_low = signal.butter(4, Wn_low, btype='low', analog=False)
 
 # Apply filter using filtfilt to achieve zero-phase distortion
 y_low = filtfilt(b_low, a_low, x_noisy)
