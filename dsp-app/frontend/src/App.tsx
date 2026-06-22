@@ -32,6 +32,7 @@ const WEEK_META = [
   { id: 12, title: 'Advanced Topics', slide: 'dsp12.pdf', hw: 'dsp_homework12.pdf' },
   { id: 13, title: 'Review & Exam Prep', slide: 'dsp13.pdf', hw: null },
   { id: 14, title: 'Final Exam Walkthrough', slide: 'dspexam24d.pdf', hw: null },
+  { id: 15, title: 'Python Coding Walkthrough', slide: null, hw: null },
 ];
 
 const API_BASE = import.meta.env.VITE_API_BASE || import.meta.env.BASE_URL.replace(/\/$/, '');
