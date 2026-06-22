@@ -461,10 +461,405 @@ Thus, the main difference in the LCCDE is that FIR filters have $a_k = 0$ for al
 - **Filter Order and Complexity**: For a given set of magnitude specifications (e.g., sharp cutoff), FIR filters generally require a much higher filter order (more coefficients) compared to IIR filters, which means higher computational cost (more multiplications and additions per sample).
 - **Feedback**: FIR filters are non-recursive (no feedback), while IIR filters are recursive (feedback is present).
 
-### 📌 Problem 3: Explain the ad
-<truncated 27928 bytes>
- are:
-$$ b_{\\text{low, norm}}[n] = \\frac{b_{\\text{low}}[n]}{\\sum_{n=0}^N b_{\\text{low}}[n]} $$
+### 📌 Problem 3: Explain the advantages and disadvantages of FIR filters compared to IIR filters. In what scenarios would you prefer one over the other?
+**Advantages of FIR filters:**
+- **Inherent Stability**: They are always strictly stable because they have no feedback.
+- **Linear Phase**: They can be designed to have exact linear phase, which means there is no phase distortion, and signal shapes are preserved perfectly.
+- **No Limit Cycles**: Because there is no feedback, they do not suffer from limit cycle oscillations caused by finite word-length quantization effects.
+
+**Disadvantages of FIR filters:**
+- **Computational Complexity**: For the same sharp magnitude response specifications (like a steep transition band), an FIR filter requires a significantly higher order than an IIR filter. This translates to more multiplications, additions, and memory.
+- **Higher Delay**: Linear phase FIR filters introduce a large delay (group delay is half the filter length), which may be undesirable in real-time control systems.
+
+**When to prefer one over the other:**
+- **Prefer FIR** when exact linear phase and waveform preservation are critical (e.g., audio crossover networks, image processing, data transmission) or when stability is a major concern.
+- **Prefer IIR** when the primary goal is achieving a sharp magnitude response with minimal computational resources and low latency (e.g., RF filtering, simple tone detection), and when phase distortion is not a significant issue.
+
+
+
+**4. What is the Fourier/window method for designing FIR filters? How does it work and what are its key benefits?**
+
+The Fourier/window method is a straightforward technique for designing finite impulse response (FIR) filters. It works by starting with an ideal frequency response $H_d(e^{j\\omega})$ (like a perfect brick-wall low-pass filter). You then find the inverse discrete-time Fourier transform (IDTFT) to get the ideal impulse response, $h_d[n]$. Because the ideal response is infinitely long and non-causal, we must truncate it. We do this by multiplying $h_d[n]$ with a finite-duration window function $w[n]$ (such as Hamming, Hanning, or Blackman), which yields the final FIR filter coefficients $h[n] = h_d[n] \\cdot w[n]$. A time delay is also added to make the filter causal.
+
+**Key benefits:**
+- It is conceptually simple and easy to implement.
+- It guarantees a strictly stable filter (FIR filters are inherently stable).
+- It easily produces linear phase filters by simply choosing a symmetric window and symmetric ideal impulse response.
+
+---
+
+**5. Implement a Python script to compute and plot the frequency response of the FIR filter designed in the previous question.**
+
+*(Assuming a general FIR low-pass filter design using the window method since the specific parameters were not provided in Q4)*
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import freqz, windows
+
+# Filter specifications
+N = 51           # Filter order
+fc = 0.2         # Normalized cutoff frequency (fraction of Nyquist)
+n = np.arange(-N//2 + 1, N//2 + 1) # Symmetric indices
+
+# Ideal impulse response (sinc)
+hd = np.sinc(2 * fc * n) * (2 * fc)
+
+# Apply Hamming window
+w = windows.hamming(N)
+h = hd * w
+h = h / np.sum(h) # Normalize DC gain
+
+# Compute frequency response
+w_rad, h_freq = freqz(h, worN=1024)
+
+# Plot
+plt.figure(figsize=(8, 5))
+plt.plot(w_rad / np.pi, 20 * np.log10(np.abs(h_freq)))
+plt.title("FIR Filter Frequency Response (Window Method)")
+plt.xlabel("Normalized Frequency ($\\\\times \\\\pi$ rad/sample)")
+plt.ylabel("Magnitude (dB)")
+plt.grid()
+plt.show()
+\`\`\`
+
+---
+
+**6. Explain the Fourier/window method for designing high-pass, band-pass, and band-stop FIR filters. Provide examples of the window functions used in each case.**
+
+The method is the same as for low-pass filters: determine the ideal impulse response $h_d[n]$ using the IDTFT of the ideal frequency response, and then multiply it by a window $w[n]$.
+- **High-pass filter:** The ideal impulse response can be constructed by subtracting an ideal low-pass impulse response from a unit impulse: $h_{HP}[n] = \\delta[n] - h_{LP}[n]$.
+- **Band-pass filter:** Constructed by subtracting a low-cutoff low-pass filter from a high-cutoff low-pass filter, or by multiplying a low-pass filter by a cosine to shift it in the frequency domain.
+- **Band-stop filter:** Constructed by subtracting a band-pass filter from a unit impulse $\\delta[n]$.
+
+**Window functions used:** The same window functions apply across all types. Examples include:
+- **Rectangular:** Simplest, but causes large ripples (Gibbs phenomenon).
+- **Bartlett (Triangular):** Reduces ripples but widens the transition band.
+- **Hann / Hamming:** Good balance between ripple reduction and transition width.
+- **Blackman:** Very high stopband attenuation but widest transition band.
+
+---
+
+**8. Why does truncating the ideal sinc impulse response introduce ripples in the frequency response?**
+
+Truncating the ideal infinite impulse response is mathematically equivalent to multiplying the time-domain signal by a rectangular window. In the frequency domain, this corresponds to convolving the ideal perfect brick-wall response with the Fourier transform of the rectangular window, which is a sinc function. The side lobes of this sinc function cause oscillatory overshoots and undershoots near the discontinuities (cutoff frequencies), a behavior known as the **Gibbs phenomenon**. 
+
+---
+
+**9. Explain why an ideal low-pass filter cannot be both causal and finite length.**
+
+An ideal low-pass filter has a "brick-wall" frequency response that is exactly zero outside the passband. The Paley-Wiener theorem dictates that a system with a frequency response that is zero over a continuous band of frequencies must have an impulse response that extends to infinity in the time domain. Because the impulse response stretches from $-\\infty$ to $+\\infty$, it cannot be finite length, and because it requires values for $n < 0$, it is non-causal.
+
+---
+
+**10. Derive the impulse response of an ideal high-pass FIR filter.**
+
+An ideal high-pass filter frequency response $H_{HP}(e^{j\\omega})$ can be expressed as $1 - H_{LP}(e^{j\\omega})$, where $H_{LP}$ is an ideal low-pass filter with cutoff $\\omega_c$. 
+Using the linearity property of the IDTFT:
+$$h_{HP}[n] = \\text{IDTFT}\\{1\\} - \\text{IDTFT}\\{H_{LP}(e^{j\\omega})\\}$$
+Since the IDTFT of 1 is the unit impulse $\\delta[n]$, and the IDTFT of an ideal low-pass filter is $\\frac{\\sin(\\omega_c n)}{\\pi n}$:
+$$h_{HP}[n] = \\delta[n] - \\frac{\\sin(\\omega_c n)}{\\pi n}$$
+
+---
+
+**11. A FIR filter has coefficients h[n] = [1, 2, 3, 2, 1]. Is the filter linear phase?**
+
+**Yes.** An FIR filter has exact linear phase if its impulse response $h[n]$ is symmetric or antisymmetric. The sequence $[1, 2, 3, 2, 1]$ is perfectly symmetric around its center value $h[2] = 3$ (i.e., $h[n] = h[4-n]$). Therefore, the filter has linear phase.
+
+---
+
+**12. Why are FIR filters always BIBO stable?**
+
+A linear time-invariant system is Bounded-Input Bounded-Output (BIBO) stable if its impulse response is absolutely summable: $\\sum_{n=-\\infty}^{\\infty} |h[n]| < \\infty$. An FIR filter, by definition, has a finite number of coefficients, and each coefficient has a finite numerical value. The sum of a finite number of finite values is always finite, guaranteeing BIBO stability.
+
+---
+
+**13. Why does increasing the filter order improve the sharpness of the transition band?**
+
+Increasing the filter order increases the length of the window function in the time domain. A longer time-domain window translates to a narrower main lobe in its frequency-domain spectrum. When the ideal frequency response is convolved with this narrower main lobe, the resulting transition from passband to stopband becomes steeper (sharper).
+
+---
+
+**14. What happens if the FIR coefficients are not symmetric?**
+
+If the coefficients are not symmetric (or antisymmetric), the filter will generally have a non-linear phase response. A non-linear phase response means that different frequency components will experience different amounts of time delay, leading to phase distortion (or dispersion) in the output signal, which can warp the shape of the waveform in the time domain.
+
+---
+
+**15. Prove analytically that the zeros of the polynomial $P(x) = \\sum_{n=0}^{N-1} x^n$ are uniformly distributed around the unit circle in the complex plane apart from $x = 1$. Show it also numerically using the numpy.roots method.**
+
+**Analytic Proof:**
+The polynomial is a finite geometric series: $P(x) = \\sum_{n=0}^{N-1} x^n = \\frac{1 - x^N}{1 - x}$ for $x \\neq 1$.
+Setting $P(x) = 0$, we look for solutions to $1 - x^N = 0$, which gives $x^N = 1$.
+The roots of unity are $x_k = e^{j \\frac{2\\pi k}{N}}$ for $k = 0, 1, 2, \\dots, N-1$.
+However, when $k=0$, $x_0 = 1$, which makes the denominator $1-x$ zero. Therefore, $x=1$ is not a root of the polynomial.
+Thus, the roots are $x_k = e^{j \\frac{2\\pi k}{N}}$ for $k = 1, \\dots, N-1$. These are spaced uniformly around the unit circle, strictly excluding $x=1$.
+
+**Numerical Demonstration:**
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+
+N = 10
+coeffs = np.ones(N)
+roots = np.roots(coeffs)
+
+plt.figure(figsize=(5, 5))
+theta = np.linspace(0, 2*np.pi, 100)
+plt.plot(np.cos(theta), np.sin(theta), 'k:', label='Unit Circle')
+plt.scatter(np.real(roots), np.imag(roots), color='red', label='Roots')
+plt.scatter(1, 0, facecolors='none', edgecolors='blue', s=100, label='Missing root at x=1')
+plt.axhline(0, color='black', linewidth=0.5)
+plt.axvline(0, color='black', linewidth=0.5)
+plt.xlim(-1.5, 1.5); plt.ylim(-1.5, 1.5)
+plt.grid(); plt.legend(); plt.title(f"Roots of P(x) for N={N}")
+plt.show()
+\`\`\`
+
+---
+
+**16. Compute and plot the response of a 21-point moving-average filter.**
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import freqz
+
+N = 21
+b = np.ones(N) / N
+w, h = freqz(b, worN=1024)
+
+plt.figure(figsize=(8, 5))
+plt.plot(w / np.pi, 20 * np.log10(np.abs(h)))
+plt.title("21-point Moving Average Filter Frequency Response")
+plt.xlabel("Normalized Frequency ($\\\\times \\\\pi$ rad/sample)")
+plt.ylabel("Magnitude (dB)")
+plt.ylim(-50, 5)
+plt.grid()
+plt.show()
+\`\`\`
+
+---
+
+**17. Argue that the moving average filter acts as a lowpass filter.**
+
+A moving average filter calculates the mean of a sliding window of the input signal. Rapidly oscillating signals (high frequencies) will average out toward zero because the positive and negative fluctuations cancel each other out over the window. Slowly varying signals or constant signals (low frequencies/DC) will remain relatively unchanged. Thus, the filter allows low frequencies to pass while attenuating high frequencies, acting as a lowpass filter.
+
+---
+
+**18. Represent the frequency response of the moving average filter and establish the qualitative dependence of the cutoff frequency and roll-off on the length of the window.**
+
+The frequency response of an $N$-point moving average filter is:
+$$H(e^{j\\omega}) = \\frac{1}{N} \\frac{\\sin(\\omega N / 2)}{\\sin(\\omega / 2)} e^{-j \\omega (N-1) / 2}$$
+
+**Qualitative dependence:**
+- **Cutoff frequency:** The width of the main lobe is determined by the first zero crossing at $\\omega = \\frac{2\\pi}{N}$. As the window length $N$ increases, the main lobe narrows, lowering the cutoff frequency.
+- **Roll-off:** Larger $N$ means a steeper main lobe, which results in a sharper roll-off transitioning into the stopband. However, the attenuation of the first sidelobe remains relatively constant at roughly -13 dB regardless of $N$.
+
+---
+
+**19. Prove that a symmetric FIR filter of odd length has a constant group delay. What is the value of this delay?**
+
+Let $h[n]$ be an impulse response of length $N$ where $N$ is odd ($N = 2M + 1$). Symmetry means $h[n] = h[N-1-n]$.
+The frequency response is $H(e^{j\\omega}) = \\sum_{n=0}^{N-1} h[n] e^{-j\\omega n}$.
+By factoring out the center phase term $e^{-j\\omega (N-1)/2}$, we can group the symmetric terms:
+$$H(e^{j\\omega}) = e^{-j\\omega \\frac{N-1}{2}} \\sum_{n=0}^{N-1} h[n] e^{-j\\omega (n - \\frac{N-1}{2})}$$
+Because of symmetry, the terms pair up into real cosines:
+$$H(e^{j\\omega}) = e^{-j\\omega \\frac{N-1}{2}} \\left[ h[M] + \\sum_{k=1}^{M} 2h[M-k]\\cos(\\omega k) \\right]$$
+The term in brackets is purely real, meaning the phase of the filter is entirely determined by the leading exponential term (ignoring phase jumps of $\\pi$ where the real amplitude goes negative).
+$$\\phi(\\omega) = -\\omega \\frac{N-1}{2}$$
+Group delay is the negative derivative of the phase:
+$$\\tau_g(\\omega) = -\\frac{d\\phi(\\omega)}{d\\omega} = \\frac{N-1}{2}$$
+This is a constant, proving that the group delay is constant for all frequencies.
+
+---
+
+**20. Study analytically the gain at the Nyquist frequency for the moving average filter.**
+
+The Nyquist frequency is $\\omega = \\pi$.
+For an $N$-point moving average filter, $h[n] = \\frac{1}{N}$ for $0 \\le n \\le N-1$.
+The frequency response at $\\omega = \\pi$ is:
+$$H(e^{j\\pi}) = \\sum_{n=0}^{N-1} h[n] e^{-j\\pi n} = \\frac{1}{N} \\sum_{n=0}^{N-1} (-1)^n$$
+- If $N$ is **even**, the alternating sum is exactly $0$. The gain at Nyquist is exactly zero ($-\\infty$ dB).
+- If $N$ is **odd**, the sum is $1$. The gain is $\\frac{1}{N}$. For large $N$, this gain approaches zero.
+
+---
+
+**21. Why is the ideal response usually specified in the frequency domain first?**
+
+The primary purpose of a filter is to alter the frequency content of a signal (e.g., removing noise, extracting a band of frequencies). These goals—cutoff frequencies, passband ripple, stopband attenuation—are inherently frequency-based concepts. Specifying requirements in the frequency domain is therefore the most natural approach. The design process then involves finding a time-domain impulse response that meets these frequency-domain specifications.
+
+---
+
+**22. Consider h[n] = $\\delta[n] - \\delta[n - 1]$. What type of filter is this: FIR/IIR, low-/high/passband? Justify!**
+
+- **FIR or IIR:** It is an **FIR** filter because the impulse response has a finite duration (it only has two non-zero coefficients: $h[0]=1$ and $h[1]=-1$).
+- **Filter Type:** We calculate the frequency response:
+$$H(e^{j\\omega}) = 1 - e^{-j\\omega}$$
+The magnitude is $|H(e^{j\\omega})| = |e^{-j\\omega/2}(e^{j\\omega/2} - e^{-j\\omega/2})| = |2j \\sin(\\omega/2)| = 2|\\sin(\\omega/2)|$.
+At DC ($\\omega = 0$), $|H(e^{j0})| = 0$.
+At Nyquist ($\\omega = \\pi$), $|H(e^{j\\pi})| = 2$.
+Because it completely blocks DC (low frequencies) and amplifies high frequencies, it is a **high-pass filter** (specifically, a first-order difference filter).
+
+---
+
+**23. Why does a linear-phase FIR filter delay all frequency components equally?**
+
+A linear phase response means $\\phi(\\omega) = -k\\omega$ for a constant $k$. Time delay (group delay) is defined as the negative derivative of the phase with respect to frequency: $\\tau_g = -\\frac{d\\phi}{d\\omega} = k$. Since the derivative of a linear function is a constant, the group delay is the same for every frequency $\\omega$. This equal delay means the signal shape is perfectly preserved without phase dispersion.
+
+---
+
+**24. Explain the difference between filter order, number of coefficients and impulse response length.**
+
+- **Filter order ($N$):** Refers to the highest power of $z^{-1}$ in the filter's transfer function, indicating the number of delay elements (memory) required to implement the filter.
+- **Number of coefficients:** The total count of $b_k$ multipliers in the filter.
+- **Impulse response length ($L$):** The total number of non-zero time-domain samples in $h[n]$.
+- **Relationship:** For an FIR filter, the impulse response length is equal to the number of coefficients, and both are equal to the filter order plus one: **$L = \\text{Coefficients} = N + 1$**.
+
+---
+
+**25. Design a lowpass FIR filter of order 20 with a cutoff frequency of 8.4kHz and a sampling frequency of 20 kHz using the Fourier/window method. Represent the frequency response and comment on the gain and phase relationship.**
+*(Assuming cutoff 8.4kHz because 84kHz is far above the 10kHz Nyquist limit)*
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import freqz, windows
+
+fs = 20000
+fc = 8400
+N_order = 20
+N_coeffs = N_order + 1
+fn = fs / 2
+fc_norm = fc / fn # Normalized to Nyquist
+
+# Ideal impulse response
+n = np.arange(-N_order//2, N_order//2 + 1)
+hd = np.sinc(fc_norm * n) * fc_norm
+
+# Window
+w = windows.hann(N_coeffs)
+h = hd * w
+h = h / np.sum(h) # Normalize DC gain
+
+# Frequency response
+w_rad, h_freq = freqz(h, worN=1024)
+f = w_rad / (2 * np.pi) * fs
+
+fig, ax1 = plt.subplots(figsize=(8,5))
+ax1.plot(f, 20 * np.log10(np.abs(h_freq)), 'b')
+ax1.set_ylabel('Magnitude (dB)', color='b')
+ax1.axvline(fc, color='r', linestyle='--')
+ax1.grid()
+
+ax2 = ax1.twinx()
+phase = np.unwrap(np.angle(h_freq))
+ax2.plot(f, phase, 'g')
+ax2.set_ylabel('Phase (radians)', color='g')
+plt.title('FIR Lowpass Filter (Order=20, fc=8.4kHz)')
+plt.show()
+\`\`\`
+**Comment:** The magnitude response shows standard lowpass behavior with attenuation starting near the cutoff. The phase response is perfectly linear across the passband, which guarantees that all frequencies are delayed by the exact same amount of time, preventing distortion.
+
+---
+
+**26. Same task as above but for a highpass filter with a cutoff frequency of 8kHz.**
+
+\`\`\`python
+fc = 8000
+fc_norm = fc / fn
+
+# Ideal lowpass, then convert to highpass
+hd_lp = np.sinc(fc_norm * n) * fc_norm
+hd_hp = -hd_lp
+hd_hp[N_order//2] += 1  # delta[n] - hd_lp[n]
+
+h = hd_hp * windows.hann(N_coeffs)
+# Normalize Nyquist gain
+h = h / np.sum((-1)**np.arange(N_coeffs) * h)
+
+w_rad, h_freq = freqz(h, worN=1024)
+f = w_rad / (2 * np.pi) * fs
+
+plt.figure(figsize=(8,5))
+plt.plot(f, 20 * np.log10(np.abs(h_freq)))
+plt.axvline(fc, color='r', linestyle='--')
+plt.title('FIR Highpass Filter (Order=20, fc=8kHz)')
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Magnitude (dB)')
+plt.grid()
+plt.show()
+\`\`\`
+
+---
+
+**27. Same task as above but for a bandpass filter with passband of 4kHz- 8kHz.**
+
+\`\`\`python
+f_low, f_high = 4000, 8000
+fc_low_norm, fc_high_norm = f_low / fn, f_high / fn
+
+# Ideal bandpass = lowpass(high_cut) - lowpass(low_cut)
+hd_lp_high = np.sinc(fc_high_norm * n) * fc_high_norm
+hd_lp_low = np.sinc(fc_low_norm * n) * fc_low_norm
+hd_bp = hd_lp_high - hd_lp_low
+
+h = hd_bp * windows.hann(N_coeffs)
+
+# Normalize center frequency gain
+f0 = (f_low + f_high) / 2
+omega0 = 2 * np.pi * f0 / fs
+H0 = np.sum(h * np.exp(-1j * omega0 * np.arange(N_coeffs)))
+h = h / np.abs(H0)
+
+w_rad, h_freq = freqz(h, worN=1024)
+f = w_rad / (2 * np.pi) * fs
+
+plt.figure(figsize=(8,5))
+plt.plot(f, 20 * np.log10(np.abs(h_freq)))
+plt.axvline(f_low, color='r', linestyle='--')
+plt.axvline(f_high, color='r', linestyle='--')
+plt.title('FIR Bandpass Filter (Order=20, 4kHz-8kHz)')
+plt.xlabel('Frequency (Hz)')
+plt.ylabel('Magnitude (dB)')
+plt.grid()
+plt.show()
+\`\`\`
+
+---
+
+**28. Show that, to normalize the DC gain of a low-pass FIR filter, the coefficients blow [n] should be divided by $\\sum b_{low} [n]$.**
+
+The frequency response is $H(e^{j\\omega}) = \\sum_{n=0}^{N-1} b[n] e^{-j\\omega n}$.
+The DC gain occurs at $\\omega = 0$:
+$$H(e^{j0}) = \\sum_{n=0}^{N-1} b[n] e^{0} = \\sum_{n=0}^{N-1} b[n]$$
+To normalize this gain to 1, we define new coefficients $b_{norm}[n]$ such that the new sum equals 1. We do this by dividing every coefficient by the sum:
+$$b_{norm}[n] = \\frac{b_{low}[n]}{\\sum_{k=0}^{N-1} b_{low}[k]}$$
+
+---
+
+**29. Show that, to normalize the Nyquist-frequency gain of a high-pass FIR filter, the coefficients bhigh [n] should be divided by $\\sum (-1)^n b_{high} [n]$.**
+
+The Nyquist frequency is $\\omega = \\pi$.
+The frequency response at $\\omega = \\pi$ is:
+$$H(e^{j\\pi}) = \\sum_{n=0}^{N-1} b_{high}[n] e^{-j\\pi n} = \\sum_{n=0}^{N-1} b_{high}[n] (-1)^n$$
+To normalize the Nyquist gain to 1, the coefficients must be divided by this exact sum:
+$$b_{norm}[n] = \\frac{b_{high}[n]}{\\sum_{k=0}^{N-1} b_{high}[k] (-1)^k}$$
+
+---
+
+**30. Show that, to normalize the gain of a band-pass FIR filter at the center frequency f0, the coefficients bband[n] should be divided by $\\sum b_{band}[n]e^{-j2\\pi f_0 n / f_s}$.**
+
+The center frequency in discrete radians per sample is $\\omega_0 = 2\\pi f_0 / f_s$.
+The frequency response at the center frequency is:
+$$H(e^{j\\omega_0}) = \\sum_{n=0}^{N-1} b_{band}[n] e^{-j\\omega_0 n} = \\sum_{n=0}^{N-1} b_{band}[n] e^{-j 2\\pi f_0 n / f_s}$$
+To ensure the filter has a gain of 1 at this center frequency, we divide the coefficients by this complex sum. *(Note: Typically, the absolute value of the sum is used if phase preservation is required, but dividing by the complex sum normalizes both magnitude to 1 and phase to 0 at $f_0$.)*
+$$b_{norm}[n] = \\frac{b_{band}[n]}{\\sum_{k=0}^{N-1} b_{band}[k] e^{-j 2\\pi f_0 k / f_s}}$$
+
+<br>
+<br>
+
+
 
 ### 📌 Problem 29: Show that, to normalize the Nyquist-frequency gain of a high-pass FIR filter, the coefficients $b_{\\text{high}}[n]$ should be divided by $|\\sum_{n=0}^N (-1)^n b_{\\text{high}}[n]|$.
 The Nyquist frequency corresponds to the normalized angular frequency $\\omega = \\pi$.
