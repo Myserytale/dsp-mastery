@@ -9,11 +9,11 @@ export const pythonWalkthrough: WeekContent[] = [
 Digital Signal Processing is heavily math-oriented, but actually implementing those algorithms requires a robust set of tools. In modern DSP, **Python** is the industry standard for prototyping and analysis.
 
 This walkthrough serves as your ultimate guide to solving DSP coding problems. We will explore the holy trinity of libraries:
-1. **NumPy** (\`numpy\`): For creating time vectors, arrays, and running the Fast Fourier Transform (FFT).
+1. **NumPy** (\`numpy\`): For creating time vectors, arrays, running the Fast Fourier Transform (FFT), and performing convolutions.
 2. **SciPy** (\`scipy.signal\`): The powerhouse that contains all filter design algorithms (FIR, IIR), filtering functions, and spectrogram analysis.
 3. **Matplotlib** (\`matplotlib.pyplot\`): For visualizing signals in the time and frequency domains.
 
-> **Key insight**: Every DSP coding problem follows the same three-step architecture: **1) Generate/Load the Signal**, **2) Process the Signal** (Filter/Transform), and **3) Analyze/Plot the Results**. Once you master this workflow, no coding exam problem will intimidate you!`,
+> **Key insight**: Every DSP coding problem follows the same three-step architecture: **1) Generate/Load the Signal**, **2) Process the Signal** (Filter/Transform/Analyze), and **3) Visualize the Results**. Once you master this workflow, no coding exam problem will intimidate you!`,
     concepts: [
       {
         name: '1. Generating Time Vectors and Signals',
@@ -64,10 +64,35 @@ sweep = chirp(t, f0=1, f1=100, t1=1, method='linear')
 `
       },
       {
-        name: '2. Frequency Analysis (FFT)',
+        name: '2. Convolution and LTI Systems',
+        explanation: `Convolution is the mathematical foundation of Linear Time-Invariant (LTI) systems. If you know a system's impulse response $h[n]$, you can find its output for *any* input $x[n]$ using convolution.
+
+### 📌 Problem 3: Performing 1D Convolution
+Use \`np.convolve\` to compute the convolution of two sequences. 
+
+\`\`\`python
+# Let's say we have a simple 3-point moving average filter
+h = np.array([1/3, 1/3, 1/3])
+
+# And a simple input signal
+x = np.array([1, 2, 3, 4, 5])
+
+# 'full' returns the full linear convolution (length N + M - 1)
+# 'same' returns an output the same length as x (centered)
+# 'valid' returns only the elements where the signals completely overlap
+y_full = np.convolve(x, h, mode='full')
+y_same = np.convolve(x, h, mode='same')
+
+print("Input length:", len(x))
+print("Output length (full):", len(y_full)) 
+\`\`\`
+`
+      },
+      {
+        name: '3. Frequency Analysis (FFT)',
         explanation: `To see what frequencies are present in a signal, we use the Fast Fourier Transform (FFT). This is the most crucial diagnostic tool in your arsenal.
 
-### 📌 Problem 3: Plotting an Accurate Spectrum
+### 📌 Problem 4: Plotting an Accurate Spectrum
 A bare \`np.fft.fft\` gives you complex numbers and the frequencies aren't ordered intuitively. You *must* use \`np.fft.fftfreq\` to get the X-axis and \`np.fft.fftshift\` to center zero frequency (DC) in the middle.
 
 \`\`\`python
@@ -99,10 +124,10 @@ plt.show()
 > Always plot spectra using absolute magnitude \`np.abs()\`. The raw FFT output is complex (containing both magnitude and phase).`
       },
       {
-        name: '3. Filter Design and Application',
+        name: '4. Filter Design and Application',
         explanation: `SciPy provides two main ways to process signals: **FIR** (Finite Impulse Response) and **IIR** (Infinite Impulse Response) filters.
 
-### 📌 Problem 4: Designing FIR Filters using Window Method
+### 📌 Problem 5: Designing FIR Filters using Window Method
 \`scipy.signal.firwin\` is the go-to function for designing FIR filters. It requires the number of taps (coefficients) and the cutoff frequency. Note that \`firwin\` expects the cutoff frequency relative to the Nyquist frequency ($f_s / 2$).
 
 \`\`\`python
@@ -121,7 +146,7 @@ a = [1.0] # FIR filters always have a = [1.0]
 filtered_x = lfilter(b, a, x + noise)
 \`\`\`
 
-### 📌 Problem 5: Designing IIR Filters (Butterworth)
+### 📌 Problem 6: Designing IIR Filters (Butterworth)
 For IIR filters, we typically use analog prototypes like Butterworth, Chebyshev, or Elliptic, which are digitized using the Bilinear Transform.
 
 \`\`\`python
@@ -142,39 +167,41 @@ zero_phase_filtered = filtfilt(b_iir, a_iir, x + noise)
 `
       },
       {
-        name: '4. Frequency Response (Bode Plots)',
-        explanation: `Once you've designed a filter (found the \`b\` and \`a\` coefficients), you need to verify it actually works by checking its frequency response.
+        name: '5. Advanced Analysis: Poles/Zeros and Spectrograms',
+        explanation: `Once you've designed a filter or obtained a system transfer function, analyzing its stability and frequency behavior mathematically is critical.
 
-### 📌 Problem 6: Visualizing the Filter Response
-Use \`scipy.signal.freqz\` to compute the frequency response of a digital filter.
-
+### 📌 Problem 7: Finding Poles and Zeros
+The transfer function is defined by numerator coefficients (\`b\`) and denominator coefficients (\`a\`). The roots of \`b\` are the zeros, and the roots of \`a\` are the poles.
 \`\`\`python
-# Compute frequency response of our FIR filter
-w, h = freqz(b, a, worN=8000)
+# For an IIR filter: H(z) = (1 + 2z^-1 + z^-2) / (1 - 0.5z^-1 + 0.8z^-2)
+b_sys = [1.0, 2.0, 1.0]
+a_sys = [1.0, -0.5, 0.8]
 
-# Convert digital angular frequency 'w' (0 to pi) back to physical Hz
-freqs_hz = (w / np.pi) * nyquist
+# Find poles and zeros using np.roots
+zeros = np.roots(b_sys)
+poles = np.roots(a_sys)
 
-# Plot Magnitude Response
-plt.figure()
-plt.plot(freqs_hz, 20 * np.log10(np.abs(h)))
-plt.title("FIR Filter Frequency Response")
-plt.xlabel("Frequency (Hz)")
-plt.ylabel("Gain (dB)")
-plt.axvline(150, color='red', linestyle='--', label='Cutoff (150Hz)')
-plt.legend()
-plt.grid()
-plt.show()
+# Check stability (all poles must be inside the unit circle: |p| < 1)
+is_stable = all(np.abs(poles) < 1.0)
+print(f"Is the system stable? {is_stable}")
+\`\`\`
 
-# Plot Phase Response
-plt.figure()
-# np.unwrap prevents phase jumps from +pi to -pi
-phase_degrees = np.unwrap(np.angle(h)) * (180 / np.pi)
-plt.plot(freqs_hz, phase_degrees)
-plt.title("FIR Filter Phase Response")
-plt.xlabel("Frequency (Hz)")
-plt.ylabel("Phase (Degrees)")
-plt.grid()
+### 📌 Problem 8: The Spectrogram (STFT)
+When frequencies change over time (like a chirp or human speech), a standard FFT isn't enough. We use the Short-Time Fourier Transform (STFT) to compute a spectrogram.
+\`\`\`python
+from scipy.signal import spectrogram
+
+# Compute the spectrogram of our chirp signal
+# nperseg is the window length. A smaller window gives better time resolution 
+# but worse frequency resolution.
+f_spec, t_spec, Sxx = spectrogram(sweep, fs, nperseg=256)
+
+# Plot using pcolormesh
+plt.pcolormesh(t_spec, f_spec, 10 * np.log10(Sxx + 1e-12), shading='gouraud')
+plt.ylabel('Frequency [Hz]')
+plt.xlabel('Time [sec]')
+plt.title('Spectrogram of a Chirp')
+plt.colorbar(label='Power/Frequency (dB/Hz)')
 plt.show()
 \`\`\`
 `
@@ -182,9 +209,9 @@ plt.show()
     ],
     homeworkGuide: `## Exam-Style Coding Walkthroughs
 
-The best way to prepare for DSP coding exams is to recognize common patterns. Let's walk through an entire end-to-end exam problem.
+The best way to prepare for DSP coding exams is to recognize common patterns. Let's walk through two entire end-to-end exam problems.
 
-### 📌 Scenario: The Humming Biosignal
+### 📌 Scenario 1: The Humming Biosignal
 **Prompt:** You are given an ECG signal sampled at 1000 Hz. However, it is corrupted by extreme 50 Hz power-line interference. 
 1. Generate a mock 1-second ECG signal (a 1 Hz sine wave) corrupted by a massive 50 Hz sine wave.
 2. Design a 2nd-order IIR Notch filter to exactly remove the 50 Hz hum. Set the quality factor $Q = 30$.
@@ -249,7 +276,85 @@ plt.show()
 \`\`\`
 
 > [!TIP]
-> Notice the deep dip at exactly 50 Hz in the magnitude spectrum! This proves your filter design was flawless. Always use spectral verification in your exams.`,
+> Notice the deep dip at exactly 50 Hz in the magnitude spectrum! This proves your filter design was flawless. Always use spectral verification in your exams.
+
+---
+
+### 📌 Scenario 2: The Mystery System
+**Prompt:** A black-box digital system operates at $f_s = 48$ kHz. You are given its difference equation: $y[n] = 0.5y[n-1] - 0.25y[n-2] + x[n] + x[n-1]$.
+1. Extract the $b$ and $a$ coefficients.
+2. Plot the system's poles and zeros on the complex plane. Is the system stable?
+3. Plot the Bode plot (Magnitude and Phase response) of this system.
+
+#### Step 1: Extracting Coefficients
+First, rearrange the difference equation so all $y$ terms are on the left:
+$y[n] - 0.5y[n-1] + 0.25y[n-2] = x[n] + x[n-1]$
+The $a$ coefficients correspond to the $y$ terms, and $b$ coefficients correspond to the $x$ terms.
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal import freqz
+
+# Coefficients MUST be in ascending powers of delay (z^0, z^-1, z^-2)
+b = [1.0, 1.0]          # for x[n], x[n-1]
+a = [1.0, -0.5, 0.25]   # for y[n], y[n-1], y[n-2]
+fs = 48000
+\`\`\`
+
+#### Step 2: Pole-Zero Plot & Stability
+\`\`\`python
+# Find roots
+zeros = np.roots(b)
+poles = np.roots(a)
+
+# Draw unit circle
+theta = np.linspace(0, 2*np.pi, 100)
+plt.plot(np.cos(theta), np.sin(theta), linestyle='--', color='gray')
+
+# Plot poles (x) and zeros (o)
+plt.scatter(np.real(zeros), np.imag(zeros), s=100, marker='o', facecolors='none', edgecolors='b', label='Zeros')
+plt.scatter(np.real(poles), np.imag(poles), s=100, marker='x', color='r', label='Poles')
+
+plt.axhline(0, color='black', lw=0.5)
+plt.axvline(0, color='black', lw=0.5)
+plt.title("Pole-Zero Plot")
+plt.legend()
+plt.axis('equal')
+plt.grid()
+plt.show()
+
+# Stability check
+is_stable = np.all(np.abs(poles) < 1.0)
+print(f"System is stable: {is_stable}")
+# Output will be True, because both poles are inside the unit circle.
+\`\`\`
+
+#### Step 3: Bode Plot (Frequency Response)
+\`\`\`python
+# Compute frequency response
+w, h = freqz(b, a, worN=8000)
+freqs_hz = (w / np.pi) * (fs / 2)
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 6))
+
+# Magnitude Plot
+ax1.plot(freqs_hz, 20 * np.log10(np.abs(h)))
+ax1.set_title('System Magnitude Response')
+ax1.set_ylabel('Gain (dB)')
+ax1.grid()
+
+# Phase Plot
+phase_rad = np.unwrap(np.angle(h))
+ax2.plot(freqs_hz, phase_rad * (180 / np.pi))
+ax2.set_title('System Phase Response')
+ax2.set_ylabel('Phase (Degrees)')
+ax2.set_xlabel('Frequency (Hz)')
+ax2.grid()
+
+plt.tight_layout()
+plt.show()
+\`\`\`
+`,
     labWalkthrough: `## Quick Reference Templates
 
 Copy and paste these templates directly into the Code IDE to quickly start solving lab or exam problems.
@@ -278,6 +383,8 @@ def plot_spectrum(x, fs, title="Spectrum"):
 Given \`b\` and \`a\` coefficients, plot its frequency response instantly.
 \`\`\`python
 from scipy.signal import freqz
+import numpy as np
+import matplotlib.pyplot as plt
 
 def plot_filter_response(b, a, fs):
     w, h = freqz(b, a, worN=8000)
@@ -291,6 +398,37 @@ def plot_filter_response(b, a, fs):
     plt.grid()
     plt.show()
 \`\`\`
+
+### 📌 Template 3: Beautiful Pole-Zero Plot
+Given \`b\` and \`a\` coefficients, perfectly visualize the poles and zeros relative to the unit circle.
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+
+def plot_pzmap(b, a):
+    zeros = np.roots(b)
+    poles = np.roots(a)
+    
+    plt.figure(figsize=(5, 5))
+    theta = np.linspace(0, 2*np.pi, 100)
+    plt.plot(np.cos(theta), np.sin(theta), '--', color='gray', alpha=0.5)
+    
+    plt.scatter(np.real(zeros), np.imag(zeros), s=100, marker='o', facecolors='none', edgecolors='b', lw=2, label='Zeros')
+    plt.scatter(np.real(poles), np.imag(poles), s=100, marker='x', color='r', lw=2, label='Poles')
+    
+    plt.axhline(0, color='black', lw=1)
+    plt.axvline(0, color='black', lw=1)
+    
+    # Dynamically set limits
+    max_val = max(1.5, np.max(np.abs(np.concatenate([zeros, poles, [1]]))) * 1.2)
+    plt.xlim(-max_val, max_val)
+    plt.ylim(-max_val, max_val)
+    
+    plt.title("Pole-Zero Map")
+    plt.legend()
+    plt.grid(alpha=0.3)
+    plt.show()
+\`\`\`
 `,
     keyFormulas: `## Python API Quick Reference
 
@@ -299,6 +437,8 @@ Here are the most critical functions you will use over and over again:
 ### NumPy
 *   \`np.arange(start, stop, step)\`: Generate a time vector.
 *   \`np.zeros(N)\`: Generate an array of zeros.
+*   \`np.convolve(a, v, mode)\`: Returns the discrete, linear convolution of two one-dimensional sequences.
+*   \`np.roots(p)\`: Return the roots of a polynomial with coefficients given in p.
 *   \`np.fft.fft(x)\`: Compute the Discrete Fourier Transform.
 *   \`np.fft.fftshift(X)\`: Shift the zero-frequency component to the center of the spectrum.
 *   \`np.fft.fftfreq(N, d)\`: Return the Discrete Fourier Transform sample frequencies. $d$ is the sample spacing ($1/f_s$).
@@ -309,6 +449,7 @@ Here are the most critical functions you will use over and over again:
 *   \`scipy.signal.iirnotch(w0, Q)\`: Design a second-order IIR notch digital filter.
 *   \`scipy.signal.freqz(b, a)\`: Compute the frequency response of a digital filter.
 *   \`scipy.signal.lfilter(b, a, x)\`: Filter data along one-dimension with an IIR or FIR filter (causes phase shift).
-*   \`scipy.signal.filtfilt(b, a, x)\`: Apply a digital filter forward and backward to a signal (zero phase distortion).`
+*   \`scipy.signal.filtfilt(b, a, x)\`: Apply a digital filter forward and backward to a signal (zero phase distortion).
+*   \`scipy.signal.spectrogram(x, fs)\`: Compute a spectrogram with consecutive Fourier transforms.`
   }
 ];
