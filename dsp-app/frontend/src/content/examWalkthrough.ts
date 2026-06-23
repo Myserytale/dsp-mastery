@@ -62,7 +62,7 @@ We now sample the continuous signal. The Nyquist theorem states that we must sam
 \`\`\`python
 # 1(c) & (d): Demonstrate sampling and Nyquist reconstruction
 fs_good = 16  # Above Nyquist rate (8)
-fs_bad = 6    # Below Nyquist rate (Aliasing!)
+fs_bad = 4    # Below Nyquist rate (Aliasing!)
 
 # Sample the signals
 t_good = np.linspace(0, 1, fs_good, endpoint=False)
