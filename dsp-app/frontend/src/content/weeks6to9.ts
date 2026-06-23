@@ -683,7 +683,10 @@ def custom_welch(x, fs, nperseg, noverlap):
     # 1. Segment
     slices = [x[i:i+nperseg] for i in range(0, len(x) - nperseg + 1, step)]
     
-    window = np.hanning(nperseg)
+    # For spectral analysis, a "periodic" (DFT-even) window is required, NOT a symmetric one.
+    # np.hanning() generates a symmetric window, which causes a slight mismatch. 
+    # We must use scipy's window generator with sym=False.
+    window = signal.windows.hann(nperseg, sym=False)
     P_custom = np.zeros(nperseg // 2 + 1)
     
     for sl in slices:
