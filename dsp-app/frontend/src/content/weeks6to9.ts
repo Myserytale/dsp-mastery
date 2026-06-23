@@ -735,8 +735,84 @@ f_nopad, p_nopad = signal.welch(x, fs, nperseg=256, nfft=256)
 f_pad, p_pad = signal.welch(x, fs, nperseg=256, nfft=1024) # Interpolated spectrum (more points)
 \`\`\`
 
-### 📌 Problem 22-24
-*(Skipped as requested: Specific \`eeg.bin\` analysis questions omitted).*
+### 📌 Problem 22-24: Reading EEG Data & Welch's Method (Dummy Data)
+*Note: Since you don't have the original \`eeg.bin\` file, we will first generate a synthetic EEG signal with similar characteristics (containing alpha brainwaves and a 50 Hz powerline interference).*
+
+**Step 1: Generate the dummy \`eeg.bin\` file**
+\`\`\`python
+import numpy as np
+
+# Simulate 10 minutes of EEG data at an unknown sampling rate (let's use 250 Hz)
+fs = 250 
+t = np.arange(0, 600, 1/fs)
+
+# Combine: 10 Hz Alpha waves + 50 Hz Powerline noise + Random noise
+eeg_signal = (20 * np.sin(2 * np.pi * 10 * t) +   # Alpha wave (10 Hz, 20 uV)
+              50 * np.sin(2 * np.pi * 50 * t) +   # Powerline interference (50 Hz, 50 uV)
+              15 * np.random.randn(len(t)))       # White noise
+
+# Cast to float32 and save as a contiguous binary file
+eeg_signal.astype(np.float32).tofile("eeg_dummy.bin")
+print("Saved eeg_dummy.bin successfully!")
+\`\`\`
+
+**Problem 22:** Read in and plot the EEG signal.
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Read the contiguous binary format
+eeg_data = np.fromfile("eeg_dummy.bin", dtype=np.float32)
+
+plt.figure(figsize=(10, 3))
+plt.plot(eeg_data[:1000], linewidth=0.8) # Plot first 1000 samples
+plt.title("Raw EEG Signal (Dummy Data)")
+plt.xlabel("Sample Index")
+plt.ylabel("Amplitude ($\\mu V$)")
+plt.show()
+\`\`\`
+
+**Problem 23 & 24:** Determine sampling frequency and calculate PSD using Welch's method (4 seconds long, 50% overlap, Hamming window, detrending).
+*Hint:* A 50 Hz notch filter removed the pollution from the power line. This means the large spike in the spectrum is exactly at 50 Hz. We can use this to reverse-engineer the sampling frequency!
+
+\`\`\`python
+import scipy.signal as signal
+
+# We don't know the exact sampling rate, but we know the powerline noise is at 50 Hz.
+# Let's find the frequency index of the maximum peak in a generic FFT or PSD.
+
+# 1. Compute PSD without a defined fs (it defaults to 1.0, giving normalized frequencies [0, 0.5])
+# 4 seconds long = we need to estimate Nperseg. Let's start with a guess or just use standard FFT to find the peak.
+f_norm, Pxx_norm = signal.welch(eeg_data, nperseg=1024)
+
+# Find the normalized frequency of the maximum peak (powerline noise)
+peak_idx = np.argmax(Pxx_norm)
+peak_f_norm = f_norm[peak_idx]
+
+# We know this peak corresponds to 50 Hz.
+# Normalized frequency = f_true / fs  =>  fs = f_true / peak_f_norm
+fs_estimated = int(round(50 / peak_f_norm))
+print(f"Estimated Sampling Frequency: {fs_estimated} Hz")
+
+# 2. Now calculate the proper Welch PSD
+nperseg = 4 * fs_estimated # 4 seconds long
+noverlap = nperseg // 2    # 50% overlap
+
+f, Pxx = signal.welch(eeg_data, fs=fs_estimated, window='hamming', 
+                      nperseg=nperseg, noverlap=noverlap, detrend='constant')
+
+plt.figure(figsize=(10, 4))
+plt.semilogy(f, Pxx, 'b')
+plt.title("Welch's Power Spectral Density of EEG")
+plt.xlabel("Frequency (Hz)")
+plt.ylabel("PSD ($\\mu V^2$/Hz)")
+plt.axvline(10, color='r', linestyle='--', label="Alpha Waves (10 Hz)")
+plt.axvline(50, color='g', linestyle='--', label="Powerline Noise (50 Hz)")
+plt.xlim(0, 100) # Focus on low frequencies
+plt.legend()
+plt.grid()
+plt.show()
+\`\`\`
 
 ### 📌 Problem 25: Laplace Transform and Kernel
 **Definition:** The one-sided Laplace Transform of a function $f(t)$ is defined as:
