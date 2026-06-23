@@ -171,9 +171,8 @@ $$ Y(z)(1 - 0.4z^{-1} + 0.2z^{-2}) = X(z)(0.3 + 0.2z^{-1} - 0.1z^{-2}) $$
 $$ y[n] - 0.4y[n-1] + 0.2y[n-2] = 0.3x[n] + 0.2x[n-1] - 0.1x[n-2] $$
 Rearranging to solve for $y[n]$:
 $$ y[n] = 0.4y[n-1] - 0.2y[n-2] + 0.3x[n] + 0.2x[n-1] - 0.1x[n-2] $$
-
----
-
+`,
+    labWalkthrough: `
 ## 3. Programming Tasks
 
 ### Task 1: Signal Generation & Sampling Theorem
@@ -352,9 +351,7 @@ plt.legend()
 plt.grid(True)
 plt.show()
 \`\`\`
-
 `,
-    labWalkthrough: '',
     keyFormulas: ''
   }
 ];
