@@ -171,6 +171,188 @@ $$ Y(z)(1 - 0.4z^{-1} + 0.2z^{-2}) = X(z)(0.3 + 0.2z^{-1} - 0.1z^{-2}) $$
 $$ y[n] - 0.4y[n-1] + 0.2y[n-2] = 0.3x[n] + 0.2x[n-1] - 0.1x[n-2] $$
 Rearranging to solve for $y[n]$:
 $$ y[n] = 0.4y[n-1] - 0.2y[n-2] + 0.3x[n] + 0.2x[n-1] - 0.1x[n-2] $$
+
+---
+
+## 3. Programming Tasks
+
+### Task 1: Signal Generation & Sampling Theorem
+This task involves generating a finite support, symmetric random signal in the frequency domain, interpreting it via the inverse Fourier transform, and demonstrating the Nyquist sampling theorem.
+
+\`\`\`python
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.signal as signal
+
+# (a) Generate a finite support, symmetric random signal (in frequency space)
+N = 128
+half_N = N // 2
+np.random.seed(42)
+X_half = np.random.randn(half_N)
+# Make it perfectly symmetric
+X_freq = np.concatenate([X_half, X_half[::-1]])
+
+plt.figure(figsize=(10, 3))
+plt.plot(X_freq, 'g')
+plt.title("(a) Finite Support Symmetric Signal $X(f)$")
+plt.show()
+
+# (b) Find the original continuous signal (Inverse FFT)
+# Since X(f) is real and symmetric, x(t) will be real and symmetric
+x_t = np.fft.ifft(X_freq)
+x_t = np.fft.fftshift(np.real(x_t)) # Shift to center
+
+plt.figure(figsize=(10, 3))
+plt.plot(x_t)
+plt.title("(b) Original Signal $x(t)$ (Time Domain)")
+plt.show()
+
+# (c) Demonstrate the effect of sampling
+M = 4 # Downsampling factor
+# Sample the signal by taking every M-th point
+x_sampled = x_t[::M]
+
+plt.figure(figsize=(10, 3))
+plt.stem(np.arange(0, N, M), x_sampled, basefmt=" ")
+plt.title("(c) Sampled Signal $x[n]$")
+plt.show()
+
+# (d) Reconstruct the original continuous signal (Nyquist Theorem)
+# We can accurately reconstruct using sinc interpolation (zero-padding in frequency domain)
+# scipy.signal.resample performs exactly this FFT-based reconstruction!
+x_reconstructed = signal.resample(x_sampled, N)
+
+plt.figure(figsize=(10, 4))
+plt.plot(x_t, label="Original $x(t)$", alpha=0.7)
+plt.plot(np.arange(0, N, M), x_sampled, 'ro', label="Samples")
+plt.plot(x_reconstructed, '--', label="Reconstructed", alpha=0.7)
+plt.title("(d) Reconstruction from Samples")
+plt.legend()
+plt.show()
+\`\`\`
+
+### Task 2: Spectral Analysis & Filtering
+We will generate a non-stationary signal with overlapping 50Hz and 100Hz components, and analyze it using spectrograms and wavelets.
+
+\`\`\`python
+import numpy as np
+import scipy.signal as signal
+import matplotlib.pyplot as plt
+
+# (a) Generate the signal
+fs = 500
+t = np.arange(0, 20, 1/fs) # 20 seconds
+
+# 50 Hz from 0 to 10s
+sig50 = np.sin(2 * np.pi * 50 * t) * (t < 10)
+# 100 Hz from 5 to 20s
+sig100 = np.sin(2 * np.pi * 100 * t) * ((t >= 5) & (t < 20))
+
+sig = sig50 + sig100
+
+# (b) Spectrogram
+f_spec, t_spec, Sxx = signal.spectrogram(sig, fs, nperseg=512, noverlap=256)
+
+plt.figure(figsize=(10, 4))
+plt.pcolormesh(t_spec, f_spec, 10 * np.log10(Sxx), shading='gouraud', cmap='viridis')
+plt.title("(b) Spectrogram of Original Signal")
+plt.ylabel('Frequency [Hz]')
+plt.xlabel('Time [sec]')
+plt.ylim(0, 150)
+plt.colorbar(label='Power/Frequency (dB/Hz)')
+plt.show()
+
+# (c) Continuous Wavelet Transform (CWT)
+widths = np.arange(1, 40)
+# Using Morlet wavelet which is excellent for frequency localization
+cwtmatr = signal.cwt(sig, signal.morlet2, widths, w=5.0)
+
+plt.figure(figsize=(10, 4))
+plt.pcolormesh(t, widths, np.abs(cwtmatr), shading='gouraud', cmap='magma')
+plt.title("(c) Continuous Wavelet Transform (CWT Magnitude)")
+plt.ylabel('Scale (Width)')
+plt.xlabel('Time [sec]')
+plt.show()
+
+# (d) Apply a Bandpass Filter to isolate the 100 Hz oscillation
+# Butterworth bandpass filter [90Hz, 110Hz]
+b_bp, a_bp = signal.butter(4, [90, 110], btype='bandpass', fs=fs)
+sig_filtered = signal.filtfilt(b_bp, a_bp, sig)
+
+# Filtered PSD
+f_psd, Pxx = signal.welch(sig_filtered, fs, nperseg=1024)
+plt.figure(figsize=(10, 3))
+plt.semilogy(f_psd, Pxx)
+plt.title("(d) PSD of Filtered Signal (100 Hz Isolated)")
+plt.xlim(0, 150)
+plt.show()
+
+# Filtered Spectrogram
+f_spec_filt, t_spec_filt, Sxx_filt = signal.spectrogram(sig_filtered, fs, nperseg=512)
+plt.figure(figsize=(10, 4))
+plt.pcolormesh(t_spec_filt, f_spec_filt, 10 * np.log10(Sxx_filt), shading='gouraud')
+plt.title("(d) Spectrogram of Filtered Signal")
+plt.ylim(0, 150)
+plt.show()
+\`\`\`
+
+### Task 3: Digital IIR Filter Design (Bilinear Transform)
+Designing a first-order low-pass filter with $f_c = 1\\text{ kHz}$ at $f_s = 8\\text{ kHz}$.
+
+\`\`\`python
+import numpy as np
+import scipy.signal as signal
+import matplotlib.pyplot as plt
+
+fc = 1000
+fs = 8000
+Omega_c = 2 * np.pi * fc
+T = 1 / fs
+
+# (a) Analytical Bilinear Transform
+# s = (2/T) * (1 - z^-1) / (1 + z^-1)
+# Plugging this into H(s) = Omega_c / (s + Omega_c) yields:
+denom = 8 + np.pi
+b_th = [np.pi / denom, np.pi / denom]
+a_th = [1.0, -(8 - np.pi) / denom]
+
+print(f"(a) Theoretical Denominator (a): {a_th}")
+print(f"(a) Theoretical Numerator (b): {b_th}\\n")
+
+# (b) Numerical check with Scipy
+b_num, a_num = signal.bilinear([Omega_c], [1, Omega_c], fs=fs)
+print(f"(b) Scipy Denominator (a): {a_num}")
+print(f"(b) Scipy Numerator (b): {b_num}\\n")
+
+# (c) Prewarping to fix Frequency Warping
+# The exact digital cutoff shifts slightly due to the non-linear mapping of the Bilinear Transform.
+# We correct this by "pre-warping" the analog cutoff frequency!
+Omega_prewarped = (2 / T) * np.tan(Omega_c * T / 2)
+print(f"(c) Original Analog Cutoff:  {Omega_c:.2f} rad/s")
+print(f"(c) Prewarped Analog Cutoff: {Omega_prewarped:.2f} rad/s\\n")
+
+# Redesign using the prewarped cutoff
+b_pre, a_pre = signal.bilinear([Omega_prewarped], [1, Omega_prewarped], fs=fs)
+
+# Frequency Responses
+w, h = signal.freqz(b_num, a_num, worN=1024, fs=fs)
+w_pre, h_pre = signal.freqz(b_pre, a_pre, worN=1024, fs=fs)
+
+plt.figure(figsize=(10, 5))
+plt.plot(w, 20 * np.log10(abs(h)), label="No Prewarping (Cutoff shifted)")
+plt.plot(w_pre, 20 * np.log10(abs(h_pre)), '--', label="Prewarped (Exact 1 kHz Cutoff)")
+plt.axvline(1000, color='r', linestyle=':', label="Target Cutoff (1 kHz)")
+plt.axhline(-3, color='k', linestyle=':', label="-3 dB Point")
+plt.title("(c) Frequency Response Comparison")
+plt.ylabel("Magnitude (dB)")
+plt.xlabel("Frequency (Hz)")
+plt.xlim(0, 4000)
+plt.ylim(-20, 2)
+plt.legend()
+plt.grid(True)
+plt.show()
+\`\`\`
+
 `,
     labWalkthrough: '',
     keyFormulas: ''
